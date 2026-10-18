@@ -1,0 +1,30 @@
+# aVinceCam
+#
+# Only source code, documentation and history live here.
+# Backups, test logs and machine-specific data do not belong in the repository.
+
+# Archives and backups
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.bak
+*.bak-*
+*~
+
+# Logs and runtime files
+*.log
+.cache/
+tmp/
+
+# Diagnostic output (written outside the repository, this is a safety net)
+diagnose-output/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Python
+__pycache__/
+*.pyc
