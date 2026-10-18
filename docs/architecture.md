@@ -10,8 +10,11 @@
 
 **Core** (`core/`, Python 3)
 - a short-lived command line program, started on demand, answers in JSON
-- planned commands: `list`, `info <id>`, `preview <id>`, `stop`, `diagnose`
+- commands: `scan`, `probe`, `status`, `preview <id>`, `stop`, `diagnose`,
+  `version` – see [json-interface.md](json-interface.md)
 - no daemon, no D-Bus service, no root rights
+
+Decisions and their reasons: [decisions.md](decisions.md).
 
 ## Sources of information
 
@@ -21,8 +24,11 @@
 | libcamera (via GStreamer device monitor or `cam`) | opens devices, no streaming | complex cameras (IPU3, IPU6, MIPI) |
 | V4L2 ioctls | opens the node | USB webcams (UVC) |
 
+Opening the applet menu uses sysfs only. libcamera is called on demand,
+because enumerating may power up sensors and lens motors.
+
 Which libcamera access becomes the main path is decided by measurements in the
-diagnostic phase (see `tools/diagnose/`).
+diagnostic phase (see `scripts/diagnose/`).
 
 ## Safety rules built into the design
 
@@ -34,14 +40,20 @@ diagnostic phase (see `tools/diagnose/`).
 - No settings or controls are written to camera devices in version 1.
 - Features the system cannot report reliably are labelled as such, never guessed.
 
-## Planned layout
+## Layout
 
 ```
-core/avincecam/        Python package (CLI, model, sources, preview, diagnose)
-applet/avincecam@avince/
-tests/unit/            automatic tests, no hardware needed
-tests/fixtures/        recorded sysfs / tool output
-tests/manual/          manual test instructions
-tools/diagnose/        read-only diagnostic helpers for development
+core/avincecam-core      launcher (python3 -I core/avincecam-core ...)
+core/avincecam/          Python package
+  __main__.py            command line
+  model.py               data classes
+  safety.py              safety rules (never open sub-devices / lens motors)
+  sysfs.py libcamera.py v4l2.py merge.py busy.py preview.py
+applet/avincecam@avince/ Cinnamon applet
+assets/                  icon sources
+scripts/diagnose/        read-only diagnostic helpers for development
+scripts/check-public.py  checks that the repository contains nothing private
+tests/unit/              automatic tests, no hardware needed
+tests/run-tests.sh       runs all automatic tests
 docs/
 ```
