@@ -96,11 +96,13 @@ def scan_media():
         return devices
     for media in sorted(os.listdir(MEDIA_BUS)):
         base = os.path.join(MEDIA_BUS, media)
+        # Media devices have no "device" link; the owner is the parent directory.
+        owner = os.path.dirname(os.path.realpath(base))
         devices.append({
             "node": media,
             "dev": "/dev/" + media,
             "model": read_attr(os.path.join(base, "model")),
-            "driver": link_name(os.path.join(base, "device", "driver")),
+            "driver": link_name(os.path.join(owner, "driver")),
         })
     return devices
 

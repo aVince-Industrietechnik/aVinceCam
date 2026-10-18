@@ -35,18 +35,34 @@ Every answer contains `schema` (interface version, currently 1) and
  "errors": [{"code": "not-implemented", "message": "...", "detail": null}]}
 ```
 
+## `scan` answer
+
+```json
+{"schema": 1, "command": "scan", "source": "sysfs", "opens_devices": false,
+ "cameras": [ ... ], "unclassified": [ ... ], "errors": []}
+```
+
+`unclassified` lists video nodes of unknown drivers (for example virtual
+devices) so that they are visible in diagnostics instead of silently hidden.
+
+Camera ids: `sensor:<i2c device>` for sensors of complex pipelines,
+`usb:<usb port>` for UVC cameras.
+
+Warnings: `needs-libcamera`, `lens-not-controlled`, `no-sensor-tuning`,
+`pipeline-unknown`.
+
 ## Camera object
 
 ```json
 {
-  "id": "libcamera:\\_SB_.PCI0.LNK0",
+  "id": "sensor:i2c-INT3479:00",
   "label": "Front camera",
   "model": "ov5670",
   "kind": "integrated",
   "api": "libcamera",
   "pipeline": "ipu3",
   "location": "front",
-  "nodes": ["/dev/media1"],
+  "nodes": ["/dev/media1", "/dev/v4l-subdev6"],
   "formats": null,
   "formats_source": "not probed",
   "status": "free",

@@ -36,3 +36,17 @@ after measurements.
 
 ## D7 – License GPL-3.0-or-later
 Compatible with Cinnamon and Cinnamon Spices.
+
+## D8 – What sysfs alone can tell
+Without opening any device, sysfs provides:
+- image sensors of complex pipelines (I2C devices with a V4L2 sub-device),
+  their driver (= sensor model) and, via `physical_location/panel` (ACPI
+  `_PLD`), whether a sensor faces front or back;
+- lens motors and the sensor they belong to (`supplier:i2c:<sensor>` link);
+- USB cameras grouped by USB device, with product name and `removable`
+  (`fixed` = built in, `removable` = external);
+- whether a libcamera tuning file exists for a sensor.
+
+Not available from sysfs: which receiver port a sensor is wired to when a
+machine has several pipelines, formats, frame rates and the busy state. These
+fields stay `unknown` / `not probed` after a scan; nothing is guessed.

@@ -9,6 +9,7 @@ import json
 import sys
 
 from . import SCHEMA_VERSION, __version__
+from . import sysfs
 from .model import CoreError, to_dict
 
 EXIT_OK = 0
@@ -37,7 +38,9 @@ def build_parser():
                                      description="aVinceCam core")
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("version", help="print version information")
-    sub.add_parser("scan", help="list cameras from sysfs (opens no device)")
+    scan = sub.add_parser("scan", help="list cameras from sysfs (opens no device)")
+    scan.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
+    scan.add_argument("--ipa-dir", action="append", help=argparse.SUPPRESS)
     probe = sub.add_parser("probe", help="query formats (opens devices)")
     probe.add_argument("camera", nargs="?")
     sub.add_parser("status", help="state of the own preview")
@@ -60,7 +63,23 @@ def main(argv=None):
     if args.command == "version":
         emit({"command": "version", "version": __version__})
         return EXIT_OK
+    if args.command == "scan":
+        return cmd_scan(args)
     return not_implemented(args.command)
+
+
+def cmd_scan(args):
+    ipa_dirs = tuple(args.ipa_dir) if args.ipa_dir else sysfs.DEFAULT_IPA_DIRS
+    cameras, unclassified = sysfs.scan(args.sysfs_root, ipa_dirs)
+    emit({
+        "command": "scan",
+        "source": "sysfs",
+        "opens_devices": False,
+        "cameras": [to_dict(c) for c in cameras],
+        "unclassified": unclassified,
+        "errors": [],
+    })
+    return EXIT_OK
 
 
 if __name__ == "__main__":
