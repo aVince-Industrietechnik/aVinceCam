@@ -1,0 +1,7 @@
+{
+    "uuid": "avincecam@avince",
+    "name": "aVinceCam",
+    "description": "Camera Control for Linux - find, select and preview cameras",
+    "max-instances": 1,
+    "version": "0.1.0"
+}
