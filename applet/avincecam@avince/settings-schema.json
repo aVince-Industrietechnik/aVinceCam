@@ -12,15 +12,35 @@
             "Single colour (follows the theme)": "symbolic"
         }
     },
-    "panel-icon-size": {
-        "type": "spinbutton",
-        "default": 0,
-        "min": 0,
-        "max": 48,
-        "step": 2,
-        "units": "px",
+    "panel-icon-size-color": {
+        "type": "combobox",
+        "default": 28,
         "description": "Panel icon size",
-        "tooltip": "0 uses the size set for this part of the panel."
+        "tooltip": "Never larger than the panel allows.",
+        "dependency": "panel-icon-style=color",
+        "options": {
+            "Like the panel": 0,
+            "20 px": 20,
+            "24 px": 24,
+            "28 px": 28,
+            "32 px": 32,
+            "36 px": 36
+        }
+    },
+    "panel-icon-size-symbolic": {
+        "type": "combobox",
+        "default": 24,
+        "description": "Panel icon size",
+        "tooltip": "Never larger than the panel allows.",
+        "dependency": "panel-icon-style=symbolic",
+        "options": {
+            "Like the panel": 0,
+            "16 px": 16,
+            "20 px": 20,
+            "24 px": 24,
+            "28 px": 28,
+            "32 px": 32
+        }
     },
     "selected-camera": {
         "type": "generic",

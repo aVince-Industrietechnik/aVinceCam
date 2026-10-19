@@ -82,6 +82,12 @@ function fakeJson(scenario, args) {
     check("unknown warning shown raw", Presenter.warningText("something-new", _) === "something-new");
 })();
 
+(function testNoteColor() {
+    check("dark theme gets light blue", Presenter.noteColor([225, 225, 225]) === "#78aeed");
+    check("light theme gets dark blue", Presenter.noteColor([48, 48, 48]) === "#1a5fb4");
+    check("unknown theme gets middle blue", Presenter.noteColor(null) === "#3584e4");
+})();
+
 (function testParseCoreResult() {
     const ok = Presenter.parseCoreResult('{"cameras": [], "errors": []}', 0, "");
     check("ok result", ok.ok && ok.error === null, ok);

@@ -22,3 +22,6 @@
   with time limits; no preview yet
 - Fake core for applet tests and offline tests of the applet modules (cjs)
 - `scripts/dev-link.sh` to link the applet for development
+- Colourful aperture icon (default) and single-colour panel icon, icon size
+  setting; `scripts/build-icons.py` builds them from `assets/icons`
+- German translation; test that every applet text is translated

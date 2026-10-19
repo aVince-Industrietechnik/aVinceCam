@@ -16,6 +16,7 @@ const PopupMenu = imports.ui.popupMenu;
 const Settings = imports.ui.settings;
 const St = imports.gi.St;
 const GLib = imports.gi.GLib;
+const Pango = imports.gi.Pango;
 const Gettext = imports.gettext;
 
 const UUID = "avincecam@avince";
@@ -50,7 +51,8 @@ class AVinceCamApplet extends Applet.IconApplet {
         this._metadataPath = metadata.path;
         this.selectedCamera = "";
         this.panelIconStyle = "color";
-        this.panelIconSize = 0;
+        this.panelIconSizeColor = 28;
+        this.panelIconSizeSymbolic = 24;
         this.settings = new Settings.AppletSettings(this, metadata.uuid, instanceId);
         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL,
                                    "selected-camera", "selectedCamera", null);
@@ -58,7 +60,10 @@ class AVinceCamApplet extends Applet.IconApplet {
                                    "panel-icon-style", "panelIconStyle",
                                    () => this._applyPanelIcon());
         this.settings.bindProperty(Settings.BindingDirection.IN,
-                                   "panel-icon-size", "panelIconSize",
+                                   "panel-icon-size-color", "panelIconSizeColor",
+                                   () => this._applyPanelIcon());
+        this.settings.bindProperty(Settings.BindingDirection.IN,
+                                   "panel-icon-size-symbolic", "panelIconSizeSymbolic",
                                    () => this._applyPanelIcon());
 
         this.client = new CoreClient.CoreClient(CoreClient.findCore(metadata.path));
@@ -75,6 +80,10 @@ class AVinceCamApplet extends Applet.IconApplet {
             else
                 this._detailsOpen = false;
         });
+
+        // Note colours depend on the theme: rebuild when it changes.
+        this._themeContext = St.ThemeContext.get_for_stage(global.stage);
+        this._themeChangedId = this._themeContext.connect("changed", () => this._buildMenu());
 
         this._buildMenu();
         // First scan right away (sysfs only, no device access), so the menu
@@ -102,10 +111,19 @@ class AVinceCamApplet extends Applet.IconApplet {
         this._applyIconSize();
     }
 
-    /* Cinnamon resets the size when the panel changes; set ours again. */
+    /*
+     * Cinnamon resets the size when the panel changes; set ours again.
+     * The icon never gets taller than the panel (minus a small margin).
+     */
     _applyIconSize() {
-        if (this._applet_icon && this.panelIconSize > 0)
-            this._applet_icon.set_icon_size(this.panelIconSize);
+        const wanted = Number(this.panelIconStyle === "symbolic"
+                              ? this.panelIconSizeSymbolic
+                              : this.panelIconSizeColor) || 0;
+        if (!this._applet_icon || wanted <= 0)
+            return;
+        const panelHeight = this.panel ? this.panel.height : 0;
+        const limit = panelHeight > 0 ? panelHeight - 4 : wanted;
+        this._applet_icon.set_icon_size(Math.max(16, Math.min(wanted, limit)));
     }
 
     on_panel_icon_size_changed(size) {
@@ -118,6 +136,10 @@ class AVinceCamApplet extends Applet.IconApplet {
 
     on_applet_removed_from_panel() {
         this._removed = true;
+        if (this._themeChangedId) {
+            this._themeContext.disconnect(this._themeChangedId);
+            this._themeChangedId = 0;
+        }
         this.client.destroy();
         this.settings.finalize();
     }
@@ -252,17 +274,32 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.menu.addMenuItem(copy);
     }
 
+    /*
+     * A text line that is easy to read but does nothing when clicked.
+     * Cinnamon draws items created with reactive: false greyed out as
+     * "insensitive", so the item stays sensitive, gets no hover highlight
+     * and its activate() does nothing (the menu stays open).
+     * No line wrapping: Cinnamon's menu then computes far too large heights
+     * (tested 2026-10-19). Texts are kept short enough for one line instead.
+     */
+    _textItem(text, iconName, styleClass) {
+        const params = { hover: false };
+        const item = iconName
+            ? new PopupMenu.PopupIconMenuItem(text, iconName, St.IconType.SYMBOLIC, params)
+            : new PopupMenu.PopupMenuItem(text, params);
+        item.activate = () => {};
+        item.label.add_style_class_name(styleClass);
+        item.label.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
+        return item;
+    }
+
     _addInfo(text) {
-        const item = new PopupMenu.PopupMenuItem(text, { reactive: false });
-        item.label.add_style_class_name("avincecam-info");
-        this.menu.addMenuItem(item);
+        this.menu.addMenuItem(this._textItem(text, null, "avincecam-info"));
     }
 
     _addError(error) {
-        const item = new PopupMenu.PopupMenuItem(Presenter.errorText(error, _),
-                                                 { reactive: false });
-        item.label.add_style_class_name("avincecam-error");
-        this.menu.addMenuItem(item);
+        this.menu.addMenuItem(this._textItem(Presenter.errorText(error, _),
+                                             "dialog-warning-symbolic", "avincecam-error"));
     }
 
     _addCameraItem(cam) {
@@ -279,15 +316,11 @@ class AVinceCamApplet extends Applet.IconApplet {
     _addDetails(cam) {
         const sub = new PopupMenu.PopupSubMenuMenuItem(
             _("Details: %s").replace("%s", Presenter.cameraTitle(cam, _)));
-        for (const line of Presenter.detailLines(cam, _)) {
-            const item = new PopupMenu.PopupMenuItem(line, { reactive: false });
-            item.label.add_style_class_name("avincecam-detail");
-            sub.menu.addMenuItem(item);
-        }
+        for (const line of Presenter.detailLines(cam, _))
+            sub.menu.addMenuItem(this._textItem(line, null, "avincecam-detail"));
 
         if (this._probing === cam.id) {
-            sub.menu.addMenuItem(new PopupMenu.PopupMenuItem(
-                _("Querying details …"), { reactive: false }));
+            sub.menu.addMenuItem(this._textItem(_("Querying details …"), null, "avincecam-detail"));
         } else if (cam.api === "libcamera") {
             const query = new PopupMenu.PopupMenuItem(
                 _("Query sizes and frame rates (switches the cameras on briefly)"));
@@ -295,8 +328,8 @@ class AVinceCamApplet extends Applet.IconApplet {
             query.setSensitive(this._probing === null);
             sub.menu.addMenuItem(query);
         } else {
-            sub.menu.addMenuItem(new PopupMenu.PopupMenuItem(
-                _("Details for USB cameras are not available yet."), { reactive: false }));
+            sub.menu.addMenuItem(this._textItem(
+                _("Details for USB cameras are not available yet."), null, "avincecam-detail"));
         }
         this.menu.addMenuItem(sub);
         // Rebuilding the menu would close the submenu the user is working in.
@@ -310,13 +343,25 @@ class AVinceCamApplet extends Applet.IconApplet {
             return;
         const sub = new PopupMenu.PopupSubMenuMenuItem(
             _("Notes (%d)").replace("%d", String(warnings.length)));
+        const color = Presenter.noteColor(this._menuTextColor());
         for (const code of warnings) {
-            const item = new PopupMenu.PopupMenuItem(Presenter.warningText(code, _),
-                                                     { reactive: false });
-            item.label.add_style_class_name("avincecam-note");
+            const item = this._textItem(Presenter.warningText(code, _),
+                                        "dialog-information-symbolic", "avincecam-note");
+            // On the item, so text and icon share the colour.
+            item.actor.set_style("color: " + color + ";");
             sub.menu.addMenuItem(item);
         }
         this.menu.addMenuItem(sub);
+    }
+
+    /* Text colour of the menu in the current theme as [r, g, b], or null. */
+    _menuTextColor() {
+        try {
+            const c = this.menu.actor.get_theme_node().get_foreground_color();
+            return [c.red, c.green, c.blue];
+        } catch (e) {
+            return null;
+        }
     }
 
     _copyReport() {

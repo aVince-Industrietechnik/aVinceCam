@@ -8,32 +8,42 @@
  * Every function takes the translation function `_` as a parameter.
  */
 
-const LOCATION_TITLES = {
-    front: "Front camera",
-    back: "Back camera"
-};
+/*
+ * The text tables are functions so that every string appears literally in a
+ * _("...") call – the translation tool (xgettext) only finds those.
+ */
+function locationTitles(_) {
+    return {
+        front: _("Front camera"),
+        back: _("Back camera")
+    };
+}
 
-const WARNING_TEXTS = {
-    "needs-libcamera": "Needs libcamera – classic webcam programs cannot use this camera.",
-    "lens-not-controlled": "Has a focus motor; aVinceCam does not control it.",
-    "no-sensor-tuning": "No libcamera tuning file for this sensor – image quality may be reduced.",
-    "pipeline-unknown": "The camera pipeline could not be determined.",
-    "libcamera-no-match": "libcamera did not report this camera.",
-    "location-mismatch": "sysfs and libcamera report different positions.",
-    "cam-output-unparsed": "The output of the libcamera tool was not understood."
-};
+function warningTexts(_) {
+    return {
+        "needs-libcamera": _("Works only with libcamera, not with classic webcam programs."),
+        "lens-not-controlled": _("Has a focus motor; aVinceCam does not control it."),
+        "no-sensor-tuning": _("No libcamera tuning file – image quality may suffer."),
+        "pipeline-unknown": _("The camera pipeline could not be determined."),
+        "libcamera-no-match": _("libcamera did not report this camera."),
+        "location-mismatch": _("sysfs and libcamera report different positions."),
+        "cam-output-unparsed": _("The output of the libcamera tool was not understood.")
+    };
+}
 
-const ERROR_TEXTS = {
-    "core-missing": "The aVinceCam core was not found.",
-    "core-failed": "The aVinceCam core stopped with an error.",
-    "core-timeout": "The aVinceCam core did not answer in time.",
-    "core-garbage": "The answer of the aVinceCam core was not understood.",
-    "unknown-camera": "This camera is no longer present.",
-    "libcamera-tools-missing": "The libcamera tools (package libcamera-tools) are not installed.",
-    "timeout": "The libcamera tool did not answer in time.",
-    "hardware-blocked": "Hardware access is switched off.",
-    "not-implemented": "This function is not available yet."
-};
+function errorTexts(_) {
+    return {
+        "core-missing": _("The aVinceCam core was not found."),
+        "core-failed": _("The aVinceCam core stopped with an error."),
+        "core-timeout": _("The aVinceCam core did not answer in time."),
+        "core-garbage": _("The answer of the aVinceCam core was not understood."),
+        "unknown-camera": _("This camera is no longer present."),
+        "libcamera-tools-missing": _("The libcamera tools (package libcamera-tools) are not installed."),
+        "timeout": _("The libcamera tool did not answer in time."),
+        "hardware-blocked": _("Hardware access is switched off."),
+        "not-implemented": _("This function is not available yet.")
+    };
+}
 
 function upper(text) {
     return text ? String(text).toUpperCase() : "";
@@ -41,8 +51,9 @@ function upper(text) {
 
 /* Title of a camera in the menu, e.g. "Front camera". */
 function cameraTitle(cam, _) {
-    if (cam.location && LOCATION_TITLES[cam.location])
-        return _(LOCATION_TITLES[cam.location]);
+    const titles = locationTitles(_);
+    if (cam.location && titles[cam.location])
+        return titles[cam.location];
     return cam.label || _("Camera");
 }
 
@@ -64,14 +75,25 @@ function cameraSubtitle(cam, _) {
 }
 
 function warningText(code, _) {
-    return WARNING_TEXTS[code] ? _(WARNING_TEXTS[code]) : code;
+    return warningTexts(_)[code] || code;
 }
 
 function errorText(error, _) {
     if (!error)
         return _("Unknown error");
-    const known = ERROR_TEXTS[error.code];
-    return known ? _(known) : (error.message || error.code || _("Unknown error"));
+    return errorTexts(_)[error.code] || error.message || error.code || _("Unknown error");
+}
+
+/*
+ * Colour for notes: blue that stays readable on the current theme.
+ * `fg` is the menu's text colour [r, g, b]; light text means a dark menu.
+ * Both blues reach a contrast of about 6.5:1 on typical menu backgrounds.
+ */
+function noteColor(fg) {
+    if (!fg || fg.length < 3)
+        return "#3584e4";
+    const brightness = (0.299 * fg[0] + 0.587 * fg[1] + 0.114 * fg[2]) / 255;
+    return brightness > 0.5 ? "#78aeed" : "#1a5fb4";
 }
 
 function sizeText(w, h) {
@@ -183,6 +205,6 @@ function summaryText(scan, details, _) {
 
 /* Exported for applet and tests (cjs legacy imports use top-level names). */
 var Presenter = {
-    cameraTitle, cameraSubtitle, warningText, errorText, formatsText,
+    cameraTitle, cameraSubtitle, warningText, errorText, noteColor, formatsText,
     frameRateText, detailLines, parseCoreResult, summaryText
 };
