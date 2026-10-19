@@ -10,6 +10,11 @@
 - **Busy detection** sees only processes of the current user.
 - **Frame rates** of libcamera cameras are limits reported by libcamera, not
   guaranteed values.
+- **Querying one libcamera camera powers up all cameras** of the machine for a
+  moment (libcamera starts all of them). aVinceCam only queries libcamera when
+  the user asks for details.
+- Sizes are those of libcamera's default (viewfinder) stream; the sensor may
+  offer more in other stream roles.
 - Browsers and video conferencing tools may not see libcamera-only cameras;
   that needs PipeWire's libcamera support or a loopback device and is outside
   the scope of aVinceCam.

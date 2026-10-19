@@ -1,0 +1,3 @@
+Available cameras:
+1: Internal front camera (\_SB_.PCI0.LNK0)
+2: Internal back camera (\_SB_.PCI0.LNK1)

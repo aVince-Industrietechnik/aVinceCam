@@ -1,0 +1,33 @@
+Using camera \_SB_.PCI0.LNK0 as cam0
+Control: FrameDurationLimits: [33336..1062603]
+Control: ScalerCrop: [(0, 0)/1348x739..(0, 0)/2600x1952]
+Control: ExposureTime: [64..33018]
+Control: TestPatternMode: [0..2]
+Control: PipelineDepth: [2..3]
+Property: SystemDevices = [ 20748, 20749, 20750, 20751, 20738, 20739, 20740, 20743, 20744, 20745 ]
+Property: PixelArrayActiveAreas = [ (12, 4)/2600x1952 ]
+Property: PixelArraySize = 2624x1980
+Property: Rotation = 0
+Property: Location = 0
+Property: ColorFilterArrangement = 1
+Property: UnitCellSize = 1120x1120
+Property: Model = ov5670
+0: 1280x720-NV12
+ * Pixelformat: NV12 (2x2)-(1280x720)/(+1,+1)
+  - 160x120
+  - 240x160
+  - 320x240
+  - 400x240
+  - 480x320
+  - 640x360
+  - 640x480
+  - 720x480
+  - 768x480
+  - 854x480
+  - 720x576
+  - 800x600
+  - 960x540
+  - 1024x576
+  - 960x640
+  - 1024x600
+  - 1280x720

@@ -35,18 +35,62 @@ Every answer contains `schema` (interface version, currently 1) and
  "errors": [{"code": "not-implemented", "message": "...", "detail": null}]}
 ```
 
+## `scan` answer
+
+```json
+{"schema": 1, "command": "scan", "source": "sysfs", "opens_devices": false,
+ "cameras": [ ... ], "unclassified": [ ... ], "errors": []}
+```
+
+`unclassified` lists video nodes of unknown drivers (for example virtual
+devices) so that they are visible in diagnostics instead of silently hidden.
+
+Camera ids: `sensor:<i2c device>` for sensors of complex pipelines,
+`usb:<usb port>` for UVC cameras.
+
+Warnings: `needs-libcamera`, `lens-not-controlled`, `no-sensor-tuning`,
+`pipeline-unknown`.
+
+## `probe` answer
+
+```json
+{"schema": 1, "command": "probe", "source": "sysfs+libcamera",
+ "opens_devices": true, "libcamera_calls": 2,
+ "cameras": [ ... ], "notes": [], "errors": []}
+```
+
+`probe [<id>]` starts from the sysfs scan and adds details:
+
+- libcamera cameras: `cam -c N -I -p --list-controls`, one call per camera,
+  stopping as soon as all requested cameras are matched. `libcamera_calls`
+  says how often libcamera was started (each start powers up the cameras).
+- UVC cameras: not implemented yet (`formats_source` says so).
+
+Additional camera fields after `probe`: `backend_id` (libcamera camera id),
+`sensor_size` (`[width, height]`), `frame_rate_limits`
+(`{"min", "max", "source"}`), `formats` (default stream sizes).
+
+Matching rule: sensor model and position; if that is not unique, model alone.
+Without a unique match nothing is merged (`libcamera-no-match`). A position
+that differs between sysfs and libcamera is reported (`location-mismatch`).
+
+Error codes: `unknown-camera`, `libcamera-tools-missing`, `timeout`,
+`hardware-blocked` (environment variable `AVINCECAM_NO_HARDWARE=1`, set by
+the test suite). Note `cam-output-unparsed`: output of `cam` did not match the
+known format.
+
 ## Camera object
 
 ```json
 {
-  "id": "libcamera:\\_SB_.PCI0.LNK0",
+  "id": "sensor:i2c-INT3479:00",
   "label": "Front camera",
   "model": "ov5670",
   "kind": "integrated",
   "api": "libcamera",
   "pipeline": "ipu3",
   "location": "front",
-  "nodes": ["/dev/media1"],
+  "nodes": ["/dev/media1", "/dev/v4l-subdev6"],
   "formats": null,
   "formats_source": "not probed",
   "status": "free",

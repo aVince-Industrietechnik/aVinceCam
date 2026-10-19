@@ -25,6 +25,11 @@ class Camera:
     nodes: List[str] = field(default_factory=list)
     formats: Optional[List[Format]] = None
     formats_source: str = "not probed"
+    # {"min": fps, "max": fps, "source": "..."} or None if unknown.
+    frame_rate_limits: Optional[dict] = None
+    # Identifier used by the backend (e.g. the libcamera camera id).
+    backend_id: Optional[str] = None
+    sensor_size: Optional[List[int]] = None
     status: str = "unknown"          # free | busy | own-preview | unknown
     status_certainty: str = "unknown"
     warnings: List[str] = field(default_factory=list)

@@ -8,3 +8,12 @@
 - Central safety rules: sub-devices and lens motors are never opened, V4L2
   queries only on UVC nodes – with unit tests on simulated sysfs trees
 - Test runner, public-content check, decision log, JSON interface description
+- `scan`: camera detection from sysfs only – UVC cameras and sensors of
+  complex pipelines, front/back position, lens motor and missing tuning
+  hints; simulated sysfs trees for tests
+- Diagnose tool: media device driver is now read from the owning device
+- `probe`: details of libcamera cameras from `cam` (sizes, frame rate limits,
+  sensor size, libcamera id), matched to the sysfs cameras by model and
+  position; stops calling `cam` as soon as all requested cameras are found
+- Parser tests against recorded `cam` output of libcamera 0.2.0
+- `AVINCECAM_NO_HARDWARE=1` blocks every camera tool call (set by the tests)
