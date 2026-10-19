@@ -17,3 +17,8 @@
   position; stops calling `cam` as soon as all requested cameras are found
 - Parser tests against recorded `cam` output of libcamera 0.2.0
 - `AVINCECAM_NO_HARDWARE=1` blocks every camera tool call (set by the tests)
+- Cinnamon applet: camera list with selection, details (queried only on
+  request), notes, camera report to the clipboard; asynchronous core calls
+  with time limits; no preview yet
+- Fake core for applet tests and offline tests of the applet modules (cjs)
+- `scripts/dev-link.sh` to link the applet for development

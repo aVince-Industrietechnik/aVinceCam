@@ -50,10 +50,16 @@ core/avincecam/          Python package
   safety.py              safety rules (never open sub-devices / lens motors)
   sysfs.py libcamera.py v4l2.py merge.py busy.py preview.py
 applet/avincecam@avince/ Cinnamon applet
+  applet.js              menu and panel icon
+  coreClient.js          asynchronous core calls with time limit
+  presenter.js           texts for the menu (pure functions, tested with cjs)
 assets/                  icon sources
 scripts/diagnose/        read-only diagnostic helpers for development
 scripts/check-public.py  checks that the repository contains nothing private
+scripts/dev-link.sh      link the applet into Cinnamon for development
 tests/unit/              automatic tests, no hardware needed
+tests/applet/            cjs tests of the applet modules
+tests/fake-core/         stand-in core for applet tests (simulated cameras)
 tests/run-tests.sh       runs all automatic tests
 docs/
 ```

@@ -1,0 +1,29 @@
+{
+    "head-appearance": {
+        "type": "header",
+        "description": "Appearance"
+    },
+    "panel-icon-style": {
+        "type": "combobox",
+        "default": "color",
+        "description": "Panel icon",
+        "options": {
+            "Colourful": "color",
+            "Single colour (follows the theme)": "symbolic"
+        }
+    },
+    "panel-icon-size": {
+        "type": "spinbutton",
+        "default": 0,
+        "min": 0,
+        "max": 48,
+        "step": 2,
+        "units": "px",
+        "description": "Panel icon size",
+        "tooltip": "0 uses the size set for this part of the panel."
+    },
+    "selected-camera": {
+        "type": "generic",
+        "default": ""
+    }
+}

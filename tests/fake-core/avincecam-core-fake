@@ -1,0 +1,101 @@
+#!/usr/bin/env python3
+"""Stand-in for the aVinceCam core, for applet tests without a camera.
+
+Usage: avincecam-core-fake --scenario=NAME <core arguments...>
+
+Scenarios built on the real core with simulated sysfs trees and recorded
+`cam` output (no device is ever touched):
+  latitude   Intel IPU3 2-in-1 with front and back camera
+  uvc        one external USB webcam
+  mixed      IPU3 cameras plus a USB webcam
+  empty      no camera at all
+
+Scenarios for error handling:
+  slow       answers after 30 seconds (the applet must time out)
+  garbage    prints text that is not JSON
+  crash      exits with code 1 and a message on stderr
+  toolmissing  probe reports that the libcamera tools are missing
+"""
+
+import contextlib
+import io
+import json
+import os
+import sys
+import tempfile
+import time
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+REPO = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, os.path.join(REPO, "core"))
+sys.path.insert(0, os.path.join(REPO, "tests", "unit"))
+
+os.environ["AVINCECAM_NO_HARDWARE"] = "1"
+
+import fakesysfs  # noqa: E402
+from avincecam.__main__ import main as core_main  # noqa: E402
+
+FIXTURES = os.path.join(REPO, "tests", "fixtures", "cam-0.2.0")
+SCENARIOS = {
+    "latitude": fakesysfs.latitude_5285,
+    "uvc": fakesysfs.single_uvc,
+    "mixed": fakesysfs.ipu3_plus_uvc,
+    "empty": fakesysfs.empty,
+}
+
+
+def run_real_core(build, args):
+    with tempfile.TemporaryDirectory() as tmp:
+        root = os.path.join(tmp, "sys")
+        ipa = os.path.join(tmp, "ipa")
+        os.makedirs(root)
+        os.makedirs(ipa)
+        build(root)
+        extra = ["--sysfs-root", root, "--ipa-dir", ipa]
+        if args and args[0] == "probe":
+            extra += ["--tool-output", FIXTURES]
+        if args and args[0] in ("scan", "probe"):
+            args = args + extra
+        return core_main(args)
+
+
+def main(argv):
+    scenario = "latitude"
+    args = []
+    for arg in argv:
+        if arg.startswith("--scenario="):
+            scenario = arg.split("=", 1)[1]
+        else:
+            args.append(arg)
+
+    if scenario in SCENARIOS:
+        return run_real_core(SCENARIOS[scenario], args)
+    if scenario == "slow":
+        time.sleep(30)
+        return run_real_core(fakesysfs.latitude_5285, args)
+    if scenario == "garbage":
+        print("Traceback (most recent call last): not json")
+        return 0
+    if scenario == "crash":
+        print("fake core: simulated crash", file=sys.stderr)
+        return 1
+    if scenario == "toolmissing":
+        if args[:1] != ["probe"]:
+            return run_real_core(fakesysfs.latitude_5285, args)
+        # The real core without cam: scan data plus the error a probe reports.
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            run_real_core(fakesysfs.latitude_5285, ["scan"])
+        data = json.loads(out.getvalue())
+        data.update({"command": "probe", "libcamera_calls": 0,
+                     "errors": [{"code": "libcamera-tools-missing",
+                                 "message": "the libcamera tool 'cam' is not installed",
+                                 "detail": None}]})
+        print(json.dumps(data))
+        return 1
+    print(f"unknown scenario {scenario}", file=sys.stderr)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

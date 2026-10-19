@@ -1,0 +1,18 @@
+/*
+ * aVinceCam – only spacing and emphasis. Colours come from the theme, so
+ * light and dark Cinnamon themes both work.
+ */
+
+.avincecam-header {
+    font-weight: bold;
+}
+
+.avincecam-info,
+.avincecam-detail,
+.avincecam-note {
+    font-size: 0.9em;
+}
+
+.avincecam-error {
+    font-weight: bold;
+}
