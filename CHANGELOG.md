@@ -29,3 +29,8 @@
   own-process-only stop; qcam or GStreamer; libcamera id from sysfs;
   applet entries to start and stop the preview, preview program setting
 - Preview of cameras with a focus motor locked by default (setting to allow)
+- USB cameras: formats, sizes and frame rates via read-only V4L2 enumeration
+  ioctls (checked against v4l2-ctl: identical); the preview picks MJPG at the
+  requested size with the highest frame rate, else the fastest YUYV mode
+- USB camera preview with VLC (only the camera's node is opened), GStreamer
+  as fallback; `scripts/diagnose/watch_opens.py` shows who opens camera nodes

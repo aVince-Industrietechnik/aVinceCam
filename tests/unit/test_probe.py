@@ -132,11 +132,12 @@ class ProbeUvcTest(ProbeBase):
     scenario = staticmethod(fakesysfs.single_uvc)
 
     def test_uvc_needs_no_libcamera_call(self):
-        code, data = self.probe()
-        self.assertEqual(code, 0)
+        with mock.patch.dict(os.environ, {"AVINCECAM_NO_HARDWARE": "1"}):
+            code, data = self.probe()
         self.assertEqual(data["libcamera_calls"], 0)
-        self.assertEqual(data["cameras"][0]["formats_source"],
-                         "v4l2 probing not implemented yet")
+        # The real V4L2 query is blocked in tests and reported, not faked.
+        self.assertEqual(data["errors"][0]["code"], "hardware-blocked")
+        self.assertIsNone(data["cameras"][0]["formats"])
 
 
 class ProbeMixedTest(ProbeBase):

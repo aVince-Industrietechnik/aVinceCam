@@ -138,8 +138,10 @@ function frameRateText(cam, _) {
     const limits = cam.frame_rate_limits;
     if (!limits || !limits.max)
         return null;
-    return _("up to %s fps (according to libcamera)")
-        .replace("%s", String(Math.round(limits.max)));
+    const max = String(Math.round(limits.max));
+    if (limits.source && limits.source.indexOf("V4L2") === 0)
+        return _("up to %s fps (reported by the camera)").replace("%s", max);
+    return _("up to %s fps (according to libcamera)").replace("%s", max);
 }
 
 /*

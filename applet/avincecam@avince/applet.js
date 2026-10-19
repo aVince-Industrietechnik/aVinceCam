@@ -480,15 +480,15 @@ class AVinceCamApplet extends Applet.IconApplet {
 
         if (this._probing === cam.id) {
             sub.menu.addMenuItem(this._textItem(_("Querying details …"), null, "avincecam-detail"));
-        } else if (cam.api === "libcamera") {
-            const query = new PopupMenu.PopupMenuItem(
-                _("Query sizes and frame rates (switches the cameras on briefly)"));
+        } else {
+            // libcamera starts every camera of the machine for a query; a
+            // USB camera is only asked for its list of formats.
+            const query = new PopupMenu.PopupMenuItem(cam.api === "libcamera"
+                ? _("Query sizes and frame rates (switches the cameras on briefly)")
+                : _("Query sizes and frame rates"));
             query.connect("activate", () => this._probe(cam.id));
             query.setSensitive(this._probing === null);
             sub.menu.addMenuItem(query);
-        } else {
-            sub.menu.addMenuItem(this._textItem(
-                _("Details for USB cameras are not available yet."), null, "avincecam-detail"));
         }
         this.menu.addMenuItem(sub);
         // Rebuilding the menu would close the submenu the user is working in.

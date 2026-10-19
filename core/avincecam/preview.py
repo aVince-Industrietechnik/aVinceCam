@@ -16,6 +16,7 @@ import os
 import shutil
 import signal
 import time
+from fractions import Fraction
 
 LOCK_NAME = "preview.json"
 LOG_NAME = "preview.log"
@@ -101,7 +102,56 @@ def status(directory, proc_root="/proc"):
             "pid": lock.get("pid"), "log": os.path.join(directory, LOG_NAME)}
 
 
-def viewer_command(camera, viewer, size):
+def choose_uvc_mode(formats, size):
+    """Pick (pixel_format, width, height, fps) for a UVC preview, or None.
+
+    Preference: the requested size in MJPG (compressed, full frame rate over
+    USB 2.0), then the requested size in YUYV, then the largest size not
+    above the request in MJPG/YUYV. Always the highest frame rate offered.
+    """
+    width, height = size
+    usable = [f for f in formats or [] if f["pixel_format"] in ("MJPG", "YUYV") and f["fps"]]
+    if not usable:
+        return None
+
+    def best(candidates):
+        candidates = sorted(candidates, key=lambda f: (f["pixel_format"] != "MJPG", -max(f["fps"])))
+        return candidates[0] if candidates else None
+
+    exact = best(f for f in usable if (f["width"], f["height"]) == (width, height))
+    if exact is None:
+        smaller = [f for f in usable if f["width"] * f["height"] <= width * height]
+        if smaller:
+            area = max(f["width"] * f["height"] for f in smaller)
+            exact = best(f for f in smaller if f["width"] * f["height"] == area)
+    if exact is None:
+        exact = best(usable)
+    return exact["pixel_format"], exact["width"], exact["height"], max(exact["fps"])
+
+
+def _gst_rate(fps):
+    frac = Fraction(fps).limit_denominator(1001)
+    return f"{frac.numerator}/{frac.denominator}"
+
+
+def which(program):
+    """shutil.which, separate so that tests can replace it."""
+    return shutil.which(program)
+
+
+def _vlc_command(device, mode):
+    """VLC with its minimal Qt view: only this device is opened, and closing
+    the window ends VLC (measured; the plain video window of cvlc does not)."""
+    argv = ["vlc", "--intf", "qt", "--qt-minimal-view", "--no-qt-privacy-ask",
+            "--play-and-exit", "v4l2://" + device]
+    if mode is not None:
+        fmt, w, h, fps = mode
+        argv += [":v4l2-chroma=" + fmt, f":v4l2-width={w}", f":v4l2-height={h}",
+                 f":v4l2-fps={fps:g}"]
+    return argv
+
+
+def viewer_command(camera, viewer, size, uvc_formats=None):
     """Argument list of the preview program, or raise PreviewError."""
     if camera.api == "libcamera":
         if not camera.backend_id:
@@ -117,14 +167,27 @@ def viewer_command(camera, viewer, size):
         capture = next((n for n in camera.nodes if os.path.basename(n).startswith("video")), None)
         if not capture:
             raise PreviewError("no-capture-node", "no video node for this camera")
-        return ["gst-launch-1.0", "-q", "v4l2src", "device=" + capture, "!",
-                "videoconvert", "!", "autovideosink"]
+        mode = choose_uvc_mode(uvc_formats, size)
+        if which("vlc"):
+            return _vlc_command(capture, mode)
+        # Fallback. Note: GStreamer's video4linux2 plugin opens every video
+        # and sub-device node of the machine when it loads (see D12).
+        source = ["gst-launch-1.0", "-q", "v4l2src", "device=" + capture, "!"]
+        if mode is None:  # formats unknown: let GStreamer negotiate
+            return source + ["videoconvert", "!", "autovideosink"]
+        fmt, w, h, fps = mode
+        if fmt == "MJPG":
+            return source + [f"image/jpeg,width={w},height={h},framerate={_gst_rate(fps)}",
+                             "!", "jpegdec", "!", "videoconvert", "!", "autovideosink"]
+        return source + [f"video/x-raw,format=YUY2,width={w},height={h},framerate={_gst_rate(fps)}",
+                         "!", "videoconvert", "!", "autovideosink"]
     raise PreviewError("unsupported-camera", f"no preview for api {camera.api!r}")
 
 
 def check_tool(argv):
     if not shutil.which(argv[0]):
-        package = {"qcam": "libcamera-tools", "gst-launch-1.0": "gstreamer1.0-tools"}.get(argv[0])
+        package = {"qcam": "libcamera-tools", "gst-launch-1.0": "gstreamer1.0-tools",
+                   "vlc": "vlc"}.get(argv[0])
         raise PreviewError("viewer-missing", f"the preview program {argv[0]} is not installed",
                            package)
 

@@ -1,0 +1,276 @@
+{
+ "note": "V4L2 formats of a Realtek 0bda:5697 USB 2.0 camera, recorded with avincecam probe",
+ "formats": [
+  {
+   "pixel_format": "MJPG",
+   "width": 2560,
+   "height": 1440,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 1600,
+   "height": 1200,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 1920,
+   "height": 1080,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 1280,
+   "height": 960,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 1280,
+   "height": 720,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 1024,
+   "height": 768,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 800,
+   "height": 600,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 640,
+   "height": 480,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 640,
+   "height": 400,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 640,
+   "height": 360,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 320,
+   "height": 240,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 352,
+   "height": 288,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "MJPG",
+   "width": 176,
+   "height": 144,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 2560,
+   "height": 1440,
+   "fps": [
+    3.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 1600,
+   "height": 1200,
+   "fps": [
+    5.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 1920,
+   "height": 1080,
+   "fps": [
+    5.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 1280,
+   "height": 960,
+   "fps": [
+    5.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 1280,
+   "height": 720,
+   "fps": [
+    5.0,
+    10.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 1024,
+   "height": 768,
+   "fps": [
+    5.0,
+    10.0,
+    15.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 800,
+   "height": 600,
+   "fps": [
+    5.0,
+    10.0,
+    15.0,
+    20.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 640,
+   "height": 480,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 640,
+   "height": 400,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 640,
+   "height": 360,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 320,
+   "height": 240,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 352,
+   "height": 288,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  },
+  {
+   "pixel_format": "YUYV",
+   "width": 176,
+   "height": 144,
+   "fps": [
+    15.0,
+    20.0,
+    25.0,
+    30.0
+   ]
+  }
+ ]
+}

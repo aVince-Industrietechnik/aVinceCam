@@ -82,6 +82,13 @@ function fakeJson(scenario, args) {
     check("unknown warning shown raw", Presenter.warningText("something-new", _) === "something-new");
 })();
 
+(function testUvcFrameRateSource() {
+    const cam = { formats: [{ pixel_format: "MJPG", width: 1920, height: 1080, fps: [30] }],
+                  frame_rate_limits: { min: 15, max: 30, source: "V4L2 frame intervals" } };
+    check("uvc rate source", Presenter.frameRateText(cam, _) === "up to 30 fps (reported by the camera)",
+          Presenter.frameRateText(cam, _));
+})();
+
 (function testPreviewErrors() {
     const busy = Presenter.errorText({ code: "camera-busy", detail: "qcam" }, _);
     check("busy names the program", busy === "The camera is in use by another program. (qcam)", busy);

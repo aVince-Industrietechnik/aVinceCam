@@ -35,7 +35,7 @@ msgstr "Kameras"
 msgid "Looking for cameras …"
 msgstr "Kameras werden gesucht …"
 
-#: applet.js:364 presenter.js:202
+#: applet.js:364 presenter.js:204
 msgid "No camera found."
 msgstr "Keine Kamera gefunden."
 
@@ -56,13 +56,9 @@ msgstr "Details: %s"
 msgid "Querying details …"
 msgstr "Details werden abgefragt …"
 
-#: applet.js:485
+#: applet.js:487
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr "Größen und Bildraten abfragen (schaltet die Kameras kurz ein)"
-
-#: applet.js:491
-msgid "Details for USB cameras are not available yet."
-msgstr "Details für USB-Kameras sind noch nicht verfügbar."
 
 #: applet.js:504
 #, javascript-format
@@ -155,45 +151,45 @@ msgstr "Unbekannter Fehler"
 msgid "%d sizes, %s to %s (%s)"
 msgstr "%d Größen, %s bis %s (%s)"
 
-#: presenter.js:141
+#: presenter.js:144
 #, javascript-format
 msgid "up to %s fps (according to libcamera)"
 msgstr "bis %s fps (laut libcamera)"
 
-#: presenter.js:152
+#: presenter.js:154
 #, javascript-format
 msgid "Sensor: %s"
 msgstr "Sensor: %s"
 
-#: presenter.js:154
+#: presenter.js:156
 #, javascript-format
 msgid "Picture: %s"
 msgstr "Bild: %s"
 
-#: presenter.js:155
+#: presenter.js:157
 msgid "Picture sizes: not queried"
 msgstr "Bildgrößen: noch nicht abgefragt"
 
-#: presenter.js:158
+#: presenter.js:160
 #, javascript-format
 msgid "Frame rate: %s"
 msgstr "Bildrate: %s"
 
-#: presenter.js:160
+#: presenter.js:162
 msgid "Frame rate: unknown"
 msgstr "Bildrate: unbekannt"
 
-#: presenter.js:162
+#: presenter.js:164
 #, javascript-format
 msgid "libcamera id: %s"
 msgstr "libcamera-Kennung: %s"
 
-#: presenter.js:164
+#: presenter.js:166
 #, javascript-format
 msgid "Devices: %s"
 msgstr "Geräte: %s"
 
-#: presenter.js:215
+#: presenter.js:217
 #, javascript-format
 msgid "Unclassified device: %s"
 msgstr "Nicht zugeordnetes Gerät: %s"
@@ -332,14 +328,6 @@ msgstr "Vorschau"
 msgid "Preview program"
 msgstr "Vorschauprogramm"
 
-#. settings-schema.json->preview-viewer->tooltip
-msgid ""
-"Both show the picture of libcamera cameras. USB cameras always use "
-"GStreamer."
-msgstr ""
-"Beide zeigen das Bild von libcamera-Kameras. USB-Kameras nutzen immer "
-"GStreamer."
-
 #. settings-schema.json->preview-viewer->options
 msgid "qcam (libcamera)"
 msgstr "qcam (libcamera)"
@@ -369,3 +357,20 @@ msgstr ""
 "Während eine solche Kamera Bilder liefert, steuert libcamera ihren "
 "Fokusmotor automatisch an. Ausgeschaltet lassen, wenn der Fokusmotor nicht "
 "einwandfrei funktioniert."
+
+#: applet.js:488
+msgid "Query sizes and frame rates"
+msgstr "Größen und Bildraten abfragen"
+
+#: presenter.js:143
+#, javascript-format
+msgid "up to %s fps (reported by the camera)"
+msgstr "bis %s fps (laut Kamera)"
+
+#. settings-schema.json->preview-viewer->tooltip
+msgid ""
+"For libcamera cameras. USB cameras use VLC if it is installed, otherwise "
+"GStreamer."
+msgstr ""
+"Für libcamera-Kameras. USB-Kameras nutzen VLC, falls installiert, sonst "
+"GStreamer."

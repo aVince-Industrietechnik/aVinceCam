@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 18:55+0200\n"
+"POT-Creation-Date: 2026-10-19 19:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -44,7 +44,7 @@ msgstr ""
 msgid "Looking for cameras …"
 msgstr ""
 
-#: applet.js:364 presenter.js:202
+#: applet.js:364 presenter.js:204
 msgid "No camera found."
 msgstr ""
 
@@ -87,12 +87,12 @@ msgstr ""
 msgid "Querying details …"
 msgstr ""
 
-#: applet.js:485
+#: applet.js:487
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr ""
 
-#: applet.js:491
-msgid "Details for USB cameras are not available yet."
+#: applet.js:488
+msgid "Query sizes and frame rates"
 msgstr ""
 
 #: applet.js:504
@@ -225,45 +225,50 @@ msgstr ""
 msgid "%d sizes, %s to %s (%s)"
 msgstr ""
 
-#: presenter.js:141
+#: presenter.js:143
+#, javascript-format
+msgid "up to %s fps (reported by the camera)"
+msgstr ""
+
+#: presenter.js:144
 #, javascript-format
 msgid "up to %s fps (according to libcamera)"
 msgstr ""
 
-#: presenter.js:152
+#: presenter.js:154
 #, javascript-format
 msgid "Sensor: %s"
 msgstr ""
 
-#: presenter.js:154
+#: presenter.js:156
 #, javascript-format
 msgid "Picture: %s"
 msgstr ""
 
-#: presenter.js:155
+#: presenter.js:157
 msgid "Picture sizes: not queried"
 msgstr ""
 
-#: presenter.js:158
+#: presenter.js:160
 #, javascript-format
 msgid "Frame rate: %s"
 msgstr ""
 
-#: presenter.js:160
-msgid "Frame rate: unknown"
-msgstr ""
-
 #: presenter.js:162
-#, javascript-format
-msgid "libcamera id: %s"
+msgid "Frame rate: unknown"
 msgstr ""
 
 #: presenter.js:164
 #, javascript-format
+msgid "libcamera id: %s"
+msgstr ""
+
+#: presenter.js:166
+#, javascript-format
 msgid "Devices: %s"
 msgstr ""
 
-#: presenter.js:215
+#: presenter.js:217
 #, javascript-format
 msgid "Unclassified device: %s"
 msgstr ""
@@ -345,7 +350,7 @@ msgstr ""
 
 #. settings-schema.json->preview-viewer->tooltip
 msgid ""
-"Both show the picture of libcamera cameras. USB cameras always use "
+"For libcamera cameras. USB cameras use VLC if it is installed, otherwise "
 "GStreamer."
 msgstr ""
 
