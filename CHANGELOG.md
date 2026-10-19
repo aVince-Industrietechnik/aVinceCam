@@ -12,3 +12,8 @@
   complex pipelines, front/back position, lens motor and missing tuning
   hints; simulated sysfs trees for tests
 - Diagnose tool: media device driver is now read from the owning device
+- `probe`: details of libcamera cameras from `cam` (sizes, frame rate limits,
+  sensor size, libcamera id), matched to the sysfs cameras by model and
+  position; stops calling `cam` as soon as all requested cameras are found
+- Parser tests against recorded `cam` output of libcamera 0.2.0
+- `AVINCECAM_NO_HARDWARE=1` blocks every camera tool call (set by the tests)

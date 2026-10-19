@@ -7,6 +7,8 @@ REPO="$(cd "$(dirname "$0")/.." && pwd)"
 
 export LANGUAGE=C
 export PYTHONDONTWRITEBYTECODE=1
+# The core refuses to run camera tools while this is set.
+export AVINCECAM_NO_HARDWARE=1
 # Never reach the live desktop session from a test.
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/nonexistent/avincecam-test"
 

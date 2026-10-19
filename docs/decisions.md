@@ -50,3 +50,28 @@ Without opening any device, sysfs provides:
 Not available from sysfs: which receiver port a sensor is wired to when a
 machine has several pipelines, formats, frame rates and the busy state. These
 fields stay `unknown` / `not probed` after a scan; nothing is guessed.
+
+## D9 – Details of libcamera cameras come from `cam`
+Measured on an Intel IPU3 machine with libcamera 0.2.0, each command run once:
+
+| Source | Sizes | Frame rates | Position, model | Sensor power-ups |
+|---|---|---|---|---|
+| `cam --list` | – | – | – | 1 |
+| `gst-device-monitor-1.0 Video/Source` | yes | **no** | – | **3** |
+| `cam -c N -I -p --list-controls` | yes | yes (`FrameDurationLimits`) | yes | 1 |
+
+`probe` therefore uses `cam -c N -I -p --list-controls`, one camera per call.
+The text output of `cam` is not a stable interface: the parser is kept in
+one module and tested against recorded output of each supported version.
+Unknown output leads to `formats_source: "unparsed"`, never to invented values.
+
+Observed side effect: libcamera's camera manager starts every camera of the
+machine, so querying one camera also powers up the others. On machines where a
+power-up produces kernel errors this happens with every libcamera program;
+aVinceCam limits it to explicit user requests (D3).
+
+The GStreamer device monitor is not used for probing, but its pipeline form
+`libcamerasrc camera-name="<id>"` is a candidate for the preview.
+
+Frame rates shown are the limits libcamera reports for the default
+(viewfinder) stream, not measured values.

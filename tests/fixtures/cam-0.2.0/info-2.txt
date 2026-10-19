@@ -1,0 +1,33 @@
+Using camera \_SB_.PCI0.LNK1 as cam0
+Control: FrameDurationLimits: [33303..441444]
+Control: ScalerCrop: [(0, 0)/1344x736..(0, 0)/3264x2448]
+Control: ExposureTime: [53..33249]
+Control: TestPatternMode: [0..3]
+Control: PipelineDepth: [2..3]
+Property: SystemDevices = [ 20748, 20749, 20750, 20751, 20738, 20739, 20740, 20743, 20744, 20745 ]
+Property: PixelArrayActiveAreas = [ (0, 0)/3264x2448 ]
+Property: PixelArraySize = 3264x2448
+Property: Rotation = 0
+Property: Location = 1
+Property: ColorFilterArrangement = 3
+Property: UnitCellSize = 1120x1120
+Property: Model = ov8858
+0: 1280x720-NV12
+ * Pixelformat: NV12 (2x2)-(1280x720)/(+1,+1)
+  - 160x120
+  - 240x160
+  - 320x240
+  - 400x240
+  - 480x320
+  - 640x360
+  - 640x480
+  - 720x480
+  - 768x480
+  - 854x480
+  - 720x576
+  - 800x600
+  - 960x540
+  - 1024x576
+  - 960x640
+  - 1024x600
+  - 1280x720

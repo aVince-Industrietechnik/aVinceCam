@@ -9,7 +9,7 @@ import json
 import sys
 
 from . import SCHEMA_VERSION, __version__
-from . import sysfs
+from . import libcamera, merge, sysfs
 from .model import CoreError, to_dict
 
 EXIT_OK = 0
@@ -43,6 +43,10 @@ def build_parser():
     scan.add_argument("--ipa-dir", action="append", help=argparse.SUPPRESS)
     probe = sub.add_parser("probe", help="query formats (opens devices)")
     probe.add_argument("camera", nargs="?")
+    probe.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
+    probe.add_argument("--ipa-dir", action="append", help=argparse.SUPPRESS)
+    # Answer from recorded cam output instead of running cam (tests).
+    probe.add_argument("--tool-output", help=argparse.SUPPRESS)
     sub.add_parser("status", help="state of the own preview")
     preview = sub.add_parser("preview", help="start a preview")
     preview.add_argument("camera")
@@ -65,12 +69,72 @@ def main(argv=None):
         return EXIT_OK
     if args.command == "scan":
         return cmd_scan(args)
+    if args.command == "probe":
+        return cmd_probe(args)
     return not_implemented(args.command)
 
 
+def _ipa_dirs(args):
+    return tuple(args.ipa_dir) if args.ipa_dir else sysfs.DEFAULT_IPA_DIRS
+
+
+def cmd_probe(args):
+    cameras, _unclassified = sysfs.scan(args.sysfs_root, _ipa_dirs(args))
+    errors = []
+    if args.camera:
+        cameras = [c for c in cameras if c.id == args.camera]
+        if not cameras:
+            errors.append(to_dict(CoreError(code="unknown-camera",
+                                            message=f"no camera with id {args.camera}")))
+            emit({"command": "probe", "cameras": [], "errors": errors})
+            return EXIT_ERROR
+
+    recorded = bool(args.tool_output)
+    runner = (libcamera.RecordedRunner(args.tool_output) if recorded
+              else libcamera.LiveRunner())
+    notes = []
+    calls = 0
+    wanted = [c for c in cameras if c.api == "libcamera"]
+    if wanted:
+        # libcamera may also list USB cameras, so allow for all of them.
+        all_cameras, _ = sysfs.scan(args.sysfs_root, _ipa_dirs(args))
+
+        def all_found(probed):
+            return merge.count_matches(wanted, probed) >= len(wanted)
+
+        try:
+            probed, probe_errors, calls = libcamera.probe_cameras(
+                runner, len(all_cameras), stop=all_found)
+            errors.extend(probe_errors)
+            notes = merge.apply_libcamera(cameras, probed)
+        except libcamera.ToolMissing:
+            errors.append(to_dict(CoreError(
+                code="libcamera-tools-missing",
+                message="the libcamera tool 'cam' is not installed")))
+        except libcamera.HardwareBlocked as exc:
+            errors.append(to_dict(CoreError(
+                code="hardware-blocked",
+                message="hardware access is switched off (AVINCECAM_NO_HARDWARE=1)",
+                detail=str(exc))))
+    for camera in cameras:
+        if camera.api == "v4l2":
+            camera.formats_source = "v4l2 probing not implemented yet"
+
+    emit({
+        "command": "probe",
+        "source": "sysfs+libcamera" + (" (recorded)" if recorded else ""),
+        "opens_devices": not recorded,
+        "libcamera_calls": calls,
+        "cameras": [to_dict(c) for c in cameras],
+        "notes": notes,
+        "errors": errors,
+    })
+    fatal = {"libcamera-tools-missing", "hardware-blocked"}
+    return EXIT_ERROR if any(e["code"] in fatal for e in errors) else EXIT_OK
+
+
 def cmd_scan(args):
-    ipa_dirs = tuple(args.ipa_dir) if args.ipa_dir else sysfs.DEFAULT_IPA_DIRS
-    cameras, unclassified = sysfs.scan(args.sysfs_root, ipa_dirs)
+    cameras, unclassified = sysfs.scan(args.sysfs_root, _ipa_dirs(args))
     emit({
         "command": "scan",
         "source": "sysfs",
