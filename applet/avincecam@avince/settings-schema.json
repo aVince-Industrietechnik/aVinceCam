@@ -1,0 +1,49 @@
+{
+    "head-appearance": {
+        "type": "header",
+        "description": "Appearance"
+    },
+    "panel-icon-style": {
+        "type": "combobox",
+        "default": "color",
+        "description": "Panel icon",
+        "options": {
+            "Colourful": "color",
+            "Single colour (follows the theme)": "symbolic"
+        }
+    },
+    "panel-icon-size-color": {
+        "type": "combobox",
+        "default": 28,
+        "description": "Panel icon size",
+        "tooltip": "Never larger than the panel allows.",
+        "dependency": "panel-icon-style=color",
+        "options": {
+            "Like the panel": 0,
+            "20 px": 20,
+            "24 px": 24,
+            "28 px": 28,
+            "32 px": 32,
+            "36 px": 36
+        }
+    },
+    "panel-icon-size-symbolic": {
+        "type": "combobox",
+        "default": 24,
+        "description": "Panel icon size",
+        "tooltip": "Never larger than the panel allows.",
+        "dependency": "panel-icon-style=symbolic",
+        "options": {
+            "Like the panel": 0,
+            "16 px": 16,
+            "20 px": 20,
+            "24 px": 24,
+            "28 px": 28,
+            "32 px": 32
+        }
+    },
+    "selected-camera": {
+        "type": "generic",
+        "default": ""
+    }
+}

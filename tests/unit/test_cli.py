@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 import unittest
 
 from avincecam import SCHEMA_VERSION, __main__ as cli
@@ -44,6 +45,21 @@ class LauncherTest(unittest.TestCase):
                                 "core", "avincecam-core")
         result = subprocess.run([sys.executable, "-I", launcher, "version"],
                                 capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, cli.EXIT_OK, result.stderr)
+        self.assertEqual(json.loads(result.stdout)["command"], "version")
+
+    def test_launcher_through_symlinked_applet_folder(self):
+        """As in development: applets/<uuid> is a symlink into the repository
+        and the applet calls <uuid>/../../core/avincecam-core."""
+        repo = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        with tempfile.TemporaryDirectory() as tmp:
+            applets = os.path.join(tmp, "share", "cinnamon", "applets")
+            os.makedirs(applets)
+            link = os.path.join(applets, "avincecam@avince")
+            os.symlink(os.path.join(repo, "applet", "avincecam@avince"), link)
+            launcher = os.path.join(link, "..", "..", "core", "avincecam-core")
+            result = subprocess.run([sys.executable, "-I", launcher, "version"],
+                                    capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, cli.EXIT_OK, result.stderr)
         self.assertEqual(json.loads(result.stdout)["command"], "version")
 

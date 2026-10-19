@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>aVinceCam</title>
+  <!-- lens body -->
+  <circle cx="64" cy="64" r="60" fill="#2C2C2A"/>
+  <circle cx="64" cy="64" r="56" fill="#444441"/>
+  <circle cx="64" cy="64" r="50" fill="#1A1A19"/>
+  <!-- six coloured aperture blades -->
+  <path d="M64.00 49.00 L85.60 23.38 A46 46 0 0 1 109.97 62.39 L76.99 56.50 Z" fill="#E24B4A"/>
+  <path d="M76.99 56.50 L109.97 62.39 A46 46 0 0 1 88.38 103.01 L76.99 71.50 Z" fill="#EF9F27"/>
+  <path d="M76.99 71.50 L88.38 103.01 A46 46 0 0 1 42.40 104.62 L64.00 79.00 Z" fill="#F2C94C"/>
+  <path d="M64.00 79.00 L42.40 104.62 A46 46 0 0 1 18.03 65.61 L51.01 71.50 Z" fill="#1D9E75"/>
+  <path d="M51.01 71.50 L18.03 65.61 A46 46 0 0 1 39.62 24.99 L51.01 56.50 Z" fill="#378ADD"/>
+  <path d="M51.01 56.50 L39.62 24.99 A46 46 0 0 1 85.60 23.38 L64.00 49.00 Z" fill="#7F77DD"/>
+  <path d="M64.00 49.00 L85.60 23.38" stroke="#A32D2D" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M76.99 56.50 L109.97 62.39" stroke="#BA7517" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M76.99 71.50 L88.38 103.01" stroke="#C9A227" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M64.00 79.00 L42.40 104.62" stroke="#0F6E56" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M51.01 71.50 L18.03 65.61" stroke="#185FA5" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M51.01 56.50 L39.62 24.99" stroke="#534AB7" stroke-width="2.2" stroke-linecap="round"/>
+  <!-- opening with glass and glint -->
+  <polygon points="64.00 48.50 77.42 56.25 77.42 71.75 64.00 79.50 50.58 71.75 50.58 56.25" fill="#0B0B0B"/>
+  <circle cx="68.5" cy="59" r="3.6" fill="#FFFFFF"/>
+  <circle cx="61" cy="68" r="1.6" fill="#FFFFFF" fill-opacity="0.6"/>
+  <!-- rim highlight -->
+  <path d="M9.50 44.16 A58 58 0 0 1 44.16 9.50" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

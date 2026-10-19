@@ -1,0 +1,281 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-19 18:24+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: applet.js:216
+msgid "1 camera"
+msgstr ""
+
+#: applet.js:217
+#, javascript-format
+msgid "%d cameras"
+msgstr ""
+
+#: applet.js:219
+#, javascript-format
+msgid "Selected: %s"
+msgstr ""
+
+#: applet.js:228
+msgid "Cameras"
+msgstr ""
+
+#: applet.js:233
+msgid "Looking for cameras …"
+msgstr ""
+
+#: applet.js:235 presenter.js:176
+msgid "No camera found."
+msgstr ""
+
+#: applet.js:252
+msgid "Search again"
+msgstr ""
+
+#: applet.js:261
+msgid "Copy camera report"
+msgstr ""
+
+#: applet.js:310
+#, javascript-format
+msgid "Details: %s"
+msgstr ""
+
+#: applet.js:315
+msgid "Querying details …"
+msgstr ""
+
+#: applet.js:318
+msgid "Query sizes and frame rates (switches the cameras on briefly)"
+msgstr ""
+
+#: applet.js:324
+msgid "Details for USB cameras are not available yet."
+msgstr ""
+
+#: applet.js:337
+#, javascript-format
+msgid "Notes (%d)"
+msgstr ""
+
+#: presenter.js:17
+msgid "Front camera"
+msgstr ""
+
+#: presenter.js:18
+msgid "Back camera"
+msgstr ""
+
+#: presenter.js:24
+msgid "Works only with libcamera, not with classic webcam programs."
+msgstr ""
+
+#: presenter.js:25
+msgid "Has a focus motor; aVinceCam does not control it."
+msgstr ""
+
+#: presenter.js:26
+msgid "No libcamera tuning file – image quality may suffer."
+msgstr ""
+
+#: presenter.js:27
+msgid "The camera pipeline could not be determined."
+msgstr ""
+
+#: presenter.js:28
+msgid "libcamera did not report this camera."
+msgstr ""
+
+#: presenter.js:29
+msgid "sysfs and libcamera report different positions."
+msgstr ""
+
+#: presenter.js:30
+msgid "The output of the libcamera tool was not understood."
+msgstr ""
+
+#: presenter.js:36
+msgid "The aVinceCam core was not found."
+msgstr ""
+
+#: presenter.js:37
+msgid "The aVinceCam core stopped with an error."
+msgstr ""
+
+#: presenter.js:38
+msgid "The aVinceCam core did not answer in time."
+msgstr ""
+
+#: presenter.js:39
+msgid "The answer of the aVinceCam core was not understood."
+msgstr ""
+
+#: presenter.js:40
+msgid "This camera is no longer present."
+msgstr ""
+
+#: presenter.js:41
+msgid "The libcamera tools (package libcamera-tools) are not installed."
+msgstr ""
+
+#: presenter.js:42
+msgid "The libcamera tool did not answer in time."
+msgstr ""
+
+#: presenter.js:43
+msgid "Hardware access is switched off."
+msgstr ""
+
+#: presenter.js:44
+msgid "This function is not available yet."
+msgstr ""
+
+#: presenter.js:57
+msgid "Camera"
+msgstr ""
+
+#: presenter.js:68
+msgid "USB (UVC)"
+msgstr ""
+
+#: presenter.js:70
+msgid "external"
+msgstr ""
+
+#: presenter.js:72
+msgid "built in"
+msgstr ""
+
+#: presenter.js:83 presenter.js:84
+msgid "Unknown error"
+msgstr ""
+
+#: presenter.js:104
+#, javascript-format
+msgid "%d sizes, %s to %s (%s)"
+msgstr ""
+
+#: presenter.js:115
+#, javascript-format
+msgid "up to %s fps (according to libcamera)"
+msgstr ""
+
+#: presenter.js:126
+#, javascript-format
+msgid "Sensor: %s"
+msgstr ""
+
+#: presenter.js:128
+#, javascript-format
+msgid "Picture: %s"
+msgstr ""
+
+#: presenter.js:129
+msgid "Picture sizes: not queried"
+msgstr ""
+
+#: presenter.js:132
+#, javascript-format
+msgid "Frame rate: %s"
+msgstr ""
+
+#: presenter.js:134
+msgid "Frame rate: unknown"
+msgstr ""
+
+#: presenter.js:136
+#, javascript-format
+msgid "libcamera id: %s"
+msgstr ""
+
+#: presenter.js:138
+#, javascript-format
+msgid "Devices: %s"
+msgstr ""
+
+#: presenter.js:189
+#, javascript-format
+msgid "Unclassified device: %s"
+msgstr ""
+
+#. metadata.json->name
+msgid "aVinceCam"
+msgstr ""
+
+#. metadata.json->description
+msgid "Camera Control for Linux - find, select and inspect cameras"
+msgstr ""
+
+#. settings-schema.json->head-appearance->description
+msgid "Appearance"
+msgstr ""
+
+#. settings-schema.json->panel-icon-style->description
+msgid "Panel icon"
+msgstr ""
+
+#. settings-schema.json->panel-icon-style->options
+msgid "Colourful"
+msgstr ""
+
+#. settings-schema.json->panel-icon-style->options
+msgid "Single colour (follows the theme)"
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-color->description
+#. settings-schema.json->panel-icon-size-symbolic->description
+msgid "Panel icon size"
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-color->tooltip
+#. settings-schema.json->panel-icon-size-symbolic->tooltip
+msgid "Never larger than the panel allows."
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-color->options
+#. settings-schema.json->panel-icon-size-symbolic->options
+msgid "Like the panel"
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-color->options
+#. settings-schema.json->panel-icon-size-symbolic->options
+msgid "20 px"
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-color->options
+#. settings-schema.json->panel-icon-size-symbolic->options
+msgid "24 px"
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-color->options
+#. settings-schema.json->panel-icon-size-symbolic->options
+msgid "28 px"
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-color->options
+#. settings-schema.json->panel-icon-size-symbolic->options
+msgid "32 px"
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-color->options
+msgid "36 px"
+msgstr ""
+
+#. settings-schema.json->panel-icon-size-symbolic->options
+msgid "16 px"
+msgstr ""

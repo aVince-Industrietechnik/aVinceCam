@@ -1,7 +1,10 @@
 {
     "uuid": "avincecam@avince",
     "name": "aVinceCam",
-    "description": "Camera Control for Linux - find, select and preview cameras",
-    "max-instances": 1,
-    "version": "0.1.0"
+    "description": "Camera Control for Linux - find, select and inspect cameras",
+    "version": "0.1.0",
+    "cinnamon-version": [
+        "6.6"
+    ],
+    "max-instances": 1
 }

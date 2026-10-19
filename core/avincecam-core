@@ -4,12 +4,16 @@
 Frontends run this file as `python3 -I <dir>/avincecam-core <command>`.
 Isolated mode (-I) ignores PYTHONPATH and the user's site-packages, so the
 package directory next to this file is added explicitly - nothing else.
+
+realpath, not abspath: the applet may call this file through a symlinked
+folder and "..", e.g. .../applets/avincecam@avince/../../core/avincecam-core.
+abspath would shorten ".." textually and miss the real location.
 """
 
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
 
 from avincecam.__main__ import main  # noqa: E402
 
