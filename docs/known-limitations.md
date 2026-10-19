@@ -20,3 +20,6 @@
 - Browsers and video conferencing tools may not see libcamera-only cameras;
   that needs PipeWire's libcamera support or a loopback device and is outside
   the scope of aVinceCam.
+- **GStreamer probes all video devices** when its video4linux2 plugin loads.
+  On machines with complex camera pipelines this briefly powers them up.
+  aVinceCam uses VLC for USB cameras when available (D12).

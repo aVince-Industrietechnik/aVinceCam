@@ -101,3 +101,17 @@ On a machine whose focus motor is not powered correctly every write fails
 and floods the kernel log. `preview` therefore refuses cameras with a focus
 motor (`lens-blocked`) unless `--allow-lens` is given; the applet passes it
 only when the user enables "Allow preview of cameras with a focus motor".
+
+## D12 – USB camera preview with VLC, GStreamer only as fallback
+Measured on an Intel IPU3 laptop with inotify and /proc: when `gst-launch-1.0`
+loads GStreamer's video4linux2 plugin, it opens **every** video and
+sub-device node of the machine for a moment – including the IPU3 nodes and
+the lens motor – which powers up the IPU3 pipeline. (Rebuilding the
+GStreamer registry, e.g. by `gst-inspect-1.0`, also loads the libcamera
+plugin and starts libcamera.)
+
+VLC (`vlc --intf qt --qt-minimal-view --play-and-exit v4l2://<device>`) opened
+only the USB camera's node, and closing its window ended VLC at once. The
+plain video window of `cvlc` did not end VLC when closed and is not used.
+UVC previews therefore use VLC when installed; GStreamer remains the
+fallback. VLC creates its own settings below `~/.config/vlc/`.

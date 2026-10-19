@@ -11,8 +11,8 @@ import sys
 import time
 
 from . import SCHEMA_VERSION, __version__
-from . import busy, libcamera, merge, preview, sysfs
-from .model import CoreError, to_dict
+from . import busy, libcamera, merge, preview, safety, sysfs, v4l2
+from .model import CoreError, Format, to_dict
 
 EXIT_OK = 0
 EXIT_ERROR = 1
@@ -164,8 +164,12 @@ def cmd_preview(args):
                           detail=lock.get("camera"))
         preview.remove_lock(directory)  # stale or missing
 
-        argv = preview.viewer_command(camera, args.viewer, size)
         fake = os.environ.get("AVINCECAM_FAKE_VIEWER")
+        uvc_formats = None
+        if camera.api == "v4l2" and not fake:
+            uvc_formats = _uvc_formats(camera, args.sysfs_root)
+        argv = preview.viewer_command(camera, args.viewer, size, uvc_formats)
+        viewer_name = os.path.basename(argv[0])
         if fake:
             argv = [fake] + argv  # tests: a stand-in that touches no camera
         elif os.environ.get("AVINCECAM_NO_HARDWARE") == "1":
@@ -189,10 +193,10 @@ def cmd_preview(args):
     log = os.path.join(directory, preview.LOG_NAME)
     preview.write_lock(directory, {
         "pid": pid, "start_time": preview.start_time(pid), "camera": camera.id,
-        "viewer": args.viewer if camera.api == "libcamera" else "gst",
+        "viewer": viewer_name,
         "command": argv, "started": int(time.time())})
     emit({"command": "preview", "started": True, "camera": camera.id,
-          "viewer": os.path.basename(argv[0]), "pid": pid, "log": log, "errors": []})
+          "viewer": viewer_name, "pid": pid, "log": log, "errors": []})
     sys.stdout.flush()
 
     # From here on the viewer's output goes to the log file.
@@ -269,7 +273,7 @@ def cmd_probe(args):
                 detail=str(exc))))
     for camera in cameras:
         if camera.api == "v4l2":
-            camera.formats_source = "v4l2 probing not implemented yet"
+            _probe_v4l2(camera, args.sysfs_root, errors)
 
     emit({
         "command": "probe",
@@ -282,6 +286,53 @@ def cmd_probe(args):
     })
     fatal = {"libcamera-tools-missing", "hardware-blocked"}
     return EXIT_ERROR if any(e["code"] in fatal for e in errors) else EXIT_OK
+
+
+def _uvc_formats(camera, sysfs_root):
+    """Formats of a UVC camera for choosing the preview mode, or None."""
+    for node in camera.nodes:
+        if not os.path.basename(node).startswith("video"):
+            continue
+        try:
+            result = v4l2.query_device(node, sysfs_root)
+        except (v4l2.HardwareBlocked, safety.SafetyError, OSError):
+            continue
+        if result is not None:
+            return result["formats"]
+    return None
+
+
+def _probe_v4l2(camera, sysfs_root, errors):
+    """Fill formats of a UVC camera from its capture node (read-only ioctls)."""
+    for node in camera.nodes:
+        if not os.path.basename(node).startswith("video"):
+            continue
+        try:
+            result = v4l2.query_device(node, sysfs_root)
+        except v4l2.HardwareBlocked as exc:
+            errors.append(to_dict(CoreError(
+                code="hardware-blocked",
+                message="hardware access is switched off (AVINCECAM_NO_HARDWARE=1)",
+                detail=str(exc))))
+            return
+        except safety.SafetyError as exc:
+            errors.append(to_dict(CoreError(code="refused", message=str(exc))))
+            continue
+        except OSError as exc:
+            errors.append(to_dict(CoreError(code="v4l2-failed",
+                                            message=f"could not query {node}",
+                                            detail=exc.strerror or str(exc))))
+            continue
+        if result is None:
+            continue  # metadata node, no picture
+        formats, limits = v4l2.summarize(result)
+        camera.formats = [Format(pixel_format=f["pixel_format"], width=f["width"],
+                                 height=f["height"], fps=f["fps"]) for f in formats]
+        camera.formats_source = "V4L2 " + node + (" (ranges not listed)" if result["stepwise"] else "")
+        camera.frame_rate_limits = limits
+        return
+    if camera.formats is None:
+        camera.formats_source = "no capture node answered"
 
 
 def cmd_scan(args):

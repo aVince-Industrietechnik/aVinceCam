@@ -11,6 +11,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 import fakesysfs
 from avincecam import preview
@@ -204,11 +205,78 @@ class UnitTest(unittest.TestCase):
 
         uvc = Camera(id="usb:1-5", label="Webcam", api="v4l2",
                      nodes=["/dev/video0", "/dev/video1", "/dev/media2"])
-        self.assertIn("device=/dev/video0", preview.viewer_command(uvc, "qcam", (1, 1)))
+        with mock.patch.object(preview, "which", lambda p: None):
+            self.assertIn("device=/dev/video0", preview.viewer_command(uvc, "qcam", (1, 1)))
+        with mock.patch.object(preview, "which", lambda p: "/usr/bin/" + p):
+            self.assertIn("v4l2:///dev/video0", preview.viewer_command(uvc, "qcam", (1, 1)))
 
         no_id = Camera(id=FRONT, label="x", api="libcamera")
         with self.assertRaises(preview.PreviewError):
             preview.viewer_command(no_id, "qcam", (1280, 720))
+
+
+class UvcModeTest(unittest.TestCase):
+    """Preview mode for the recorded formats of a real USB 2.0 webcam."""
+
+    @classmethod
+    def setUpClass(cls):
+        path = os.path.join(REPO, "tests", "fixtures", "uvc", "realtek-0bda-5697.json")
+        with open(path) as f:
+            cls.formats = json.load(f)["formats"]
+        cls.cam = Camera(id="usb:1-9", label="USB 2.0 Camera", api="v4l2",
+                         nodes=["/dev/video14", "/dev/video15", "/dev/media2"])
+
+    def test_mjpg_preferred_at_requested_size(self):
+        self.assertEqual(preview.choose_uvc_mode(self.formats, (1280, 720)),
+                         ("MJPG", 1280, 720, 30.0))
+
+    def setUp(self):
+        # Default for these tests: no VLC, so the GStreamer fallback is used.
+        patcher = mock.patch.object(preview, "which", lambda p: None)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_vlc_preferred_when_installed(self):
+        with mock.patch.object(preview, "which", lambda p: "/usr/bin/" + p):
+            argv = preview.viewer_command(self.cam, "qcam", (1280, 720), self.formats)
+        self.assertEqual(argv[0], "vlc")
+        self.assertIn("--qt-minimal-view", argv)
+        self.assertIn("--play-and-exit", argv)
+        self.assertIn("v4l2:///dev/video14", argv)
+        self.assertEqual(argv[-4:], [":v4l2-chroma=MJPG", ":v4l2-width=1280",
+                                     ":v4l2-height=720", ":v4l2-fps=30"])
+
+    def test_vlc_without_known_formats(self):
+        with mock.patch.object(preview, "which", lambda p: "/usr/bin/" + p):
+            argv = preview.viewer_command(self.cam, "qcam", (1280, 720), None)
+        self.assertEqual(argv[-1], "v4l2:///dev/video14")
+
+    def test_gstreamer_fallback_uses_jpeg_decoder(self):
+        argv = preview.viewer_command(self.cam, "qcam", (1280, 720), self.formats)
+        self.assertEqual(argv[0], "gst-launch-1.0")
+        self.assertIn("image/jpeg,width=1280,height=720,framerate=30/1", argv)
+        self.assertIn("jpegdec", argv)
+        self.assertIn("device=/dev/video14", argv)
+
+    def test_unknown_size_takes_largest_smaller_one(self):
+        self.assertEqual(preview.choose_uvc_mode(self.formats, (1000, 700))[1:3], (800, 600))
+
+    def test_yuyv_only_camera(self):
+        yuyv = [f for f in self.formats if f["pixel_format"] == "YUYV"]
+        mode = preview.choose_uvc_mode(yuyv, (640, 480))
+        self.assertEqual(mode, ("YUYV", 640, 480, 30.0))
+        argv = preview.viewer_command(self.cam, "qcam", (640, 480), yuyv)
+        self.assertIn("video/x-raw,format=YUY2,width=640,height=480,framerate=30/1", argv)
+
+    def test_unknown_formats_let_gstreamer_choose(self):
+        argv = preview.viewer_command(self.cam, "qcam", (1280, 720), None)
+        self.assertEqual(argv[-3:], ["videoconvert", "!", "autovideosink"])
+        self.assertNotIn("jpegdec", argv)
+
+    def test_fractional_rate(self):
+        fmts = [{"pixel_format": "MJPG", "width": 640, "height": 480, "fps": [7.5]}]
+        argv = preview.viewer_command(self.cam, "qcam", (640, 480), fmts)
+        self.assertIn("image/jpeg,width=640,height=480,framerate=15/2", argv)
 
 
 if __name__ == "__main__":

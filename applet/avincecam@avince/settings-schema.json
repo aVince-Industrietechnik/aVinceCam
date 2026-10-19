@@ -50,7 +50,7 @@
         "type": "combobox",
         "default": "qcam",
         "description": "Preview program",
-        "tooltip": "Both show the picture of libcamera cameras. USB cameras always use GStreamer.",
+        "tooltip": "For libcamera cameras. USB cameras use VLC if it is installed, otherwise GStreamer.",
         "options": {
             "qcam (libcamera)": "qcam",
             "GStreamer": "gst"

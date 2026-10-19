@@ -64,7 +64,9 @@ Warnings: `needs-libcamera`, `lens-not-controlled`, `no-sensor-tuning`,
 - libcamera cameras: `cam -c N -I -p --list-controls`, one call per camera,
   stopping as soon as all requested cameras are matched. `libcamera_calls`
   says how often libcamera was started (each start powers up the cameras).
-- UVC cameras: not implemented yet (`formats_source` says so).
+- UVC cameras: read-only V4L2 enumeration (`VIDIOC_QUERYCAP`, `ENUM_FMT`,
+  `ENUM_FRAMESIZES`, `ENUM_FRAMEINTERVALS`) of the capture node; no format
+  is set and nothing streams. `formats[].fps` lists the offered frame rates.
 
 Additional camera fields after `probe`: `backend_id` (libcamera camera id),
 `sensor_size` (`[width, height]`), `frame_rate_limits`
@@ -74,7 +76,7 @@ Matching rule: sensor model and position; if that is not unique, model alone.
 Without a unique match nothing is merged (`libcamera-no-match`). A position
 that differs between sysfs and libcamera is reported (`location-mismatch`).
 
-Error codes: `unknown-camera`, `libcamera-tools-missing`, `timeout`,
+Error codes: `unknown-camera`, `libcamera-tools-missing`, `timeout`, `v4l2-failed`,
 `hardware-blocked` (environment variable `AVINCECAM_NO_HARDWARE=1`, set by
 the test suite). Note `cam-output-unparsed`: output of `cam` did not match the
 known format.
