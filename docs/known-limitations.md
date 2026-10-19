@@ -5,6 +5,8 @@
   have wrong colours. aVinceCam reports this but cannot fix it.
 - **Autofocus** is not controlled by version 1. On some machines the lens
   motor is not powered correctly; aVinceCam never addresses lens motors.
+- **Cameras with a focus motor:** libcamera drives the motor automatically
+  during a preview. aVinceCam locks their preview by default (see D11).
 - **Intel IPU3** can run only one camera pipeline at a time. aVinceCam allows
   one preview at a time.
 - **Busy detection** sees only processes of the current user.

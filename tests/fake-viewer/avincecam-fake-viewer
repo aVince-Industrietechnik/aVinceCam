@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+"""Stand-in for qcam / gst-launch in tests. Touches no camera.
+
+It is started as: avincecam-fake-viewer <real viewer command ...>
+and prints that command, then waits like a preview window would.
+
+Environment:
+  FAKE_VIEWER_EXIT=<code>     end at once with this exit code (viewer failure)
+  FAKE_VIEWER_IGNORE_TERM=1   ignore SIGTERM (a hanging viewer)
+  FAKE_VIEWER_SECONDS=<n>     how long to stay open (default 60)
+"""
+
+import os
+import signal
+import sys
+import time
+
+print("fake viewer for:", " ".join(sys.argv[1:]), flush=True)
+
+code = os.environ.get("FAKE_VIEWER_EXIT")
+if code is not None:
+    print("fake viewer: simulated failure", file=sys.stderr, flush=True)
+    sys.exit(int(code))
+
+if os.environ.get("FAKE_VIEWER_IGNORE_TERM") == "1":
+    signal.signal(signal.SIGTERM, signal.SIG_IGN)
+else:
+    signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+
+time.sleep(float(os.environ.get("FAKE_VIEWER_SECONDS", "60")))

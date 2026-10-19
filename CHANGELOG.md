@@ -25,3 +25,7 @@
 - Colourful aperture icon (default) and single-colour panel icon, icon size
   setting; `scripts/build-icons.py` builds them from `assets/icons`
 - German translation; test that every applet text is translated
+- Preview: `preview`, `stop`, `status` with lock file, busy check and
+  own-process-only stop; qcam or GStreamer; libcamera id from sysfs;
+  applet entries to start and stop the preview, preview program setting
+- Preview of cameras with a focus motor locked by default (setting to allow)

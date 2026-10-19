@@ -26,8 +26,7 @@ class CliTest(unittest.TestCase):
         self.assertIn("version", data)
 
     def test_unimplemented_commands_say_so(self):
-        for argv in (["status"], ["stop"], ["diagnose"],
-                     ["preview", "x"]):
+        for argv in (["diagnose"],):
             code, data = run(argv)
             self.assertEqual(code, cli.EXIT_NOT_IMPLEMENTED, argv)
             self.assertEqual(data["errors"][0]["code"], "not-implemented")

@@ -121,6 +121,75 @@ var CoreClient = class CoreClient {
         return this._running.size > 0;
     }
 
+    /*
+     * Start a preview. The core checks everything, prints one JSON line and
+     * then becomes the viewer (same process). Callbacks:
+     *   onStarted(result)            first answer, { ok, data, error }
+     *   onExit(exitStatus, signaled) when the viewer has ended
+     * Returns the Gio.Subprocess, or null if it could not be started.
+     */
+    startPreview(args, startTimeoutSeconds, onStarted, onExit) {
+        if (!this.commandPrefix) {
+            onStarted({ ok: false, data: null,
+                        error: { code: "core-missing", message: null, detail: null } });
+            return null;
+        }
+        let proc;
+        try {
+            proc = Gio.Subprocess.new(
+                this.commandPrefix.concat(args),
+                Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE
+            );
+        } catch (e) {
+            onStarted({ ok: false, data: null,
+                        error: { code: "core-missing", message: null, detail: String(e) } });
+            return null;
+        }
+
+        let answered = false;
+        const answer = result => {
+            if (answered || this._destroyed)
+                return;
+            answered = true;
+            onStarted(result);
+        };
+
+        const timer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, startTimeoutSeconds, () => {
+            answer({ ok: false, data: null,
+                     error: { code: "core-timeout", message: null,
+                              detail: String(startTimeoutSeconds) + " s" } });
+            proc.force_exit();  // our own child only
+            return GLib.SOURCE_REMOVE;
+        });
+
+        const stream = new Gio.DataInputStream({ base_stream: proc.get_stdout_pipe() });
+        stream.read_line_async(GLib.PRIORITY_DEFAULT, null, (s, res) => {
+            GLib.source_remove(timer);
+            let line = null;
+            try {
+                [line] = s.read_line_finish_utf8(res);
+            } catch (e) {
+                line = null;
+            }
+            // Exit status is not known yet; a JSON answer with errors means failure.
+            answer(Presenter.parseCoreResult(line || "", line ? 0 : 1, ""));
+        });
+
+        proc.wait_async(null, (p, res) => {
+            try {
+                p.wait_finish(res);
+            } catch (e) {
+                // nothing to do: the process is gone either way
+            }
+            if (this._destroyed)
+                return;
+            answer({ ok: false, data: null,
+                     error: { code: "core-failed", message: null, detail: null } });
+            onExit(p.get_if_exited() ? p.get_exit_status() : -1, p.get_if_signaled());
+        });
+        return proc;
+    }
+
     /* Stop all calls started by this client and drop their results. */
     destroy() {
         this._destroyed = true;

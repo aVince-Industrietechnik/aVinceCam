@@ -82,6 +82,13 @@ function fakeJson(scenario, args) {
     check("unknown warning shown raw", Presenter.warningText("something-new", _) === "something-new");
 })();
 
+(function testPreviewErrors() {
+    const busy = Presenter.errorText({ code: "camera-busy", detail: "qcam" }, _);
+    check("busy names the program", busy === "The camera is in use by another program. (qcam)", busy);
+    const running = Presenter.errorText({ code: "preview-running", detail: "sensor:x" }, _);
+    check("running without internal id", running.indexOf("sensor:") < 0, running);
+})();
+
 (function testNoteColor() {
     check("dark theme gets light blue", Presenter.noteColor([225, 225, 225]) === "#78aeed");
     check("light theme gets dark blue", Presenter.noteColor([48, 48, 48]) === "#1a5fb4");
@@ -168,6 +175,55 @@ const PY = GLib.find_program_in_path("python3");
     const prefix = CoreClient.findCore(APPLET);
     check("core found from applet folder", prefix !== null &&
           prefix[prefix.length - 1].endsWith("core/avincecam-core"), prefix);
+})();
+
+function withFakeRuntime(fn) {
+    const dir = GLib.dir_make_tmp("avincecam-test-XXXXXX");
+    GLib.setenv("AVINCECAM_FAKE_RUNTIME", dir, true);
+    try {
+        fn(dir);
+    } finally {
+        GLib.unsetenv("AVINCECAM_FAKE_RUNTIME");
+        GLib.spawn_command_line_sync("rm -rf -- " + GLib.shell_quote(dir));
+    }
+}
+
+(function testPreviewStartAndStop() {
+    withFakeRuntime(() => {
+        const loop = new GLib.MainLoop(null, false);
+        const client = new CoreClient.CoreClient([PY, "-I", FAKE, "--scenario=latitude"]);
+        let started = null, exited = null;
+        client.startPreview(["preview", "sensor:i2c-INT3479:00"], 10,
+            r => {
+                started = r;
+                client.run(["stop"], 10, () => {});
+            },
+            (status, signaled) => {
+                exited = { status, signaled };
+                loop.quit();
+            });
+        const guard = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 20, () => { loop.quit(); return false; });
+        loop.run();
+        GLib.source_remove(guard);
+        check("preview started", started && !started.error && started.data.started, started);
+        check("preview ended after stop", exited !== null && exited.status === 0, exited);
+    });
+})();
+
+(function testPreviewViewerFailure() {
+    withFakeRuntime(() => {
+        GLib.setenv("FAKE_VIEWER_EXIT", "3", true);
+        const loop = new GLib.MainLoop(null, false);
+        const client = new CoreClient.CoreClient([PY, "-I", FAKE, "--scenario=latitude"]);
+        let exited = null;
+        client.startPreview(["preview", "sensor:i2c-INT3479:00"], 10, () => {},
+            (status, signaled) => { exited = { status, signaled }; loop.quit(); });
+        const guard = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 20, () => { loop.quit(); return false; });
+        loop.run();
+        GLib.source_remove(guard);
+        GLib.unsetenv("FAKE_VIEWER_EXIT");
+        check("failed viewer reports exit code", exited !== null && exited.status === 3, exited);
+    });
 })();
 
 (function testDestroyDropsResult() {

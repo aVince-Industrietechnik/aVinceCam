@@ -22,7 +22,7 @@ function locationTitles(_) {
 function warningTexts(_) {
     return {
         "needs-libcamera": _("Works only with libcamera, not with classic webcam programs."),
-        "lens-not-controlled": _("Has a focus motor; aVinceCam does not control it."),
+        "lens-not-controlled": _("Has a focus motor; libcamera drives it during a preview."),
         "no-sensor-tuning": _("No libcamera tuning file – image quality may suffer."),
         "pipeline-unknown": _("The camera pipeline could not be determined."),
         "libcamera-no-match": _("libcamera did not report this camera."),
@@ -41,9 +41,20 @@ function errorTexts(_) {
         "libcamera-tools-missing": _("The libcamera tools (package libcamera-tools) are not installed."),
         "timeout": _("The libcamera tool did not answer in time."),
         "hardware-blocked": _("Hardware access is switched off."),
-        "not-implemented": _("This function is not available yet.")
+        "not-implemented": _("This function is not available yet."),
+        "preview-running": _("A preview is already running – stop it first."),
+        "camera-busy": _("The camera is in use by another program."),
+        "viewer-missing": _("The preview program is not installed."),
+        "viewer-failed": _("The preview ended with an error."),
+        "no-camera-id": _("The libcamera id of this camera is unknown."),
+        "no-runtime-dir": _("No runtime folder for the preview is available."),
+        "stop-failed": _("The preview could not be stopped."),
+        "lens-blocked": _("Preview locked: camera has a focus motor")
     };
 }
+
+/* Errors whose detail is worth showing next to the text. */
+const DETAIL_ERRORS = ["camera-busy", "viewer-missing", "viewer-failed"];
 
 function upper(text) {
     return text ? String(text).toUpperCase() : "";
@@ -81,7 +92,10 @@ function warningText(code, _) {
 function errorText(error, _) {
     if (!error)
         return _("Unknown error");
-    return errorTexts(_)[error.code] || error.message || error.code || _("Unknown error");
+    const text = errorTexts(_)[error.code] || error.message || error.code || _("Unknown error");
+    if (error.detail && DETAIL_ERRORS.indexOf(error.code) >= 0)
+        return text + " (" + String(error.detail).slice(0, 80) + ")";
+    return text;
 }
 
 /*

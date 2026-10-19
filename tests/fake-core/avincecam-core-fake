@@ -44,7 +44,31 @@ SCENARIOS = {
 }
 
 
+FAKE_VIEWER = os.path.join(REPO, "tests", "fake-viewer", "avincecam-fake-viewer")
+
+
+def fake_runtime_dir():
+    """Lock and log folder of the fake previews (never the real one)."""
+    path = os.environ.get("AVINCECAM_FAKE_RUNTIME") or os.path.join(
+        tempfile.gettempdir(), f"avincecam-fake-{os.getuid()}")
+    os.makedirs(path, mode=0o700, exist_ok=True)
+    return path
+
+
 def run_real_core(build, args):
+    command = args[0] if args else None
+    runtime = ["--runtime-dir", fake_runtime_dir()]
+    if command == "preview":
+        # The core replaces itself with the fake viewer, so the simulated
+        # sysfs tree must outlive this process: keep it in the runtime folder.
+        root = os.path.join(fake_runtime_dir(), "sys")
+        if not os.path.isdir(root):
+            os.makedirs(root)
+            build(root)
+        os.environ["AVINCECAM_FAKE_VIEWER"] = FAKE_VIEWER
+        return core_main(args + ["--sysfs-root", root] + runtime)
+    if command in ("stop", "status"):
+        return core_main(args + runtime)
     with tempfile.TemporaryDirectory() as tmp:
         root = os.path.join(tmp, "sys")
         ipa = os.path.join(tmp, "ipa")
@@ -52,9 +76,11 @@ def run_real_core(build, args):
         os.makedirs(ipa)
         build(root)
         extra = ["--sysfs-root", root, "--ipa-dir", ipa]
-        if args and args[0] == "probe":
+        if command == "probe":
             extra += ["--tool-output", FIXTURES]
-        if args and args[0] in ("scan", "probe"):
+        if command == "scan":
+            extra += runtime
+        if command in ("scan", "probe"):
             args = args + extra
         return core_main(args)
 

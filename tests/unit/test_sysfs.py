@@ -60,6 +60,13 @@ class Latitude5285Test(Base):
         cams = self.by_id(self.scan()[0])
         self.assertIn("lens-not-controlled", cams["sensor:i2c-INT3477:00"].warnings)
         self.assertNotIn("lens-not-controlled", cams["sensor:i2c-INT3479:00"].warnings)
+        self.assertTrue(cams["sensor:i2c-INT3477:00"].has_lens)
+        self.assertFalse(cams["sensor:i2c-INT3479:00"].has_lens)
+
+    def test_libcamera_id_from_acpi_path(self):
+        cams = self.by_id(self.scan()[0])
+        self.assertEqual(cams["sensor:i2c-INT3479:00"].backend_id, r"\_SB_.PCI0.LNK0")
+        self.assertEqual(cams["sensor:i2c-INT3477:00"].backend_id, r"\_SB_.PCI0.LNK1")
 
     def test_lens_motor_is_no_camera_and_not_listed(self):
         cameras, _ = self.scan()

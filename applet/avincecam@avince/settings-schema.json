@@ -42,6 +42,26 @@
             "32 px": 32
         }
     },
+    "head-preview": {
+        "type": "header",
+        "description": "Preview"
+    },
+    "preview-viewer": {
+        "type": "combobox",
+        "default": "qcam",
+        "description": "Preview program",
+        "tooltip": "Both show the picture of libcamera cameras. USB cameras always use GStreamer.",
+        "options": {
+            "qcam (libcamera)": "qcam",
+            "GStreamer": "gst"
+        }
+    },
+    "allow-lens-cameras": {
+        "type": "switch",
+        "default": false,
+        "description": "Allow preview of cameras with a focus motor",
+        "tooltip": "While such a camera streams, libcamera drives its focus motor automatically. Leave this off if the focus motor does not work properly."
+    },
     "selected-camera": {
         "type": "generic",
         "default": ""

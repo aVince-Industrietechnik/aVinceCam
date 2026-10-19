@@ -15,6 +15,7 @@ const Applet = imports.ui.applet;
 const PopupMenu = imports.ui.popupMenu;
 const Settings = imports.ui.settings;
 const St = imports.gi.St;
+const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Pango = imports.gi.Pango;
 const Gettext = imports.gettext;
@@ -26,6 +27,8 @@ const CoreClient = AppletDir.coreClient;
 
 const SCAN_TIMEOUT_SECONDS = 10;
 const PROBE_TIMEOUT_SECONDS = 40;
+const PREVIEW_START_TIMEOUT_SECONDS = 15;
+const STOP_TIMEOUT_SECONDS = 15;
 // Used when the applet's own panel icon is missing.
 const FALLBACK_ICON_NAME = "camera-web-symbolic";
 
@@ -47,13 +50,22 @@ class AVinceCamApplet extends Applet.IconApplet {
         this._probing = null;       // camera id being probed
         this._scanRunning = false;
         this._detailsOpen = false;  // keep the details submenu open on rebuild
+        this._previewBusy = false;  // a start or stop request is under way
+        this._previewProc = null;   // viewer started by this applet instance
 
         this._metadataPath = metadata.path;
         this.selectedCamera = "";
         this.panelIconStyle = "color";
         this.panelIconSizeColor = 28;
         this.panelIconSizeSymbolic = 24;
+        this.previewViewer = "qcam";
+        this.allowLensCameras = false;
         this.settings = new Settings.AppletSettings(this, metadata.uuid, instanceId);
+        this.settings.bindProperty(Settings.BindingDirection.IN,
+                                   "preview-viewer", "previewViewer", null);
+        this.settings.bindProperty(Settings.BindingDirection.IN,
+                                   "allow-lens-cameras", "allowLensCameras",
+                                   () => this._buildMenu());
         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL,
                                    "selected-camera", "selectedCamera", null);
         this.settings.bindProperty(Settings.BindingDirection.IN,
@@ -140,6 +152,16 @@ class AVinceCamApplet extends Applet.IconApplet {
             this._themeContext.disconnect(this._themeChangedId);
             this._themeChangedId = 0;
         }
+        // Do not leave a preview behind that nobody can stop from the panel.
+        if (this._previewRunning() && this.client.commandPrefix) {
+            try {
+                Gio.Subprocess.new(this.client.commandPrefix.concat(["stop"]),
+                                   Gio.SubprocessFlags.STDOUT_SILENCE |
+                                   Gio.SubprocessFlags.STDERR_SILENCE);
+            } catch (e) {
+                global.logError("aVinceCam: could not stop the preview: " + e);
+            }
+        }
         this.client.destroy();
         this.settings.finalize();
     }
@@ -171,7 +193,100 @@ class AVinceCamApplet extends Applet.IconApplet {
     }
 
     _stateKey() {
-        return JSON.stringify([this._cameras(), this._lastError, this.selectedCamera]);
+        return JSON.stringify([this._cameras(), this._lastError, this.selectedCamera,
+                               this._scan ? this._scan.preview : null]);
+    }
+
+    // ------------------------------------------------------------ preview
+
+    /* Preview state as last reported by the core (lock file based). */
+    _previewState() {
+        return (this._scan && this._scan.preview) || { running: false };
+    }
+
+    _previewRunning() {
+        return this._previewProc !== null || this._previewState().running === true;
+    }
+
+    _startPreview(cameraId) {
+        if (this._removed || this._previewBusy || this._previewRunning())
+            return;
+        this._previewBusy = true;
+        this._lastError = null;
+        const startedAt = GLib.get_monotonic_time();
+        let proc = null;
+        const args = ["preview", cameraId, "--viewer", this.previewViewer === "gst" ? "gst" : "qcam"];
+        if (this.allowLensCameras)
+            args.push("--allow-lens");
+        proc = this.client.startPreview(
+            args,
+            PREVIEW_START_TIMEOUT_SECONDS,
+            result => {
+                this._previewBusy = false;
+                const data = result.data || {};
+                if (result.error || !data.started) {
+                    this._previewProc = null;
+                    this._lastError = { error: result.error ||
+                        { code: "core-failed", message: null, detail: null }, context: "preview" };
+                } else {
+                    this._previewProc = proc;
+                    if (this._scan)
+                        this._scan.preview = { running: true, camera: data.camera,
+                                               viewer: data.viewer, pid: data.pid, log: data.log };
+                }
+                this._buildMenu();
+                this._updateTooltip();
+            },
+            (exitStatus, signaled) => {
+                const seconds = (GLib.get_monotonic_time() - startedAt) / 1e6;
+                const log = this._scan && this._scan.preview ? this._scan.preview.log : null;
+                this._previewProc = null;
+                this._previewBusy = false;
+                if (this._scan)
+                    this._scan.preview = { running: false };
+                // A viewer that fails right away usually could not open the camera.
+                if (!signaled && exitStatus !== 0 && seconds < 15)
+                    this._reportViewerFailure(log);
+                this._buildMenu();
+                this._updateTooltip();
+            });
+        if (proc === null)
+            this._previewBusy = false;
+        this._buildMenu();
+    }
+
+    _reportViewerFailure(logPath) {
+        this._lastError = { error: { code: "viewer-failed", message: null, detail: null },
+                            context: "preview" };
+        if (!logPath)
+            return;
+        Gio.File.new_for_path(logPath).load_contents_async(null, (file, res) => {
+            try {
+                const [, bytes] = file.load_contents_finish(res);
+                const lines = new TextDecoder().decode(bytes).trim().split("\n");
+                this._lastError.error.detail = lines.slice(-2).join(" / ");
+                this._buildMenu();
+            } catch (e) {
+                // the log is optional
+            }
+        });
+    }
+
+    _stopPreview() {
+        if (this._removed || this._previewBusy)
+            return;
+        this._previewBusy = true;
+        this._buildMenu();
+        this.client.run(["stop"], STOP_TIMEOUT_SECONDS, result => {
+            this._previewBusy = false;
+            if (result.error)
+                this._lastError = { error: result.error, context: "stop" };
+            if (this._scan)
+                this._scan.preview = { running: false };
+            this._buildMenu();
+            this._updateTooltip();
+            this._refresh();
+        });
     }
 
     _probe(cameraId) {
@@ -225,6 +340,12 @@ class AVinceCamApplet extends Applet.IconApplet {
                                                : _("%d cameras").replace("%d", String(cams.length)));
         if (selected)
             text += "\n" + _("Selected: %s").replace("%s", Presenter.cameraTitle(selected, _));
+        const running = this._previewState();
+        if (running.running) {
+            const cam = cams.find(c => c.id === running.camera);
+            text += "\n" + _("Preview running: %s").replace("%s",
+                cam ? Presenter.cameraTitle(cam, _) : (running.camera || "?"));
+        }
         this.set_applet_tooltip(text);
     }
 
@@ -250,6 +371,8 @@ class AVinceCamApplet extends Applet.IconApplet {
             this._addError(this._lastError.error);
 
         const selected = this._cameras().find(c => c.id === this.selectedCamera);
+        this._addPreviewItem(selected);
+
         if (selected) {
             this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             this._addDetails(this._details[selected.id] || selected);
@@ -300,6 +423,42 @@ class AVinceCamApplet extends Applet.IconApplet {
     _addError(error) {
         this.menu.addMenuItem(this._textItem(Presenter.errorText(error, _),
                                              "dialog-warning-symbolic", "avincecam-error"));
+    }
+
+    /*
+     * One entry: "Start preview" for the selected camera, or "Stop preview"
+     * while one runs. Only one preview at a time (Intel IPU3 rule).
+     */
+    _addPreviewItem(selected) {
+        const state = this._previewState();
+        if (this._previewBusy) {
+            this.menu.addMenuItem(this._textItem(_("Please wait …"), "content-loading-symbolic",
+                                                 "avincecam-info"));
+            return;
+        }
+        if (this._previewRunning()) {
+            const cam = this._cameras().find(c => c.id === state.camera);
+            const title = cam ? Presenter.cameraTitle(cam, _) : "";
+            const stop = new PopupMenu.PopupIconMenuItem(
+                title ? _("Stop preview (%s)").replace("%s", title) : _("Stop preview"),
+                "media-playback-stop-symbolic", St.IconType.SYMBOLIC);
+            stop.connect("activate", () => this._stopPreview());
+            this.menu.addMenuItem(stop);
+            return;
+        }
+        if (!selected)
+            return;
+        if (selected.has_lens && !this.allowLensCameras) {
+            // Locked: libcamera would drive the focus motor automatically.
+            this.menu.addMenuItem(this._textItem(_("Preview locked: camera has a focus motor"),
+                                                 "changes-prevent-symbolic", "avincecam-info"));
+            return;
+        }
+        const start = new PopupMenu.PopupIconMenuItem(
+            _("Start preview (%s)").replace("%s", Presenter.cameraTitle(selected, _)),
+            "camera-video-symbolic", St.IconType.SYMBOLIC);
+        start.connect("activate", () => this._startPreview(selected.id));
+        this.menu.addMenuItem(start);
     }
 
     _addCameraItem(cam) {
