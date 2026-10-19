@@ -29,6 +29,9 @@ class Camera:
     frame_rate_limits: Optional[dict] = None
     # Identifier used by the backend (e.g. the libcamera camera id).
     backend_id: Optional[str] = None
+    # A focus motor (lens/VCM) belongs to this camera. libcamera drives it
+    # automatically while streaming, so the preview is locked by default.
+    has_lens: bool = False
     sensor_size: Optional[List[int]] = None
     status: str = "unknown"          # free | busy | own-preview | unknown
     status_certainty: str = "unknown"

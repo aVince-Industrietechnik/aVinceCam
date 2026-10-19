@@ -6,10 +6,12 @@ implemented yet say so explicitly instead of returning empty results.
 
 import argparse
 import json
+import os
 import sys
+import time
 
 from . import SCHEMA_VERSION, __version__
-from . import libcamera, merge, sysfs
+from . import busy, libcamera, merge, preview, sysfs
 from .model import CoreError, to_dict
 
 EXIT_OK = 0
@@ -47,10 +49,22 @@ def build_parser():
     probe.add_argument("--ipa-dir", action="append", help=argparse.SUPPRESS)
     # Answer from recorded cam output instead of running cam (tests).
     probe.add_argument("--tool-output", help=argparse.SUPPRESS)
-    sub.add_parser("status", help="state of the own preview")
-    preview = sub.add_parser("preview", help="start a preview")
+    status = sub.add_parser("status", help="state of the own preview")
+    preview = sub.add_parser("preview", help="start a preview (streams one camera)")
     preview.add_argument("camera")
-    sub.add_parser("stop", help="stop the own preview")
+    preview.add_argument("--viewer", choices=("qcam", "gst"), default="qcam")
+    preview.add_argument("--size", default="1280x720",
+                         help="picture size for the GStreamer viewer")
+    preview.add_argument("--allow-lens", action="store_true",
+                         help="also preview cameras with a focus motor "
+                              "(libcamera then drives the motor automatically)")
+    preview.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
+    stop = sub.add_parser("stop", help="stop the own preview")
+    # Test hooks: simulated /proc, /dev prefix and runtime directory.
+    for command in (scan, preview, stop, status):
+        command.add_argument("--runtime-dir", help=argparse.SUPPRESS)
+        command.add_argument("--proc-root", default="/proc", help=argparse.SUPPRESS)
+    preview.add_argument("--dev-root", default="/", help=argparse.SUPPRESS)
     sub.add_parser("diagnose", help="diagnostic report")
     for name in sub.choices:
         sub.choices[name].add_argument("--json", action="store_true",
@@ -71,7 +85,144 @@ def main(argv=None):
         return cmd_scan(args)
     if args.command == "probe":
         return cmd_probe(args)
+    if args.command == "preview":
+        return cmd_preview(args)
+    if args.command == "stop":
+        return cmd_stop(args)
+    if args.command == "status":
+        return cmd_status(args)
     return not_implemented(args.command)
+
+
+def _error(command, code, message, detail=None, **extra):
+    emit({"command": command, **extra,
+          "errors": [to_dict(CoreError(code=code, message=message, detail=detail))]})
+    return EXIT_ERROR
+
+
+def _runtime_dir(args):
+    if args.runtime_dir:
+        os.makedirs(args.runtime_dir, mode=0o700, exist_ok=True)
+        return args.runtime_dir
+    return preview.runtime_dir()
+
+
+def _preview_status(args):
+    try:
+        return preview.status(_runtime_dir(args), args.proc_root)
+    except preview.PreviewError as exc:
+        return {"running": False, "error": exc.code}
+
+
+def _parse_size(text):
+    try:
+        width, height = (int(v) for v in text.lower().split("x"))
+    except ValueError:
+        return None
+    return (width, height) if 16 <= width <= 8192 and 16 <= height <= 8192 else None
+
+
+def _pipeline_nodes(camera, sysfs_root):
+    """Device nodes that must be free before this camera may stream.
+
+    For complex pipelines (IPU3) all nodes of the pipeline count: only one
+    camera may use the pipeline at a time.
+    """
+    nodes = set(camera.nodes)
+    if camera.api == "libcamera":
+        for node in sysfs.read_nodes(sysfs_root):
+            if node["driver"] in sysfs.PIPELINE_DRIVERS:
+                nodes.add(node["dev"])
+        for media in sysfs.read_media(sysfs_root):
+            if media["driver"] in sysfs.PIPELINE_DRIVERS:
+                nodes.add(media["dev"])
+    return sorted(nodes)
+
+
+def cmd_preview(args):
+    """Check everything, write the lock, then become the viewer (exec)."""
+    cameras, _ = sysfs.scan(args.sysfs_root, sysfs.DEFAULT_IPA_DIRS)
+    camera = next((c for c in cameras if c.id == args.camera), None)
+    if camera is None:
+        return _error("preview", "unknown-camera", f"no camera with id {args.camera}")
+    if camera.has_lens and not args.allow_lens:
+        # Measured on an Intel IPU3 laptop: while streaming, libcamera's
+        # automatic focus writes to the lens motor about 48 times a second.
+        return _error("preview", "lens-blocked",
+                      "preview of cameras with a focus motor is locked "
+                      "(libcamera would drive the motor automatically)")
+    size = _parse_size(args.size)
+    if size is None:
+        return _error("preview", "bad-size", f"invalid size {args.size!r}")
+
+    try:
+        directory = _runtime_dir(args)
+        lock = preview.read_lock(directory)
+        if preview.lock_alive(lock, args.proc_root):
+            return _error("preview", "preview-running",
+                          "a preview is already running – stop it first",
+                          detail=lock.get("camera"))
+        preview.remove_lock(directory)  # stale or missing
+
+        argv = preview.viewer_command(camera, args.viewer, size)
+        fake = os.environ.get("AVINCECAM_FAKE_VIEWER")
+        if fake:
+            argv = [fake] + argv  # tests: a stand-in that touches no camera
+        elif os.environ.get("AVINCECAM_NO_HARDWARE") == "1":
+            return _error("preview", "hardware-blocked",
+                          "hardware access is switched off (AVINCECAM_NO_HARDWARE=1)")
+        else:
+            preview.check_tool(argv)
+    except preview.PreviewError as exc:
+        return _error("preview", exc.code, exc.message, exc.detail)
+
+    devices = _pipeline_nodes(camera, args.sysfs_root)
+    if args.dev_root != "/":
+        devices = [os.path.join(args.dev_root, d.lstrip("/")) for d in devices]
+    holding = busy.holders(devices, args.proc_root, exclude_pids=(os.getpid(),))
+    if holding:
+        names = ", ".join(sorted({h["name"] or str(h["pid"]) for h in holding}))
+        return _error("preview", "camera-busy", "the camera is in use by another program",
+                      detail=names, holders=holding)
+
+    pid = os.getpid()
+    log = os.path.join(directory, preview.LOG_NAME)
+    preview.write_lock(directory, {
+        "pid": pid, "start_time": preview.start_time(pid), "camera": camera.id,
+        "viewer": args.viewer if camera.api == "libcamera" else "gst",
+        "command": argv, "started": int(time.time())})
+    emit({"command": "preview", "started": True, "camera": camera.id,
+          "viewer": os.path.basename(argv[0]), "pid": pid, "log": log, "errors": []})
+    sys.stdout.flush()
+
+    # From here on the viewer's output goes to the log file.
+    fd = os.open(log, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    os.dup2(fd, 1)
+    os.dup2(fd, 2)
+    os.close(fd)
+    try:
+        os.execvp(argv[0], argv)
+    except OSError as exc:
+        preview.remove_lock(directory)
+        print(f"aVinceCam: could not start {argv[0]}: {exc}", file=sys.stderr)
+        return EXIT_ERROR
+    return EXIT_OK  # not reached
+
+
+def cmd_stop(args):
+    try:
+        result = preview.stop(_runtime_dir(args), args.proc_root)
+    except preview.PreviewError as exc:
+        return _error("stop", exc.code, exc.message)
+    except OSError as exc:
+        return _error("stop", "stop-failed", "the preview could not be stopped", str(exc))
+    emit({"command": "stop", **result, "errors": []})
+    return EXIT_OK
+
+
+def cmd_status(args):
+    emit({"command": "status", "preview": _preview_status(args), "errors": []})
+    return EXIT_OK
 
 
 def _ipa_dirs(args):
@@ -141,6 +292,7 @@ def cmd_scan(args):
         "opens_devices": False,
         "cameras": [to_dict(c) for c in cameras],
         "unclassified": unclassified,
+        "preview": _preview_status(args),
         "errors": [],
     })
     return EXIT_OK

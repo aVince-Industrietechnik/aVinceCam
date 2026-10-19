@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 18:24+0200\n"
+"POT-Creation-Date: 2026-10-19 18:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,58 +17,85 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: applet.js:216
+#: applet.js:339
 msgid "1 camera"
 msgstr ""
 
-#: applet.js:217
+#: applet.js:340
 #, javascript-format
 msgid "%d cameras"
 msgstr ""
 
-#: applet.js:219
+#: applet.js:342
 #, javascript-format
 msgid "Selected: %s"
 msgstr ""
 
-#: applet.js:228
+#: applet.js:346
+#, javascript-format
+msgid "Preview running: %s"
+msgstr ""
+
+#: applet.js:357
 msgid "Cameras"
 msgstr ""
 
-#: applet.js:233
+#: applet.js:362
 msgid "Looking for cameras …"
 msgstr ""
 
-#: applet.js:235 presenter.js:176
+#: applet.js:364 presenter.js:202
 msgid "No camera found."
 msgstr ""
 
-#: applet.js:252
+#: applet.js:383
 msgid "Search again"
 msgstr ""
 
-#: applet.js:261
+#: applet.js:392
 msgid "Copy camera report"
 msgstr ""
 
-#: applet.js:310
+#: applet.js:435
+msgid "Please wait …"
+msgstr ""
+
+#: applet.js:443
+#, javascript-format
+msgid "Stop preview (%s)"
+msgstr ""
+
+#: applet.js:443
+msgid "Stop preview"
+msgstr ""
+
+#: applet.js:453 presenter.js:52
+msgid "Preview locked: camera has a focus motor"
+msgstr ""
+
+#: applet.js:458
+#, javascript-format
+msgid "Start preview (%s)"
+msgstr ""
+
+#: applet.js:477
 #, javascript-format
 msgid "Details: %s"
 msgstr ""
 
-#: applet.js:315
+#: applet.js:482
 msgid "Querying details …"
 msgstr ""
 
-#: applet.js:318
+#: applet.js:485
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr ""
 
-#: applet.js:324
+#: applet.js:491
 msgid "Details for USB cameras are not available yet."
 msgstr ""
 
-#: applet.js:337
+#: applet.js:504
 #, javascript-format
 msgid "Notes (%d)"
 msgstr ""
@@ -86,7 +113,7 @@ msgid "Works only with libcamera, not with classic webcam programs."
 msgstr ""
 
 #: presenter.js:25
-msgid "Has a focus motor; aVinceCam does not control it."
+msgid "Has a focus motor; libcamera drives it during a preview."
 msgstr ""
 
 #: presenter.js:26
@@ -145,70 +172,98 @@ msgstr ""
 msgid "This function is not available yet."
 msgstr ""
 
-#: presenter.js:57
-msgid "Camera"
+#: presenter.js:45
+msgid "A preview is already running – stop it first."
+msgstr ""
+
+#: presenter.js:46
+msgid "The camera is in use by another program."
+msgstr ""
+
+#: presenter.js:47
+msgid "The preview program is not installed."
+msgstr ""
+
+#: presenter.js:48
+msgid "The preview ended with an error."
+msgstr ""
+
+#: presenter.js:49
+msgid "The libcamera id of this camera is unknown."
+msgstr ""
+
+#: presenter.js:50
+msgid "No runtime folder for the preview is available."
+msgstr ""
+
+#: presenter.js:51
+msgid "The preview could not be stopped."
 msgstr ""
 
 #: presenter.js:68
+msgid "Camera"
+msgstr ""
+
+#: presenter.js:79
 msgid "USB (UVC)"
 msgstr ""
 
-#: presenter.js:70
+#: presenter.js:81
 msgid "external"
 msgstr ""
 
-#: presenter.js:72
+#: presenter.js:83
 msgid "built in"
 msgstr ""
 
-#: presenter.js:83 presenter.js:84
+#: presenter.js:94 presenter.js:95
 msgid "Unknown error"
 msgstr ""
 
-#: presenter.js:104
+#: presenter.js:130
 #, javascript-format
 msgid "%d sizes, %s to %s (%s)"
 msgstr ""
 
-#: presenter.js:115
+#: presenter.js:141
 #, javascript-format
 msgid "up to %s fps (according to libcamera)"
 msgstr ""
 
-#: presenter.js:126
+#: presenter.js:152
 #, javascript-format
 msgid "Sensor: %s"
 msgstr ""
 
-#: presenter.js:128
+#: presenter.js:154
 #, javascript-format
 msgid "Picture: %s"
 msgstr ""
 
-#: presenter.js:129
+#: presenter.js:155
 msgid "Picture sizes: not queried"
 msgstr ""
 
-#: presenter.js:132
+#: presenter.js:158
 #, javascript-format
 msgid "Frame rate: %s"
 msgstr ""
 
-#: presenter.js:134
+#: presenter.js:160
 msgid "Frame rate: unknown"
 msgstr ""
 
-#: presenter.js:136
+#: presenter.js:162
 #, javascript-format
 msgid "libcamera id: %s"
 msgstr ""
 
-#: presenter.js:138
+#: presenter.js:164
 #, javascript-format
 msgid "Devices: %s"
 msgstr ""
 
-#: presenter.js:189
+#: presenter.js:215
 #, javascript-format
 msgid "Unclassified device: %s"
 msgstr ""
@@ -278,4 +333,36 @@ msgstr ""
 
 #. settings-schema.json->panel-icon-size-symbolic->options
 msgid "16 px"
+msgstr ""
+
+#. settings-schema.json->head-preview->description
+msgid "Preview"
+msgstr ""
+
+#. settings-schema.json->preview-viewer->description
+msgid "Preview program"
+msgstr ""
+
+#. settings-schema.json->preview-viewer->tooltip
+msgid ""
+"Both show the picture of libcamera cameras. USB cameras always use "
+"GStreamer."
+msgstr ""
+
+#. settings-schema.json->preview-viewer->options
+msgid "qcam (libcamera)"
+msgstr ""
+
+#. settings-schema.json->preview-viewer->options
+msgid "GStreamer"
+msgstr ""
+
+#. settings-schema.json->allow-lens-cameras->description
+msgid "Allow preview of cameras with a focus motor"
+msgstr ""
+
+#. settings-schema.json->allow-lens-cameras->tooltip
+msgid ""
+"While such a camera streams, libcamera drives its focus motor automatically."
+" Leave this off if the focus motor does not work properly."
 msgstr ""

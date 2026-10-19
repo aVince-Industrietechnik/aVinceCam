@@ -75,3 +75,29 @@ The GStreamer device monitor is not used for probing, but its pipeline form
 
 Frame rates shown are the limits libcamera reports for the default
 (viewfinder) stream, not measured values.
+
+## D10 – Preview: lock file, exec and own-process-only stop
+`preview <id>` checks everything first (camera known, no aVinceCam preview
+running, no visible process holding any node of the camera's pipeline,
+viewer installed), then writes `$XDG_RUNTIME_DIR/avincecam/preview.json`
+with PID and process start time, prints one JSON line and replaces itself
+with the viewer (`exec`). The PID therefore stays the viewer's PID.
+
+`stop` signals only a process whose PID **and** start time match the lock
+(a reused PID never matches); a zombie counts as ended. After 5 seconds a
+hanging viewer of our own is killed.
+
+On Intel IPU3 the busy check covers all nodes of the pipeline, so a running
+back camera also blocks the front camera.
+
+The libcamera camera id comes from sysfs (`firmware_node/path`, the ACPI
+path), so starting a preview needs no extra libcamera query.
+
+## D11 – Preview of cameras with a focus motor is locked by default
+Measured on an Intel IPU3 laptop (libcamera 0.2.0): while a camera with a
+lens motor streams, libcamera's built-in automatic focus writes the lens
+position about 48 times a second. It cannot be switched off in that version.
+On a machine whose focus motor is not powered correctly every write fails
+and floods the kernel log. `preview` therefore refuses cameras with a focus
+motor (`lens-blocked`) unless `--allow-lens` is given; the applet passes it
+only when the user enables "Allow preview of cameras with a focus motor".

@@ -174,7 +174,8 @@ def _sensor_cameras(nodes, media, ipa_dirs):
         panel = _read(os.path.join(node["device"], "physical_location", "panel"))
         location = panel.lower() if panel else None
         warnings = ["needs-libcamera"]
-        if _lens_for(node["device"], nodes):
+        has_lens = bool(_lens_for(node["device"], nodes))
+        if has_lens:
             warnings.append("lens-not-controlled")
         if pipeline is None:
             warnings.append("pipeline-unknown")
@@ -192,8 +193,21 @@ def _sensor_cameras(nodes, media, ipa_dirs):
             status="unknown",
             status_certainty="not checked",
             warnings=warnings,
+            backend_id=_acpi_path(node["device"]),
+            has_lens=has_lens,
         ))
     return cameras
+
+
+def _acpi_path(device):
+    """ACPI path of a sensor, e.g. \\_SB_.PCI0.LNK0, or None.
+
+    libcamera names cameras on ACPI machines after this path (measured with
+    libcamera 0.2.0: cam --list shows the same ids), so the preview can
+    address a camera without querying libcamera first.
+    """
+    path = _read(os.path.join(device, "firmware_node", "path"))
+    return path if path and path.startswith("\\") else None
 
 
 def _unclassified(nodes, cameras):

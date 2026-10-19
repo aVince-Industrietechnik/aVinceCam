@@ -59,6 +59,10 @@ def add_location(device_path, panel):
         _write(os.path.join(device_path, "physical_location", key), value)
 
 
+def add_acpi_path(device_path, path):
+    _write(os.path.join(device_path, "firmware_node", "path"), path)
+
+
 def add_ipa_tuning(ipa_root, pipeline, *names):
     for name in names:
         _write(os.path.join(ipa_root, pipeline, name), "# tuning")
@@ -86,11 +90,13 @@ def latitude_5285(root):
     front = add_device(root, "pci0000:00/INT3446:00/i2c-3/i2c-INT3479:00",
                        "ov5670", "i2c", {"name": "INT3479:00"})
     add_location(front, "front")
+    add_acpi_path(front, r"\_SB_.PCI0.LNK0")
     add_v4l(root, front, "v4l-subdev6", "ov5670 3-0036")
 
     back = add_device(root, "pci0000:00/0000:00:15.2/i2c-2/i2c-INT3477:00",
                       "ov8858", "i2c", {"name": "INT3477:00"})
     add_location(back, "back")
+    add_acpi_path(back, r"\_SB_.PCI0.LNK1")
     add_v4l(root, back, "v4l-subdev7", "ov8858 2-0010")
 
     vcm = add_device(root, "pci0000:00/0000:00:15.2/i2c-2/i2c-INT3477:00-VCM",
