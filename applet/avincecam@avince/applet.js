@@ -93,6 +93,8 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.menuManager = new PopupMenu.PopupMenuManager(this);
         this.menu = new Applet.AppletPopupMenu(this, orientation);
         this.menuManager.addMenu(this.menu);
+        this._relayoutId = this.menu.box.connect_after("queue-relayout",
+                                                       () => this._dropCachedRowSizes(this.menu.box));
         this.menu.connect("open-state-changed", (menu, open) => {
             if (open)
                 this._refresh();
@@ -209,6 +211,10 @@ class AVinceCamApplet extends Applet.IconApplet {
         if (this._themeChangedId) {
             this._themeContext.disconnect(this._themeChangedId);
             this._themeChangedId = 0;
+        }
+        if (this._relayoutId) {
+            this.menu.box.disconnect(this._relayoutId);
+            this._relayoutId = 0;
         }
         // Do not leave a preview behind that nobody can stop from the panel.
         if (this._previewRunning() && this.client.commandPrefix) {
@@ -459,6 +465,25 @@ class AVinceCamApplet extends Applet.IconApplet {
         copy.connect("activate", () => this._copyReport());
         copy.setSensitive(this._scan !== null);
         this.menu.addMenuItem(copy);
+    }
+
+    /*
+     * Cinnamon aligns all rows of a menu, submenus included, in shared
+     * columns. Opening a submenu with longer rows widens the first column,
+     * but the rows keep their cached preferred widths (Cinnamon only drops
+     * them for themes with a background image, see
+     * PopupMenuBase._menuQueueRelayout). For some frames the rows are then
+     * narrower than their columns and Clutter logs "Actor 'StBin' tried to
+     * allocate a size of -N x ..." for the ornament and the submenu arrow
+     * (measured 2026-10-20). Dropping the caches on every relayout of the
+     * menu keeps rows and columns in step.
+     */
+    _dropCachedRowSizes(box) {
+        for (const child of box.get_children()) {
+            child.queue_relayout();
+            if (child._delegate instanceof PopupMenu.PopupSubMenu)
+                this._dropCachedRowSizes(child._delegate.box);
+        }
     }
 
     /*
