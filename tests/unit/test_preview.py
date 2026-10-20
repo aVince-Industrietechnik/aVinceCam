@@ -262,7 +262,8 @@ class UnitTest(unittest.TestCase):
         self.assertEqual(preview.viewer_command(cam, "qcam", (1280, 720)),
                          ["qcam", "-c", r"\_SB_.PCI0.LNK0"])
         gst = preview.viewer_command(cam, "gst", (640, 480))
-        self.assertIn(r"camera-name=\_SB_.PCI0.LNK0", gst)
+        # gst-launch reads a backslash as escape character: it must be doubled
+        self.assertIn(r'camera-name="\\_SB_.PCI0.LNK0"', gst)
         self.assertIn("video/x-raw,width=640,height=480", gst)
 
         uvc = Camera(id="usb:1-5", label="Webcam", api="v4l2",

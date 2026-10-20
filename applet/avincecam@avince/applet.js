@@ -277,7 +277,12 @@ class AVinceCamApplet extends Applet.IconApplet {
                 this._scan = result.data;
                 this._forgetVanishedDetails();
             }
-            this._lastError = result.ok ? null : { error: result.error, context: "scan" };
+            // A scan clears only its own error: an error of a preview or a photo
+            // must stay visible until the user has seen it (desk test T10).
+            if (!result.ok)
+                this._lastError = { error: result.error, context: "scan" };
+            else if (this._lastError && this._lastError.context === "scan")
+                this._lastError = null;
             this._ensureSelection();
             if (this._stateKey() !== before)
                 this._buildMenu();

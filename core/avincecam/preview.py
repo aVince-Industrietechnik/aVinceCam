@@ -163,6 +163,13 @@ def _vlc_command(device, mode):
     return argv
 
 
+def gst_launch_value(text):
+    """A property value for gst-launch, which treats a backslash as escape
+    character: the IPU3 id \\_SB_.PCI0.LNK0 would arrive as _SB_.PCI0.LNK0
+    (desk test T10, 2026-10-20). Quoting keeps it intact."""
+    return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
+
+
 def viewer_command(camera, viewer, size, uvc_formats=None):
     """Argument list of the preview program, or raise PreviewError.
 
@@ -184,7 +191,7 @@ def viewer_command(camera, viewer, size, uvc_formats=None):
         if viewer == "gst":
             width, height = size
             return ["gst-launch-1.0", "-q", "libcamerasrc",
-                    "camera-name=" + camera.backend_id, "!",
+                    "camera-name=" + gst_launch_value(camera.backend_id), "!",
                     f"video/x-raw,width={width},height={height}", "!",
                     "videoconvert", "!", "autovideosink"]
         return ["qcam", "-c", camera.backend_id]
