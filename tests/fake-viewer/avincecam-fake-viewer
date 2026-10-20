@@ -16,6 +16,9 @@ import sys
 import time
 
 print("fake viewer for:", " ".join(sys.argv[1:]), flush=True)
+if os.environ.get("GST_PLUGIN_SYSTEM_PATH_1_0"):
+    print("fake viewer gst plugins:", os.environ["GST_PLUGIN_SYSTEM_PATH_1_0"],
+          sorted(os.listdir(os.environ["GST_PLUGIN_SYSTEM_PATH_1_0"])), flush=True)
 
 code = os.environ.get("FAKE_VIEWER_EXIT")
 if code is not None:

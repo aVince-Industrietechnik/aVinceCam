@@ -29,4 +29,6 @@
 - **Camera use** of processes of other users is shown as "unknown program".
 - **GStreamer probes all video devices** when its video4linux2 plugin loads.
   On machines with complex camera pipelines this briefly powers them up.
-  aVinceCam uses VLC for USB cameras when available (D12).
+  aVinceCam keeps that plugin out of its libcamera pipelines and uses VLC for
+  USB cameras when available; only the GStreamer fallback for USB cameras
+  still loads it (D12).

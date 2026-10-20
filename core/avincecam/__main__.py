@@ -202,6 +202,7 @@ def cmd_preview(args):
         if camera.api == "v4l2" and not fake:
             uvc_formats = _uvc_formats(camera, args.sysfs_root)
         argv = preview.viewer_command(camera, args.viewer, size, uvc_formats)
+        viewer_env = preview.viewer_environment(camera, args.viewer, directory)
         viewer_name = ("virtual-camera" if args.viewer == "virtual"
                        else os.path.basename(argv[0]))
         if fake:
@@ -238,6 +239,8 @@ def cmd_preview(args):
     os.dup2(fd, 1)
     os.dup2(fd, 2)
     os.close(fd)
+    if viewer_env:
+        os.environ.update(viewer_env)
     try:
         os.execvp(argv[0], argv)
     except OSError as exc:

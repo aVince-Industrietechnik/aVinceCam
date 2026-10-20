@@ -116,6 +116,12 @@ plain video window of `cvlc` did not end VLC when closed and is not used.
 UVC previews therefore use VLC when installed; GStreamer remains the
 fallback. VLC creates its own settings below `~/.config/vlc/`.
 
+Addendum (2026-10-20): processes that only need libcamera – the GStreamer
+preview of a libcamera camera and the virtual camera (D14) – run with a
+private plugin folder and registry in the runtime folder (`gstisolation`),
+so the video4linux2 plugin is never loaded. The GStreamer fallback for USB
+cameras needs `v4l2src` from that very plugin and cannot be isolated.
+
 ## D13 – Camera use is watched with inotify, never by opening a device
 The core command `watch` adds inotify watches to the camera device nodes
 (adding a watch only looks up the path; the device is not opened) and reads
