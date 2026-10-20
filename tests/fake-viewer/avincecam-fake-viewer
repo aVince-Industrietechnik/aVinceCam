@@ -16,6 +16,8 @@ import sys
 import time
 
 print("fake viewer for:", " ".join(sys.argv[1:]), flush=True)
+if os.environ.get("LIBCAMERA_IPA_CONFIG_PATH"):
+    print("fake viewer ipa config:", os.environ["LIBCAMERA_IPA_CONFIG_PATH"], flush=True)
 if os.environ.get("GST_PLUGIN_SYSTEM_PATH_1_0"):
     print("fake viewer gst plugins:", os.environ["GST_PLUGIN_SYSTEM_PATH_1_0"],
           sorted(os.listdir(os.environ["GST_PLUGIN_SYSTEM_PATH_1_0"])), flush=True)

@@ -153,3 +153,20 @@ core runs `cam` for 30 frames at 1600x1200 (the camera is soft at full size,
 so this keeps its detail), keeps the last frame and writes a PNG with the
 standard library. Frames go to the runtime folder (tmpfs) and are deleted at
 once. Cameras with a focus motor stay locked as for the preview (D11).
+
+## D16 – Cameras with a lens motor run without libcamera's autofocus
+libcamera's IPU3 autofocus sweeps the lens on every stream and ignores the
+AfMode control (`auto-focus-mode=AfModeManual` of libcamerasrc is already
+its default and changes nothing). On a machine whose lens motor does not
+answer, that means dozens of failed I2C writes per second (desk test T5-2).
+The IPA sends the focus position with every frame, but the kernel only calls
+the driver when the value changes. Without the autofocus algorithm the value
+stays constant and nothing is written while streaming.
+
+For every libcamera camera with a lens motor, aVinceCam writes a copy of the
+tuning file libcamera would load (`<sensor>.yaml`, else `uncalibrated.yaml`)
+without the `Af` entry to its runtime folder and sets
+`LIBCAMERA_IPA_CONFIG_PATH` for the processes it starts (preview, virtual
+camera, photo). The system's files are not changed and any calibration in
+them is kept. The lens stays where it rests; the focus is fixed. Whether the
+lock of D11 can be relaxed is decided after a desk test.

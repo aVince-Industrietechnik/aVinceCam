@@ -13,7 +13,7 @@ import sys
 import time
 
 from . import SCHEMA_VERSION, __version__
-from . import busy, libcamera, merge, preview, safety, snapshot, sysfs, v4l2, virtualcam, watch
+from . import busy, libcamera, merge, preview, safety, snapshot, sysfs, tuning, v4l2, virtualcam, watch
 from .model import CoreError, Format, to_dict
 
 EXIT_OK = 0
@@ -333,8 +333,10 @@ def cmd_snapshot(args):
         shutil.rmtree(frame_dir, ignore_errors=True)
         os.makedirs(frame_dir, mode=0o700)
         argv = [tool] + snapshot.cam_args(camera.backend_id, size, args.frames, frame_dir)
+        # Cameras with a lens motor: tuning file without autofocus (D16).
+        env = dict(os.environ, **tuning.environment(directory, [camera]))
         try:
-            done = subprocess.run(argv, capture_output=True, text=True,
+            done = subprocess.run(argv, capture_output=True, text=True, env=env,
                                   timeout=SNAPSHOT_CAM_TIMEOUT, stdin=subprocess.DEVNULL)
         except subprocess.TimeoutExpired:
             return _error("snapshot", "cam-timeout", "cam did not finish in time",
