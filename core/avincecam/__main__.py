@@ -60,6 +60,9 @@ def build_parser():
                               "(libcamera then drives the motor automatically)")
     preview.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
     stop = sub.add_parser("stop", help="stop the own preview")
+    stop.add_argument("--cleanup-only", action="store_true",
+                      help="only remove the lock of a preview that has already ended; "
+                           "never stops a process")
     # Test hooks: simulated /proc, /dev prefix and runtime directory.
     for command in (scan, preview, stop, status):
         command.add_argument("--runtime-dir", help=argparse.SUPPRESS)
@@ -215,7 +218,10 @@ def cmd_preview(args):
 
 def cmd_stop(args):
     try:
-        result = preview.stop(_runtime_dir(args), args.proc_root)
+        if args.cleanup_only:
+            result = preview.cleanup(_runtime_dir(args), args.proc_root)
+        else:
+            result = preview.stop(_runtime_dir(args), args.proc_root)
     except preview.PreviewError as exc:
         return _error("stop", exc.code, exc.message)
     except OSError as exc:

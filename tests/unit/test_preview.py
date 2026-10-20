@@ -24,6 +24,32 @@ FRONT = "sensor:i2c-INT3479:00"
 BACK = "sensor:i2c-INT3477:00"
 
 
+def wait_for(condition, timeout=10.0, what="condition"):
+    """Poll instead of sleeping a fixed time: busy machines are slow."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if condition():
+            return
+        time.sleep(0.05)
+    raise AssertionError(f"timed out waiting for {what}")
+
+
+def holds_open(pid, path):
+    fd_dir = f"/proc/{pid}/fd"
+    try:
+        return any(os.readlink(os.path.join(fd_dir, fd)) == path for fd in os.listdir(fd_dir))
+    except OSError:
+        return False
+
+
+def start_holder(path):
+    """A process that keeps `path` open; returns once it really is open."""
+    holder = subprocess.Popen([sys.executable, "-c",
+                               f"import time; f=open({path!r}); time.sleep(30)"])
+    wait_for(lambda: holds_open(holder.pid, path), what=f"holder of {path}")
+    return holder
+
+
 class PreviewBase(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -46,6 +72,18 @@ class PreviewBase(unittest.TestCase):
         result = subprocess.run([sys.executable, "-I", CORE, *args, "--runtime-dir", self.run_dir],
                                 capture_output=True, text=True, timeout=30, env=env or self.env)
         return result.returncode, json.loads(result.stdout)
+
+    def wait_ready(self):
+        """Wait until the fake viewer has started and installed its handlers."""
+        log = os.path.join(self.run_dir, preview.LOG_NAME)
+
+        def ready():
+            try:
+                with open(log) as f:
+                    return "fake viewer ready" in f.read()
+            except OSError:
+                return False
+        wait_for(ready, what="fake viewer")
 
     def start(self, camera=FRONT, *extra, env=None):
         """Start a preview; returns (process, first JSON answer)."""
@@ -75,7 +113,7 @@ class StartStopTest(PreviewBase):
 
     def test_viewer_gets_libcamera_id(self):
         proc, _ = self.start()
-        time.sleep(0.5)
+        self.wait_ready()
         self.core("stop")
         proc.wait(timeout=10)
         with open(os.path.join(self.run_dir, preview.LOG_NAME)) as log:
@@ -105,6 +143,24 @@ class StartStopTest(PreviewBase):
         self.core("stop")
         proc.wait(timeout=10)
 
+    def test_cleanup_only_never_stops_a_running_viewer(self):
+        proc, _ = self.start()
+        self.wait_ready()
+        code, result = self.core("stop", "--cleanup-only")
+        self.assertEqual(result, {"schema": 1, "command": "stop", "cleaned": False,
+                                  "reason": "still-running", "errors": []})
+        self.assertIsNone(proc.poll(), "the running viewer must not be touched")
+        self.assertIsNotNone(preview.read_lock(self.run_dir))
+
+    def test_cleanup_only_removes_lock_of_ended_viewer(self):
+        env = dict(self.env, FAKE_VIEWER_EXIT="0")
+        proc, _ = self.start(env=env)
+        proc.wait(timeout=10)
+        self.assertIsNotNone(preview.read_lock(self.run_dir))
+        code, result = self.core("stop", "--cleanup-only")
+        self.assertTrue(result["cleaned"])
+        self.assertIsNone(preview.read_lock(self.run_dir))
+
     def test_stop_without_preview(self):
         code, result = self.core("stop")
         self.assertEqual((code, result["stopped"], result["reason"]), (0, False, "no-preview"))
@@ -112,7 +168,7 @@ class StartStopTest(PreviewBase):
     def test_hanging_viewer_is_forced(self):
         env = dict(self.env, FAKE_VIEWER_IGNORE_TERM="1")
         proc, _ = self.start(env=env)
-        time.sleep(0.5)  # let the viewer install its signal handler
+        self.wait_ready()  # the viewer has installed its signal handler
         code, result = self.core("stop")
         self.assertTrue(result["stopped"])
         self.assertTrue(result["forced"])
@@ -147,10 +203,8 @@ class SafetyTest(PreviewBase):
         os.makedirs(os.path.join(dev_root, "dev"))
         node = os.path.join(dev_root, "dev", "media1")
         open(node, "w").close()
-        holder = subprocess.Popen([sys.executable, "-c",
-                                   f"import time; f=open({node!r}); time.sleep(30)"])
+        holder = start_holder(node)
         self.procs.append(holder)
-        time.sleep(0.5)
         proc, answer = self.start(FRONT, "--dev-root", dev_root)
         self.assertEqual(answer["errors"][0]["code"], "camera-busy")
         self.assertEqual(answer["holders"][0]["pid"], holder.pid)
@@ -163,10 +217,8 @@ class SafetyTest(PreviewBase):
         os.makedirs(os.path.join(dev_root, "dev"))
         node = os.path.join(dev_root, "dev", "video3")  # IMGU viewfinder node
         open(node, "w").close()
-        holder = subprocess.Popen([sys.executable, "-c",
-                                   f"import time; f=open({node!r}); time.sleep(30)"])
+        holder = start_holder(node)
         self.procs.append(holder)
-        time.sleep(0.5)
         _, answer = self.start(FRONT, "--dev-root", dev_root)
         self.assertEqual(answer["errors"][0]["code"], "camera-busy")
 

@@ -192,6 +192,17 @@ def check_tool(argv):
                            package)
 
 
+def cleanup(directory, proc_root="/proc"):
+    """Remove the lock only if its viewer has ended. Never signals a process."""
+    lock = read_lock(directory)
+    if lock is None:
+        return {"cleaned": False, "reason": "no-lock"}
+    if lock_alive(lock, proc_root):
+        return {"cleaned": False, "reason": "still-running"}
+    remove_lock(directory)
+    return {"cleaned": True}
+
+
 def stop(directory, proc_root="/proc", wait=STOP_WAIT_SECONDS):
     """Stop the own preview. Returns a result dict; never touches other processes."""
     lock = read_lock(directory)
