@@ -86,7 +86,17 @@ class PreviewBase(unittest.TestCase):
         wait_for(ready, what="fake viewer")
 
     def start(self, camera=FRONT, *extra, env=None):
-        """Start a preview; returns (process, first JSON answer)."""
+        """Start a preview; returns (process, first JSON answer).
+
+        The busy check looks for holders of the camera nodes in the real
+        /proc. Without --dev-root it would see real programs holding the real
+        /dev nodes (a stream that just ended made a test fail on 2026-10-20),
+        so tests always use a folder of their own.
+        """
+        if "--dev-root" not in extra:
+            empty = os.path.join(self.tmp.name, "devroot-empty")
+            os.makedirs(os.path.join(empty, "dev"), exist_ok=True)
+            extra = extra + ("--dev-root", empty)
         proc = subprocess.Popen(
             [sys.executable, "-I", CORE, "preview", camera, "--sysfs-root", self.root,
              "--runtime-dir", self.run_dir, *extra],
