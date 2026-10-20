@@ -171,9 +171,10 @@ class SnapshotCliTest(unittest.TestCase):
         self.assertEqual(data["errors"][0]["code"], "lens-blocked")
         self.assertFalse(os.path.exists(self.out))
 
-    def test_usb_camera_not_supported(self):
+    def test_usb_camera_blocked_without_hardware(self):
+        # USB photos use plain V4L2 (D17); the tests never reach a real device.
         code, data = self.snap("usb:1-5")
-        self.assertEqual(data["errors"][0]["code"], "snapshot-unsupported")
+        self.assertEqual(data["errors"][0]["code"], "hardware-blocked")
 
     def test_cam_failure_reported_and_cleaned(self):
         code, data = self.snap(env=dict(self.env, FAKE_CAM_EXIT="3"))

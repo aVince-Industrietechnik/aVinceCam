@@ -15,7 +15,8 @@ import sys
 import time
 
 from . import SCHEMA_VERSION, __version__
-from . import busy, libcamera, merge, preview, safety, snapshot, sysfs, tuning, v4l2, virtualcam, watch
+from . import (busy, libcamera, merge, preview, safety, snapshot, sysfs, tuning, uvcphoto, v4l2,
+               virtualcam, watch)
 from .model import CoreError, Format, to_dict
 
 EXIT_OK = 0
@@ -71,7 +72,8 @@ def build_parser():
                          help="with --allow-lens: let libcamera's autofocus drive the "
                               "focus motor")
     preview.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
-    snap = sub.add_parser("snapshot", help="take a still photo (streams ~1 s, saves a PNG)")
+    snap = sub.add_parser("snapshot", help="take a still photo (streams ~1 s; PNG, or JPEG "
+                                           "for USB cameras with MJPEG)")
     snap.add_argument("camera")
     snap.add_argument("--size", default="%dx%d" % snapshot.DEFAULT_SIZE)
     snap.add_argument("--frames", type=int, default=snapshot.DEFAULT_FRAMES)
@@ -283,7 +285,10 @@ SNAPSHOT_CAM_TIMEOUT = 30
 
 
 def cmd_snapshot(args):
-    """Stream ~30 frames with cam, keep the last one, save it as PNG.
+    """libcamera cameras: stream ~30 frames with cam, keep the last one, save
+    it as PNG (D15). USB cameras: stream about a second from the camera's
+    own video node, keep the last frame, save MJPEG as JPEG or YUYV as PNG
+    (D17).
 
     Same checks as a preview (lens lock, lock file, busy pipeline). While it
     runs, the lock file names this process with viewer "snapshot", so the
@@ -294,9 +299,11 @@ def cmd_snapshot(args):
     camera = next((c for c in cameras if c.id == args.camera), None)
     if camera is None:
         return _error("snapshot", "unknown-camera", f"no camera with id {args.camera}")
+    if camera.api == "v4l2":
+        return _snapshot_usb(args, camera, started)
     if camera.api != "libcamera" or not camera.backend_id:
         return _error("snapshot", "snapshot-unsupported",
-                      "photos are available for libcamera cameras only")
+                      "photos are not available for this camera")
     if camera.has_lens and not args.allow_lens:
         return _error("snapshot", "lens-blocked",
                       "photos with cameras with a focus motor are locked "
@@ -314,24 +321,9 @@ def cmd_snapshot(args):
         return _error("snapshot", "libcamera-tools-missing",
                       "the libcamera tool 'cam' is not installed", "libcamera-tools")
 
-    try:
-        directory = _runtime_dir(args)
-    except preview.PreviewError as exc:
-        return _error("snapshot", exc.code, exc.message)
-    lock = preview.read_lock(directory)
-    if preview.lock_alive(lock, args.proc_root):
-        return _error("snapshot", "preview-running",
-                      "a preview is running – stop it first", detail=lock.get("camera"))
-    preview.remove_lock(directory)  # stale or missing
-
-    devices = _pipeline_nodes(camera, args.sysfs_root)
-    if args.dev_root != "/":
-        devices = [os.path.join(args.dev_root, d.lstrip("/")) for d in devices]
-    holding = busy.holders(devices, args.proc_root, exclude_pids=(os.getpid(),))
-    if holding:
-        names = ", ".join(sorted({h["name"] or str(h["pid"]) for h in holding}))
-        return _error("snapshot", "camera-busy", "the camera is in use by another program",
-                      detail=names, holders=holding)
+    directory, failed = _snapshot_prepare(args, camera)
+    if failed is not None:
+        return failed
 
     out_dir = args.out or os.path.join(snapshot.pictures_dir(), snapshot.SUBFOLDER)
     frame_dir = os.path.join(directory, "snapshot")
@@ -376,6 +368,92 @@ def cmd_snapshot(args):
 
     emit({"command": "snapshot", "camera": camera.id, "path": path, "folder": out_dir,
           "size": list(size), "frames": args.frames, **snapshot.last_metadata(done.stdout),
+          "seconds": round(time.monotonic() - started, 1), "errors": []})
+    return EXIT_OK
+
+
+def _snapshot_prepare(args, camera):
+    """Runtime folder, lock and busy checks shared by both photo paths.
+
+    Returns (directory, None) or (None, exit code of the error answer).
+    """
+    try:
+        directory = _runtime_dir(args)
+    except preview.PreviewError as exc:
+        return None, _error("snapshot", exc.code, exc.message)
+    lock = preview.read_lock(directory)
+    if preview.lock_alive(lock, args.proc_root):
+        return None, _error("snapshot", "preview-running",
+                            "a preview is running – stop it first", detail=lock.get("camera"))
+    preview.remove_lock(directory)  # stale or missing
+    devices = _pipeline_nodes(camera, args.sysfs_root)
+    if args.dev_root != "/":
+        devices = [os.path.join(args.dev_root, d.lstrip("/")) for d in devices]
+    holding = busy.holders(devices, args.proc_root, exclude_pids=(os.getpid(),))
+    if holding:
+        names = ", ".join(sorted({h["name"] or str(h["pid"]) for h in holding}))
+        return None, _error("snapshot", "camera-busy", "the camera is in use by another program",
+                            detail=names, holders=holding)
+    return directory, None
+
+
+def _snapshot_usb(args, camera, started):
+    """Photo of a USB camera with plain V4L2 (uvcphoto, D17)."""
+    size = _parse_size(args.size)
+    if size is None:
+        return _error("snapshot", "invalid-argument", "invalid size")
+    try:
+        backend = uvcphoto.TEST_BACKEND or uvcphoto.Backend()
+    except v4l2.HardwareBlocked:
+        return _error("snapshot", "hardware-blocked",
+                      "hardware access is switched off (AVINCECAM_NO_HARDWARE=1)")
+    directory, failed = _snapshot_prepare(args, camera)
+    if failed is not None:
+        return failed
+    out_dir = args.out or os.path.join(snapshot.pictures_dir(), snapshot.SUBFOLDER)
+    pid = os.getpid()
+    preview.write_lock(directory, {"pid": pid, "start_time": preview.start_time(pid),
+                                   "camera": camera.id, "viewer": "snapshot",
+                                   "command": ["v4l2"], "started": int(time.time())})
+    try:
+        try:
+            node, formats = uvcphoto.capture_node(camera.nodes, args.sysfs_root, backend)
+            mode = uvcphoto.choose_mode(formats, size)
+            if mode is None:
+                return _error("snapshot", "no-photo-format",
+                              "the camera offers neither MJPEG nor YUYV",
+                              ", ".join(sorted({f["pixel_format"] for f in formats})))
+            frame = uvcphoto.capture(node, args.sysfs_root, mode, backend)
+            width, height = frame["width"], frame["height"]
+            if frame["pixel_format"] == "MJPG":
+                ext, data = "jpg", uvcphoto.complete_jpeg(frame["data"])
+            else:
+                ext, data = "png", None
+        except uvcphoto.PhotoError as exc:
+            return _error("snapshot", exc.code, exc.message, exc.detail)
+        except safety.SafetyError as exc:
+            return _error("snapshot", "unsafe-node", "the camera node may not be opened", str(exc))
+        except OSError as exc:
+            return _error("snapshot", "capture-failed", "the camera could not take the photo",
+                          str(exc))
+        try:
+            os.makedirs(out_dir, exist_ok=True)
+            path = snapshot.photo_path(out_dir, ext=ext)
+            if data is not None:
+                snapshot.write_file(path, data)
+            else:
+                snapshot.write_png(path, width, height, uvcphoto.yuyv_rows(
+                    frame["data"], width, height, frame["bytesperline"]))
+        except uvcphoto.PhotoError as exc:
+            return _error("snapshot", exc.code, exc.message, exc.detail)
+        except OSError as exc:
+            return _error("snapshot", "write-failed", "the photo could not be saved", str(exc))
+    finally:
+        preview.remove_lock(directory)
+
+    emit({"command": "snapshot", "camera": camera.id, "path": path, "folder": out_dir,
+          "size": [width, height], "frames": frame["frames"], "format": frame["pixel_format"],
+          "exposure_us": None, "analogue_gain": None,
           "seconds": round(time.monotonic() - started, 1), "errors": []})
     return EXIT_OK
 

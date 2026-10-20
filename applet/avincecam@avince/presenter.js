@@ -52,19 +52,26 @@ function errorTexts(_) {
         "no-runtime-dir": _("No runtime folder for the preview is available."),
         "stop-failed": _("The preview could not be stopped."),
         "lens-blocked": _("Preview locked: camera has a focus motor"),
-        "snapshot-unsupported": _("Photos are available for libcamera cameras only."),
+        "snapshot-unsupported": _("Photos are not available for this camera."),
         "cam-failed": _("The photo could not be taken."),
         "cam-timeout": _("The photo took too long and was cancelled."),
         "no-frame": _("The camera delivered no picture."),
         "frame-size": _("The picture had an unexpected size."),
         "write-failed": _("The photo could not be saved."),
-        "invalid-argument": _("Invalid photo size.")
+        "invalid-argument": _("Invalid photo size."),
+        "capture-failed": _("The camera could not take the photo."),
+        "no-photo-format": _("The camera offers no picture format for photos (MJPEG or YUYV)."),
+        "format-refused": _("The camera refused the picture format for the photo."),
+        "no-buffers": _("The camera could not provide picture buffers."),
+        "bad-frame": _("The camera delivered a damaged picture."),
+        "no-capture-node": _("The camera has no video device that delivers pictures."),
+        "unsafe-node": _("aVinceCam does not open this device (safety rule).")
     };
 }
 
 /* Errors whose detail is worth showing next to the text. */
 const DETAIL_ERRORS = ["camera-busy", "viewer-missing", "viewer-failed", "cam-failed",
-                       "write-failed"];
+                       "write-failed", "capture-failed", "no-photo-format"];
 
 function upper(text) {
     return text ? String(text).toUpperCase() : "";

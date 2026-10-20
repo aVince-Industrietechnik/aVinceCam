@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 # Copyright (C) 2026 Angelo Vincenti
-"""Still photo of a libcamera camera, saved as PNG (decision D13).
+"""Still photo of a libcamera camera, saved as PNG (decision D15).
+USB cameras take their photos with plain V4L2 (uvcphoto.py, D17).
 
 `cam` streams about 30 frames so that exposure and the ImgU's temporal noise
 reduction have settled; only the last frame is kept. Measured on an Intel
@@ -148,12 +149,20 @@ def pictures_dir():
     return os.path.join(home, "Pictures")
 
 
-def photo_path(directory, now=None):
-    """aVinceCam_YYYY-MM-DD_HH-MM-SS.png in `directory`, never overwriting a file."""
+def photo_path(directory, now=None, ext="png"):
+    """aVinceCam_YYYY-MM-DD_HH-MM-SS.<ext> in `directory`, never overwriting a file."""
     stamp = time.strftime("%Y-%m-%d_%H-%M-%S", time.localtime(now))
-    path = os.path.join(directory, f"aVinceCam_{stamp}.png")
+    path = os.path.join(directory, f"aVinceCam_{stamp}.{ext}")
     n = 2
     while os.path.exists(path):
-        path = os.path.join(directory, f"aVinceCam_{stamp}-{n}.png")
+        path = os.path.join(directory, f"aVinceCam_{stamp}-{n}.{ext}")
         n += 1
     return path
+
+
+def write_file(path, data):
+    """Write bytes to a temporary name and rename it."""
+    tmp = path + ".tmp"
+    with open(tmp, "wb") as handle:
+        handle.write(data)
+    os.replace(tmp, path)

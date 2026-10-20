@@ -19,7 +19,8 @@ Ausführliche Beschreibung (Englisch): [README.md](README.md)
   Kamera eingeschaltet
 - **Vorschau** mit vorhandenen Programmen (qcam, GStreamer, VLC); aVinceCam beendet nur
   die eigene Vorschau
-- **Foto aufnehmen** (libcamera-Kameras): Belichtung einregeln lassen, PNG speichern
+- **Foto aufnehmen**: libcamera-Kameras als PNG nach dem Einregeln der Belichtung,
+  USB-Webcams als JPEG (nur das Gerät der Webcam wird geöffnet)
 - **Virtuelle Kamera** über PipeWire für Browser und Videoanrufe
 - **Kamera in Benutzung**: roter Punkt am Panel-Symbol, wenn ein Programm eine Kamera
   nutzt – ohne ein Gerät zu öffnen

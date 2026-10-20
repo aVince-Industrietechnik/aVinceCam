@@ -73,12 +73,19 @@ def run_real_core(build, args):
     if command in ("stop", "status"):
         return core_main(args + runtime)
     if command == "snapshot":
-        # Fake cam, fake /dev; photos go to the fake runtime folder, never to ~/Pictures.
+        # Fake cam (libcamera) or simulated webcam (USB, D17), fake /dev;
+        # photos go to the fake runtime folder, never to ~/Pictures.
         os.environ["AVINCECAM_FAKE_CAM"] = FAKE_CAM
         with tempfile.TemporaryDirectory() as tmp:
             root = os.path.join(tmp, "sys")
             os.makedirs(root)
             build(root)
+            import fakeuvc  # noqa: E402
+            from avincecam import sysfs, uvcphoto  # noqa: E402
+            webcam = [c for c in sysfs.scan(root, ())[0] if c.api == "v4l2"]
+            if webcam:
+                node = sorted(n for n in webcam[0].nodes if "video" in n)[0]
+                uvcphoto.TEST_BACKEND = fakeuvc.FakeUvc(capture_node=os.path.basename(node))
             os.makedirs(os.path.join(tmp, "dev"))
             extra = ["--sysfs-root", root, "--dev-root", tmp,
                      "--out", os.path.join(fake_runtime_dir(), "photos")]

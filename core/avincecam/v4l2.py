@@ -4,7 +4,7 @@
 
 Only enumeration ioctls are used: VIDIOC_QUERYCAP, VIDIOC_ENUM_FMT,
 VIDIOC_ENUM_FRAMESIZES and VIDIOC_ENUM_FRAMEINTERVALS. No format is set, no
-buffer is requested and no stream is started. Before a node is opened,
+buffer is requested and no stream is started here (photos: uvcphoto.py, D17). Before a node is opened,
 safety.check_v4l2_query() must allow it (UVC video nodes only).
 
 The ioctl function is injectable so that the tests can answer with

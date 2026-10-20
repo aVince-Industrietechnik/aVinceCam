@@ -53,6 +53,7 @@ core/avincecam/          Python package
   safety.py              safety rules (never open sub-devices / lens motors)
   sysfs.py libcamera.py v4l2.py merge.py busy.py preview.py
   snapshot.py            photos (cam, last of ~30 frames, PNG)
+  uvcphoto.py            photos of USB cameras (own video node, MJPEG/YUYV, D17)
   virtualcam.py          virtual camera through PipeWire
   watch.py               camera use (inotify, /proc)
   gstisolation.py        private GStreamer plugin set (D12)
