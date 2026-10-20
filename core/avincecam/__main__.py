@@ -11,7 +11,7 @@ import sys
 import time
 
 from . import SCHEMA_VERSION, __version__
-from . import busy, libcamera, merge, preview, safety, sysfs, v4l2, watch
+from . import busy, libcamera, merge, preview, safety, sysfs, v4l2, virtualcam, watch
 from .model import CoreError, Format, to_dict
 
 EXIT_OK = 0
@@ -19,7 +19,8 @@ EXIT_ERROR = 1
 EXIT_USAGE = 2
 EXIT_NOT_IMPLEMENTED = 3
 
-COMMANDS = ("scan", "probe", "status", "preview", "stop", "watch", "diagnose", "version")
+COMMANDS = ("scan", "probe", "status", "preview", "stop", "watch", "virtual-camera",
+            "diagnose", "version")
 
 
 def emit(payload):
@@ -52,7 +53,9 @@ def build_parser():
     status = sub.add_parser("status", help="state of the own preview")
     preview = sub.add_parser("preview", help="start a preview (streams one camera)")
     preview.add_argument("camera")
-    preview.add_argument("--viewer", choices=("qcam", "gst"), default="qcam")
+    preview.add_argument("--viewer", choices=("qcam", "gst", "virtual"), default="qcam",
+                         help="virtual: offer the camera to other programs through "
+                              "PipeWire instead of showing it")
     preview.add_argument("--size", default="1280x720",
                          help="picture size for the GStreamer viewer")
     preview.add_argument("--allow-lens", action="store_true",
@@ -63,6 +66,12 @@ def build_parser():
     stop.add_argument("--cleanup-only", action="store_true",
                       help="only remove the lock of a preview that has already ended; "
                            "never stops a process")
+    virtual = sub.add_parser("virtual-camera",
+                             help="internal: the process behind 'preview --viewer virtual'")
+    virtual.add_argument("camera_id", help="libcamera camera id")
+    virtual.add_argument("--size", default="1280x720")
+    virtual.add_argument("--name", default="Camera")
+    virtual.add_argument("--runtime-dir", help=argparse.SUPPRESS)
     watch_cmd = sub.add_parser("watch", help="report which programs use a camera "
                                              "(opens no device; runs until stdin closes)")
     watch_cmd.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
@@ -100,6 +109,8 @@ def main(argv=None):
         return cmd_status(args)
     if args.command == "watch":
         return cmd_watch(args)
+    if args.command == "virtual-camera":
+        return cmd_virtual_camera(args)
     return not_implemented(args.command)
 
 
@@ -178,7 +189,8 @@ def cmd_preview(args):
         if camera.api == "v4l2" and not fake:
             uvc_formats = _uvc_formats(camera, args.sysfs_root)
         argv = preview.viewer_command(camera, args.viewer, size, uvc_formats)
-        viewer_name = os.path.basename(argv[0])
+        viewer_name = ("virtual-camera" if args.viewer == "virtual"
+                       else os.path.basename(argv[0]))
         if fake:
             argv = [fake] + argv  # tests: a stand-in that touches no camera
         elif os.environ.get("AVINCECAM_NO_HARDWARE") == "1":
@@ -239,6 +251,24 @@ def cmd_stop(args):
 def cmd_status(args):
     emit({"command": "status", "preview": _preview_status(args), "errors": []})
     return EXIT_OK
+
+
+def cmd_virtual_camera(args):
+    """Stream one libcamera camera into PipeWire until stopped (no JSON:
+    this process is the "viewer" of a preview and writes to its log)."""
+    if os.environ.get("AVINCECAM_NO_HARDWARE") == "1":
+        print("aVinceCam: hardware access is switched off", file=sys.stderr)
+        return EXIT_ERROR
+    size = _parse_size(args.size)
+    if size is None:
+        print(f"aVinceCam: invalid size {args.size}", file=sys.stderr)
+        return EXIT_USAGE
+    try:
+        directory = _runtime_dir(args)
+    except preview.PreviewError as exc:
+        print(f"aVinceCam: {exc.message}", file=sys.stderr)
+        return EXIT_ERROR
+    return virtualcam.run(args.camera_id, size[0], size[1], args.name, directory)
 
 
 def cmd_watch(args):

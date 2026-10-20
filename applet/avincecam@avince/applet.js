@@ -289,14 +289,19 @@ class AVinceCamApplet extends Applet.IconApplet {
         return this._previewProc !== null || this._previewState().running === true;
     }
 
-    _startPreview(cameraId) {
+    /*
+     * viewer: "qcam"/"gst" from the settings, or "virtual" to offer the
+     * camera to other programs through PipeWire (browsers, video calls).
+     */
+    _startPreview(cameraId, viewer) {
         if (this._removed || this._previewBusy || this._previewRunning())
             return;
         this._previewBusy = true;
         this._lastError = null;
         const startedAt = GLib.get_monotonic_time();
         let proc = null;
-        const args = ["preview", cameraId, "--viewer", this.previewViewer === "gst" ? "gst" : "qcam"];
+        const args = ["preview", cameraId, "--viewer",
+                      viewer || (this.previewViewer === "gst" ? "gst" : "qcam")];
         if (this.allowLensCameras)
             args.push("--allow-lens");
         proc = this.client.startPreview(
@@ -431,7 +436,9 @@ class AVinceCamApplet extends Applet.IconApplet {
         const running = this._previewState();
         if (running.running) {
             const cam = cams.find(c => c.id === running.camera);
-            text += "\n" + _("Preview running: %s").replace("%s",
+            const label = running.viewer === "virtual-camera"
+                ? _("Virtual camera active: %s") : _("Preview running: %s");
+            text += "\n" + label.replace("%s",
                 cam ? Presenter.cameraTitle(cam, _) : (running.camera || "?"));
         }
         this.set_applet_tooltip(text);
@@ -621,9 +628,12 @@ class AVinceCamApplet extends Applet.IconApplet {
         if (this._previewRunning()) {
             const cam = this._cameras().find(c => c.id === state.camera);
             const title = cam ? Presenter.cameraTitle(cam, _) : "";
+            const virtual = state.viewer === "virtual-camera";
+            const text = virtual
+                ? (title ? _("Stop virtual camera (%s)").replace("%s", title) : _("Stop virtual camera"))
+                : (title ? _("Stop preview (%s)").replace("%s", title) : _("Stop preview"));
             const stop = new PopupMenu.PopupIconMenuItem(
-                title ? _("Stop preview (%s)").replace("%s", title) : _("Stop preview"),
-                "media-playback-stop-symbolic", St.IconType.SYMBOLIC);
+                text, "media-playback-stop-symbolic", St.IconType.SYMBOLIC);
             stop.connect("activate", () => this._stopPreview());
             this.menu.addMenuItem(stop);
             return;
@@ -641,6 +651,16 @@ class AVinceCamApplet extends Applet.IconApplet {
             "camera-video-symbolic", St.IconType.SYMBOLIC);
         start.connect("activate", () => this._startPreview(selected.id));
         this.menu.addMenuItem(start);
+
+        // USB cameras reach other programs directly; libcamera cameras need
+        // aVinceCam to offer them through PipeWire.
+        if (selected.api === "libcamera") {
+            const virtual = new PopupMenu.PopupIconMenuItem(
+                _("Offer as virtual camera (%s)").replace("%s", Presenter.cameraTitle(selected, _)),
+                "camera-web-symbolic", St.IconType.SYMBOLIC);
+            virtual.connect("activate", () => this._startPreview(selected.id, "virtual"));
+            this.menu.addMenuItem(virtual);
+        }
     }
 
     _addCameraItem(cam) {

@@ -15,9 +15,13 @@ import json
 import os
 import shutil
 import signal
+import sys
 import time
 from fractions import Fraction
 
+# The core launcher; the virtual camera runs as its own core process.
+LAUNCHER = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
+                        "avincecam-core")
 LOCK_NAME = "preview.json"
 LOG_NAME = "preview.log"
 STOP_WAIT_SECONDS = 5
@@ -152,7 +156,20 @@ def _vlc_command(device, mode):
 
 
 def viewer_command(camera, viewer, size, uvc_formats=None):
-    """Argument list of the preview program, or raise PreviewError."""
+    """Argument list of the preview program, or raise PreviewError.
+
+    viewer "virtual" offers the camera to other programs through PipeWire
+    instead of showing it (see virtualcam.py).
+    """
+    if viewer == "virtual":
+        if camera.api != "libcamera":
+            raise PreviewError("virtual-not-needed",
+                               "USB cameras are available to other programs directly")
+        if not camera.backend_id:
+            raise PreviewError("no-camera-id", "the libcamera id of this camera is unknown")
+        width, height = size
+        return [sys.executable, "-I", LAUNCHER, "virtual-camera", camera.backend_id,
+                "--size", f"{width}x{height}", "--name", camera.label]
     if camera.api == "libcamera":
         if not camera.backend_id:
             raise PreviewError("no-camera-id", "the libcamera id of this camera is unknown")

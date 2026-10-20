@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 10:32+0200\n"
+"POT-Creation-Date: 2026-10-20 10:43+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,90 +17,109 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: applet.js:424
+#: applet.js:429
 msgid "1 camera"
 msgstr ""
 
-#: applet.js:425
+#: applet.js:430
 #, javascript-format
 msgid "%d cameras"
 msgstr ""
 
-#: applet.js:427
+#: applet.js:432
 #, javascript-format
 msgid "Selected: %s"
 msgstr ""
 
-#: applet.js:430 applet.js:521
+#: applet.js:435 applet.js:528
 #, javascript-format
 msgid "Camera in use: %s"
 msgstr ""
 
-#: applet.js:434
+#: applet.js:440
+#, javascript-format
+msgid "Virtual camera active: %s"
+msgstr ""
+
+#: applet.js:440
 #, javascript-format
 msgid "Preview running: %s"
 msgstr ""
 
-#: applet.js:515
+#: applet.js:522
 msgid "Cameras"
 msgstr ""
 
-#: applet.js:525
+#: applet.js:532
 msgid "Looking for cameras …"
 msgstr ""
 
-#: applet.js:527 presenter.js:205
+#: applet.js:534 presenter.js:205
 msgid "No camera found."
 msgstr ""
 
-#: applet.js:546
+#: applet.js:553
 msgid "Search again"
 msgstr ""
 
-#: applet.js:555
+#: applet.js:562
 msgid "Copy camera report"
 msgstr ""
 
-#: applet.js:617
+#: applet.js:624
 msgid "Please wait …"
 msgstr ""
 
-#: applet.js:625
+#: applet.js:633
+#, javascript-format
+msgid "Stop virtual camera (%s)"
+msgstr ""
+
+#: applet.js:633
+msgid "Stop virtual camera"
+msgstr ""
+
+#: applet.js:634
 #, javascript-format
 msgid "Stop preview (%s)"
 msgstr ""
 
-#: applet.js:625
+#: applet.js:634
 msgid "Stop preview"
 msgstr ""
 
-#: applet.js:635 presenter.js:52
+#: applet.js:645 presenter.js:52
 msgid "Preview locked: camera has a focus motor"
 msgstr ""
 
-#: applet.js:640
+#: applet.js:650
 #, javascript-format
 msgid "Start preview (%s)"
 msgstr ""
 
 #: applet.js:659
 #, javascript-format
+msgid "Offer as virtual camera (%s)"
+msgstr ""
+
+#: applet.js:679
+#, javascript-format
 msgid "Details: %s"
 msgstr ""
 
-#: applet.js:664
+#: applet.js:684
 msgid "Querying details …"
 msgstr ""
 
-#: applet.js:669
+#: applet.js:689
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr ""
 
-#: applet.js:670
+#: applet.js:690
 msgid "Query sizes and frame rates"
 msgstr ""
 
-#: applet.js:686
+#: applet.js:706
 #, javascript-format
 msgid "Notes (%d)"
 msgstr ""
