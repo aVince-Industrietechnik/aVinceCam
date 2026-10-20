@@ -128,6 +128,21 @@ function fakeJson(scenario, args) {
           .indexOf("No camera found.") >= 0);
 })();
 
+(function testUsageText() {
+    const cams = fakeJson("mixed", ["scan"]).cameras;
+    const front = cams[0].id, webcam = cams[2].id;
+    check("no users, no text", Presenter.usageText([], cams, _) === null);
+    check("own preview is not foreign", Presenter.usageText(
+        [{ pid: 1, name: "qcam", cameras: [front], certain: true, own_preview: true }], cams, _) === null);
+    const text = Presenter.usageText([
+        { pid: 2, name: "firefox", cameras: [webcam], certain: true, own_preview: false },
+        { pid: 3, name: null, cameras: [front, cams[1].id], certain: false, own_preview: false }
+    ], cams, _);
+    check("usage text", text === "HD Webcam (firefox), built-in camera (unknown program)", text);
+    check("foreign users", Presenter.foreignUsers(
+        [{ own_preview: true }, { own_preview: false }]).length === 1);
+})();
+
 // ---------------------------------------------------------------- coreClient
 
 function runClient(prefix, args, timeout) {
@@ -249,6 +264,30 @@ function withFakeRuntime(fn) {
     loop.run();
     check("no callback after destroy", !called);
     check("not busy after destroy", !client.busy);
+})();
+
+(function testWatchFirstAnswerAndStop() {
+    const loop = new GLib.MainLoop(null, false);
+    const answers = [];
+    let exited = false;
+    const client = new CoreClient.CoreClient([PY, "-I", FAKE, "--scenario=mixed"]);
+    const handle = client.watch(["watch"], r => { answers.push(r); loop.quit(); },
+                                () => { exited = true; });
+    const guard = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 20, () => { loop.quit(); return false; });
+    loop.run();
+    GLib.source_remove(guard);
+    check("watch first answer", answers.length === 1 && answers[0].ok &&
+          Array.isArray(answers[0].data.users) && answers[0].data.users.length === 0, answers);
+    handle.stop();
+    const loop2 = new GLib.MainLoop(null, false);
+    GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, () => { loop2.quit(); return false; });
+    loop2.run();
+    check("watch stopped, no exit callback", handle.stopped && !exited);
+    check("watch process gone", handle.proc.get_identifier() === null);
+})();
+
+(function testWatchWithoutCore() {
+    check("watch without core", new CoreClient.CoreClient(null).watch(["watch"], () => {}, () => {}) === null);
 })();
 
 print("applet tests: " + passed + " passed, " + failures + " failed");

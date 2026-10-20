@@ -22,7 +22,8 @@ def _comm(pid, proc_root):
 def holders(device_paths, proc_root=PROC, exclude_pids=()):
     """Processes that have one of `device_paths` open.
 
-    Returns a list of {"pid", "name", "device"}; one entry per process.
+    Returns a list of {"pid", "name", "device", "devices"}; one entry per
+    process. "device" is the first node found, "devices" all of them.
     """
     wanted = {os.path.realpath(p) for p in device_paths}
     exclude = {str(p) for p in exclude_pids}
@@ -39,13 +40,15 @@ def holders(device_paths, proc_root=PROC, exclude_pids=()):
             fds = os.listdir(fd_dir)
         except OSError:
             continue  # other user's process or already gone
+        held = []
         for fd in fds:
             try:
                 target = os.readlink(os.path.join(fd_dir, fd))
             except OSError:
                 continue
-            if target in wanted:
-                found.append({"pid": int(pid), "name": _comm(pid, proc_root),
-                              "device": target})
-                break
+            if target in wanted and target not in held:
+                held.append(target)
+        if held:
+            found.append({"pid": int(pid), "name": _comm(pid, proc_root),
+                          "device": held[0], "devices": sorted(held)})
     return found

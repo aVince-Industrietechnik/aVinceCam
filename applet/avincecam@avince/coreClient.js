@@ -50,6 +50,7 @@ var CoreClient = class CoreClient {
         // e.g. ["/usr/bin/python3", "-I", ".../avincecam-core"]
         this.commandPrefix = commandPrefix;
         this._running = new Set();
+        this._watches = new Set();
         this._destroyed = false;
     }
 
@@ -190,9 +191,76 @@ var CoreClient = class CoreClient {
         return proc;
     }
 
+    /*
+     * Run a long-lived core command that prints one JSON line per change
+     * (the "watch" command). `onAnswer(result)` gets every line as
+     * { ok, data, error }; `onExit()` is called once when the process has
+     * ended. The core ends by itself when its stdin closes, so it never
+     * outlives Cinnamon. Returns a handle with stop(), or null.
+     */
+    watch(args, onAnswer, onExit) {
+        if (!this.commandPrefix)
+            return null;
+        let proc;
+        try {
+            proc = Gio.Subprocess.new(
+                this.commandPrefix.concat(args),
+                Gio.SubprocessFlags.STDIN_PIPE | Gio.SubprocessFlags.STDOUT_PIPE |
+                Gio.SubprocessFlags.STDERR_SILENCE
+            );
+        } catch (e) {
+            return null;
+        }
+        const handle = {
+            proc: proc,
+            stopped: false,
+            cancellable: new Gio.Cancellable(),
+            stop: () => {
+                if (handle.stopped)
+                    return;
+                handle.stopped = true;
+                handle.cancellable.cancel();
+                proc.force_exit();  // our own child only
+                this._watches.delete(handle);
+            }
+        };
+        this._watches.add(handle);
+
+        const stream = new Gio.DataInputStream({ base_stream: proc.get_stdout_pipe() });
+        const readNext = () => {
+            stream.read_line_async(GLib.PRIORITY_DEFAULT, handle.cancellable, (s, res) => {
+                let line = null;
+                try {
+                    [line] = s.read_line_finish_utf8(res);
+                } catch (e) {
+                    line = null;
+                }
+                if (line === null || handle.stopped || this._destroyed)
+                    return;
+                onAnswer(Presenter.parseCoreResult(line, 0, ""));
+                readNext();
+            });
+        };
+        readNext();
+
+        proc.wait_async(null, (p, res) => {
+            try {
+                p.wait_finish(res);
+            } catch (e) {
+                // gone either way
+            }
+            this._watches.delete(handle);
+            if (!handle.stopped && !this._destroyed)
+                onExit();
+        });
+        return handle;
+    }
+
     /* Stop all calls started by this client and drop their results. */
     destroy() {
         this._destroyed = true;
+        for (const handle of Array.from(this._watches))
+            handle.stop();
         for (const call of this._running) {
             if (call.timer) {
                 GLib.source_remove(call.timer);

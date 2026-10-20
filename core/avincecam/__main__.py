@@ -11,7 +11,7 @@ import sys
 import time
 
 from . import SCHEMA_VERSION, __version__
-from . import busy, libcamera, merge, preview, safety, sysfs, v4l2
+from . import busy, libcamera, merge, preview, safety, sysfs, v4l2, watch
 from .model import CoreError, Format, to_dict
 
 EXIT_OK = 0
@@ -19,7 +19,7 @@ EXIT_ERROR = 1
 EXIT_USAGE = 2
 EXIT_NOT_IMPLEMENTED = 3
 
-COMMANDS = ("scan", "probe", "status", "preview", "stop", "diagnose", "version")
+COMMANDS = ("scan", "probe", "status", "preview", "stop", "watch", "diagnose", "version")
 
 
 def emit(payload):
@@ -63,8 +63,12 @@ def build_parser():
     stop.add_argument("--cleanup-only", action="store_true",
                       help="only remove the lock of a preview that has already ended; "
                            "never stops a process")
+    watch_cmd = sub.add_parser("watch", help="report which programs use a camera "
+                                             "(opens no device; runs until stdin closes)")
+    watch_cmd.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
+    watch_cmd.add_argument("--dev-root", default="/", help=argparse.SUPPRESS)
     # Test hooks: simulated /proc, /dev prefix and runtime directory.
-    for command in (scan, preview, stop, status):
+    for command in (scan, preview, stop, status, watch_cmd):
         command.add_argument("--runtime-dir", help=argparse.SUPPRESS)
         command.add_argument("--proc-root", default="/proc", help=argparse.SUPPRESS)
     preview.add_argument("--dev-root", default="/", help=argparse.SUPPRESS)
@@ -94,6 +98,8 @@ def main(argv=None):
         return cmd_stop(args)
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "watch":
+        return cmd_watch(args)
     return not_implemented(args.command)
 
 
@@ -232,6 +238,35 @@ def cmd_stop(args):
 
 def cmd_status(args):
     emit({"command": "status", "preview": _preview_status(args), "errors": []})
+    return EXIT_OK
+
+
+def cmd_watch(args):
+    """One JSON line per change of camera use, until stdin is closed."""
+    try:
+        directory = _runtime_dir(args)
+    except preview.PreviewError:
+        directory = None
+
+    def own_preview_pid():
+        lock = preview.read_lock(directory) if directory else None
+        return lock["pid"] if preview.lock_alive(lock, args.proc_root) else None
+
+    def report(users):
+        emit({"command": "watch", "users": users, "errors": []})
+        sys.stdout.flush()
+
+    try:
+        watcher = watch.Watcher(report, sysfs_root=args.sysfs_root, dev_root=args.dev_root,
+                                proc_root=args.proc_root, own_preview_pid=own_preview_pid)
+    except watch.WatchError as exc:
+        return _error("watch", "watch-failed", "camera use cannot be watched", str(exc))
+    try:
+        watcher.run(stop_fd=sys.stdin.fileno())
+    except (BrokenPipeError, KeyboardInterrupt):
+        pass
+    finally:
+        watcher.close()
     return EXIT_OK
 
 

@@ -66,6 +66,12 @@
             "No change": "off"
         }
     },
+    "usage-indicator": {
+        "type": "switch",
+        "default": true,
+        "description": "Show when a program uses a camera",
+        "tooltip": "Red dot on the panel icon and a line in the menu. aVinceCam only watches the camera device files; it does not open them."
+    },
     "allow-lens-cameras": {
         "type": "switch",
         "default": false,

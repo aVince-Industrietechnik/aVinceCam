@@ -7,8 +7,9 @@
  *
  *   menu opened         -> core "scan"   (sysfs only, no device access)
  *   "Query details"     -> core "probe"  (starts libcamera cameras briefly)
- *
- * The preview follows in a later version.
+ *   "Start preview"     -> core "preview" (becomes the viewer)
+ *   while loaded        -> core "watch"  (which programs use a camera;
+ *                                         inotify and /proc, no device access)
  */
 
 const Applet = imports.ui.applet;
@@ -31,6 +32,9 @@ const SCAN_TIMEOUT_SECONDS = 10;
 const PROBE_TIMEOUT_SECONDS = 40;
 const PREVIEW_START_TIMEOUT_SECONDS = 15;
 const STOP_TIMEOUT_SECONDS = 15;
+// The watch process is started again after an unexpected end, a few times.
+const WATCH_RETRY_SECONDS = 10;
+const WATCH_RESTARTS = 5;
 // Used when the applet's own panel icon is missing.
 const FALLBACK_ICON_NAME = "camera-web-symbolic";
 
@@ -54,6 +58,10 @@ class AVinceCamApplet extends Applet.IconApplet {
         this._detailsOpen = false;  // keep the details submenu open on rebuild
         this._previewBusy = false;  // a start or stop request is under way
         this._previewProc = null;   // viewer started by this applet instance
+        this._usage = [];           // other programs using a camera (core "watch")
+        this._watch = null;
+        this._watchRetryId = 0;
+        this._watchRestarts = 0;
 
         this._metadataPath = metadata.path;
         this.selectedCamera = "";
@@ -63,6 +71,7 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.previewViewer = "qcam";
         this.allowLensCameras = false;
         this.activeIndicator = "rotate";
+        this.usageIndicator = true;
         this._indicatorKey = null;
         this.settings = new Settings.AppletSettings(this, metadata.uuid, instanceId);
         this.settings.bindProperty(Settings.BindingDirection.IN,
@@ -73,6 +82,9 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.settings.bindProperty(Settings.BindingDirection.IN,
                                    "active-indicator", "activeIndicator",
                                    () => this._updateIndicator());
+        this.settings.bindProperty(Settings.BindingDirection.IN,
+                                   "usage-indicator", "usageIndicator",
+                                   () => this._applyUsageSetting());
         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL,
                                    "selected-camera", "selectedCamera", null);
         this.settings.bindProperty(Settings.BindingDirection.IN,
@@ -110,6 +122,7 @@ class AVinceCamApplet extends Applet.IconApplet {
         // First scan right away (sysfs only, no device access), so the menu
         // already has its content when it is opened for the first time.
         this._refresh();
+        this._applyUsageSetting();
     }
 
     on_applet_clicked(event) {
@@ -121,7 +134,9 @@ class AVinceCamApplet extends Applet.IconApplet {
     /* Colourful (default) or single-colour icon, optionally in an own size. */
     _applyPanelIcon() {
         const symbolic = this.panelIconStyle === "symbolic";
-        const dot = this._previewRunning() && this.activeIndicator === "pulse";
+        // Red dot: own preview with "pulse", or another program uses a camera.
+        const dot = (this._previewRunning() && this.activeIndicator === "pulse") ||
+                    this._cameraInUse();
         const name = "avincecam" + (dot ? "-active" : "") + (symbolic ? "-symbolic" : "") + ".svg";
         const file = GLib.build_filenamev([this._metadataPath, "icons", name]);
         if (!GLib.file_test(file, GLib.FileTest.IS_REGULAR))
@@ -175,7 +190,8 @@ class AVinceCamApplet extends Applet.IconApplet {
 
     /* Re-apply the icon only when what it shows has changed. */
     _updateIndicator() {
-        const key = [this._previewRunning(), this.activeIndicator, this.panelIconStyle].join("|");
+        const key = [this._previewRunning(), this.activeIndicator, this.panelIconStyle,
+                     this._cameraInUse()].join("|");
         if (key === this._indicatorKey)
             return;
         this._indicatorKey = key;
@@ -207,6 +223,7 @@ class AVinceCamApplet extends Applet.IconApplet {
 
     on_applet_removed_from_panel() {
         this._removed = true;
+        this._stopWatch();
         this._applyIndicatorAnimation();  // stops any running animation
         if (this._themeChangedId) {
             this._themeContext.disconnect(this._themeChangedId);
@@ -408,6 +425,9 @@ class AVinceCamApplet extends Applet.IconApplet {
                                                : _("%d cameras").replace("%d", String(cams.length)));
         if (selected)
             text += "\n" + _("Selected: %s").replace("%s", Presenter.cameraTitle(selected, _));
+        const usage = Presenter.usageText(this._usage, cams, _);
+        if (usage)
+            text += "\n" + _("Camera in use: %s").replace("%s", usage);
         const running = this._previewState();
         if (running.running) {
             const cam = cams.find(c => c.id === running.camera);
@@ -419,6 +439,74 @@ class AVinceCamApplet extends Applet.IconApplet {
         this._updateIndicator();
     }
 
+    // ------------------------------------------------------------ camera use
+
+    /*
+     * Show when another program uses a camera (setting "usage-indicator").
+     * The core's "watch" command runs while the applet is loaded; it learns
+     * about opened device nodes from inotify and reads the programs from
+     * /proc, so it never opens a camera itself.
+     */
+    _applyUsageSetting() {
+        if (this.usageIndicator && !this._removed)
+            this._startWatch();
+        else
+            this._stopWatch();
+    }
+
+    _startWatch() {
+        if (this._watch || this._watchRetryId)
+            return;
+        this._watch = this.client.watch(["watch"], result => this._onUsage(result), () => {
+            // Ended unexpectedly: try again a few times, then give up quietly.
+            this._watch = null;
+            this._setUsage([]);
+            if (this._removed || this._watchRestarts >= WATCH_RESTARTS)
+                return;
+            this._watchRestarts++;
+            this._watchRetryId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT,
+                                                          WATCH_RETRY_SECONDS, () => {
+                this._watchRetryId = 0;
+                this._applyUsageSetting();
+                return GLib.SOURCE_REMOVE;
+            });
+        });
+    }
+
+    _stopWatch() {
+        if (this._watchRetryId) {
+            GLib.source_remove(this._watchRetryId);
+            this._watchRetryId = 0;
+        }
+        if (this._watch) {
+            this._watch.stop();
+            this._watch = null;
+        }
+        this._setUsage([]);
+    }
+
+    _onUsage(result) {
+        if (!result.data || !Array.isArray(result.data.users))
+            return;
+        this._watchRestarts = 0;
+        this._setUsage(Presenter.foreignUsers(result.data.users));
+    }
+
+    _setUsage(users) {
+        if (JSON.stringify(users) === JSON.stringify(this._usage))
+            return;
+        this._usage = users;
+        if (this._removed)
+            return;
+        this._updateTooltip();  // also updates the panel icon
+        if (this.menu.isOpen)
+            this._buildMenu();
+    }
+
+    _cameraInUse() {
+        return this._usage.length > 0;
+    }
+
     // ------------------------------------------------------------ menu
 
     _buildMenu() {
@@ -427,6 +515,11 @@ class AVinceCamApplet extends Applet.IconApplet {
         const header = new PopupMenu.PopupMenuItem(_("Cameras"), { reactive: false });
         header.label.add_style_class_name("avincecam-header");
         this.menu.addMenuItem(header);
+
+        const usage = Presenter.usageText(this._usage, this._cameras(), _);
+        if (usage)
+            this.menu.addMenuItem(this._textItem(_("Camera in use: %s").replace("%s", usage),
+                                                 "camera-web-symbolic", "avincecam-usage"));
 
         if (!this._scan && !this._lastError) {
             this._addInfo(_("Looking for cameras …"));

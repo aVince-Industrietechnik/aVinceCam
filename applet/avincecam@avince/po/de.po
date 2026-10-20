@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aVinceCam 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 18:04+0200\n"
+"POT-Creation-Date: 2026-10-20 10:32+0200\n"
 "PO-Revision-Date: 2026-10-19 18:05+0200\n"
 "Last-Translator: aVinceCam project\n"
 "Language-Team: German\n"
@@ -13,54 +13,90 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: applet.js:397
+#: applet.js:424
 msgid "1 camera"
 msgstr "1 Kamera"
 
-#: applet.js:398
+#: applet.js:425
 #, javascript-format
 msgid "%d cameras"
 msgstr "%d Kameras"
 
-#: applet.js:400
+#: applet.js:427
 #, javascript-format
 msgid "Selected: %s"
 msgstr "Ausgewählt: %s"
 
-#: applet.js:417
+#: applet.js:430 applet.js:521
+#, javascript-format
+msgid "Camera in use: %s"
+msgstr "Kamera in Benutzung: %s"
+
+#: applet.js:434
+#, javascript-format
+msgid "Preview running: %s"
+msgstr "Vorschau läuft: %s"
+
+#: applet.js:515
 msgid "Cameras"
 msgstr "Kameras"
 
-#: applet.js:422
+#: applet.js:525
 msgid "Looking for cameras …"
 msgstr "Kameras werden gesucht …"
 
-#: applet.js:424 presenter.js:204
+#: applet.js:527 presenter.js:205
 msgid "No camera found."
 msgstr "Keine Kamera gefunden."
 
-#: applet.js:443
+#: applet.js:546
 msgid "Search again"
 msgstr "Erneut suchen"
 
-#: applet.js:452
+#: applet.js:555
 msgid "Copy camera report"
 msgstr "Kamerabericht kopieren"
 
-#: applet.js:537
+#: applet.js:617
+msgid "Please wait …"
+msgstr "Bitte warten …"
+
+#: applet.js:625
+#, javascript-format
+msgid "Stop preview (%s)"
+msgstr "Vorschau beenden (%s)"
+
+#: applet.js:625
+msgid "Stop preview"
+msgstr "Vorschau beenden"
+
+#: applet.js:635 presenter.js:52
+msgid "Preview locked: camera has a focus motor"
+msgstr "Vorschau gesperrt: Kamera mit Fokusmotor"
+
+#: applet.js:640
+#, javascript-format
+msgid "Start preview (%s)"
+msgstr "Vorschau starten (%s)"
+
+#: applet.js:659
 #, javascript-format
 msgid "Details: %s"
 msgstr "Details: %s"
 
-#: applet.js:542
+#: applet.js:664
 msgid "Querying details …"
 msgstr "Details werden abgefragt …"
 
-#: applet.js:547
+#: applet.js:669
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr "Größen und Bildraten abfragen (schaltet die Kameras kurz ein)"
 
-#: applet.js:564
+#: applet.js:670
+msgid "Query sizes and frame rates"
+msgstr "Größen und Bildraten abfragen"
+
+#: applet.js:686
 #, javascript-format
 msgid "Notes (%d)"
 msgstr "Hinweise (%d)"
@@ -72,6 +108,18 @@ msgstr "Frontkamera"
 #: presenter.js:18
 msgid "Back camera"
 msgstr "Rückkamera"
+
+#: presenter.js:24
+msgid "Works only with libcamera, not with classic webcam programs."
+msgstr "Nur mit libcamera nutzbar, nicht mit klassischen Webcam-Programmen."
+
+#: presenter.js:25
+msgid "Has a focus motor; libcamera drives it during a preview."
+msgstr "Hat einen Fokusmotor; libcamera steuert ihn während einer Vorschau an."
+
+#: presenter.js:26
+msgid "No libcamera tuning file – image quality may suffer."
+msgstr "Keine libcamera-Abstimmungsdatei – die Bildqualität kann leiden."
 
 #: presenter.js:27
 msgid "The camera pipeline could not be determined."
@@ -126,6 +174,34 @@ msgstr "Der Hardwarezugriff ist abgeschaltet."
 msgid "This function is not available yet."
 msgstr "Diese Funktion ist noch nicht verfügbar."
 
+#: presenter.js:45
+msgid "A preview is already running – stop it first."
+msgstr "Es läuft bereits eine Vorschau – bitte zuerst beenden."
+
+#: presenter.js:46
+msgid "The camera is in use by another program."
+msgstr "Die Kamera wird von einem anderen Programm verwendet."
+
+#: presenter.js:47
+msgid "The preview program is not installed."
+msgstr "Das Vorschauprogramm ist nicht installiert."
+
+#: presenter.js:48
+msgid "The preview ended with an error."
+msgstr "Die Vorschau wurde mit einem Fehler beendet."
+
+#: presenter.js:49
+msgid "The libcamera id of this camera is unknown."
+msgstr "Die libcamera-Kennung dieser Kamera ist unbekannt."
+
+#: presenter.js:50
+msgid "No runtime folder for the preview is available."
+msgstr "Kein Laufzeitordner für die Vorschau verfügbar."
+
+#: presenter.js:51
+msgid "The preview could not be stopped."
+msgstr "Die Vorschau konnte nicht beendet werden."
+
 #: presenter.js:68
 msgid "Camera"
 msgstr "Kamera"
@@ -146,53 +222,66 @@ msgstr "eingebaut"
 msgid "Unknown error"
 msgstr "Unbekannter Fehler"
 
-#: presenter.js:130
+#: presenter.js:131
 #, javascript-format
 msgid "%d sizes, %s to %s (%s)"
 msgstr "%d Größen, %s bis %s (%s)"
 
 #: presenter.js:144
 #, javascript-format
+msgid "up to %s fps (reported by the camera)"
+msgstr "bis %s fps (laut Kamera)"
+
+#: presenter.js:145
+#, javascript-format
 msgid "up to %s fps (according to libcamera)"
 msgstr "bis %s fps (laut libcamera)"
 
-#: presenter.js:154
+#: presenter.js:155
 #, javascript-format
 msgid "Sensor: %s"
 msgstr "Sensor: %s"
 
-#: presenter.js:156
+#: presenter.js:157
 #, javascript-format
 msgid "Picture: %s"
 msgstr "Bild: %s"
 
-#: presenter.js:157
+#: presenter.js:158
 msgid "Picture sizes: not queried"
 msgstr "Bildgrößen: noch nicht abgefragt"
 
-#: presenter.js:160
+#: presenter.js:161
 #, javascript-format
 msgid "Frame rate: %s"
 msgstr "Bildrate: %s"
 
-#: presenter.js:162
+#: presenter.js:163
 msgid "Frame rate: unknown"
 msgstr "Bildrate: unbekannt"
 
-#: presenter.js:164
+#: presenter.js:165
 #, javascript-format
 msgid "libcamera id: %s"
 msgstr "libcamera-Kennung: %s"
 
-#: presenter.js:166
+#: presenter.js:167
 #, javascript-format
 msgid "Devices: %s"
 msgstr "Geräte: %s"
 
-#: presenter.js:217
+#: presenter.js:218
 #, javascript-format
 msgid "Unclassified device: %s"
 msgstr "Nicht zugeordnetes Gerät: %s"
+
+#: presenter.js:239
+msgid "built-in camera"
+msgstr "eingebaute Kamera"
+
+#: presenter.js:244
+msgid "unknown program"
+msgstr "unbekanntes Programm"
 
 #. metadata.json->name
 msgid "aVinceCam"
@@ -230,6 +319,11 @@ msgstr "Nie größer, als das Panel zulässt."
 
 #. settings-schema.json->panel-icon-size-color->options
 #. settings-schema.json->panel-icon-size-symbolic->options
+msgid "Like the panel"
+msgstr "Wie das Panel"
+
+#. settings-schema.json->panel-icon-size-color->options
+#. settings-schema.json->panel-icon-size-symbolic->options
 msgid "20 px"
 msgstr "20 px"
 
@@ -252,73 +346,9 @@ msgstr "32 px"
 msgid "36 px"
 msgstr "36 px"
 
-#. settings-schema.json->panel-icon-size-color->options
-#. settings-schema.json->panel-icon-size-symbolic->options
-msgid "Like the panel"
-msgstr "Wie das Panel"
-
 #. settings-schema.json->panel-icon-size-symbolic->options
 msgid "16 px"
 msgstr "16 px"
-
-#: presenter.js:24
-msgid "Works only with libcamera, not with classic webcam programs."
-msgstr "Nur mit libcamera nutzbar, nicht mit klassischen Webcam-Programmen."
-
-#: presenter.js:26
-msgid "No libcamera tuning file – image quality may suffer."
-msgstr "Keine libcamera-Abstimmungsdatei – die Bildqualität kann leiden."
-
-#: applet.js:404
-#, javascript-format
-msgid "Preview running: %s"
-msgstr "Vorschau läuft: %s"
-
-#: applet.js:495
-msgid "Please wait …"
-msgstr "Bitte warten …"
-
-#: applet.js:503
-#, javascript-format
-msgid "Stop preview (%s)"
-msgstr "Vorschau beenden (%s)"
-
-#: applet.js:503
-msgid "Stop preview"
-msgstr "Vorschau beenden"
-
-#: applet.js:518
-#, javascript-format
-msgid "Start preview (%s)"
-msgstr "Vorschau starten (%s)"
-
-#: presenter.js:45
-msgid "A preview is already running – stop it first."
-msgstr "Es läuft bereits eine Vorschau – bitte zuerst beenden."
-
-#: presenter.js:46
-msgid "The camera is in use by another program."
-msgstr "Die Kamera wird von einem anderen Programm verwendet."
-
-#: presenter.js:47
-msgid "The preview program is not installed."
-msgstr "Das Vorschauprogramm ist nicht installiert."
-
-#: presenter.js:48
-msgid "The preview ended with an error."
-msgstr "Die Vorschau wurde mit einem Fehler beendet."
-
-#: presenter.js:49
-msgid "The libcamera id of this camera is unknown."
-msgstr "Die libcamera-Kennung dieser Kamera ist unbekannt."
-
-#: presenter.js:50
-msgid "No runtime folder for the preview is available."
-msgstr "Kein Laufzeitordner für die Vorschau verfügbar."
-
-#: presenter.js:51
-msgid "The preview could not be stopped."
-msgstr "Die Vorschau konnte nicht beendet werden."
 
 #. settings-schema.json->head-preview->description
 msgid "Preview"
@@ -328,45 +358,6 @@ msgstr "Vorschau"
 msgid "Preview program"
 msgstr "Vorschauprogramm"
 
-#. settings-schema.json->preview-viewer->options
-msgid "qcam (libcamera)"
-msgstr "qcam (libcamera)"
-
-#. settings-schema.json->preview-viewer->options
-msgid "GStreamer"
-msgstr "GStreamer"
-
-#: applet.js:513 presenter.js:52
-msgid "Preview locked: camera has a focus motor"
-msgstr "Vorschau gesperrt: Kamera mit Fokusmotor"
-
-#: presenter.js:25
-msgid "Has a focus motor; libcamera drives it during a preview."
-msgstr ""
-"Hat einen Fokusmotor; libcamera steuert ihn während einer Vorschau an."
-
-#. settings-schema.json->allow-lens-cameras->description
-msgid "Allow preview of cameras with a focus motor"
-msgstr "Vorschau für Kameras mit Fokusmotor erlauben"
-
-#. settings-schema.json->allow-lens-cameras->tooltip
-msgid ""
-"While such a camera streams, libcamera drives its focus motor automatically."
-" Leave this off if the focus motor does not work properly."
-msgstr ""
-"Während eine solche Kamera Bilder liefert, steuert libcamera ihren "
-"Fokusmotor automatisch an. Ausgeschaltet lassen, wenn der Fokusmotor nicht "
-"einwandfrei funktioniert."
-
-#: applet.js:548
-msgid "Query sizes and frame rates"
-msgstr "Größen und Bildraten abfragen"
-
-#: presenter.js:143
-#, javascript-format
-msgid "up to %s fps (reported by the camera)"
-msgstr "bis %s fps (laut Kamera)"
-
 #. settings-schema.json->preview-viewer->tooltip
 msgid ""
 "For libcamera cameras. USB cameras use VLC if it is installed, otherwise "
@@ -374,6 +365,14 @@ msgid ""
 msgstr ""
 "Für libcamera-Kameras. USB-Kameras nutzen VLC, falls installiert, sonst "
 "GStreamer."
+
+#. settings-schema.json->preview-viewer->options
+msgid "qcam (libcamera)"
+msgstr "qcam (libcamera)"
+
+#. settings-schema.json->preview-viewer->options
+msgid "GStreamer"
+msgstr "GStreamer"
 
 #. settings-schema.json->active-indicator->description
 msgid "Panel icon while a preview runs"
@@ -390,3 +389,28 @@ msgstr "Pulsieren mit rotem Punkt"
 #. settings-schema.json->active-indicator->options
 msgid "No change"
 msgstr "Keine Änderung"
+
+#. settings-schema.json->usage-indicator->description
+msgid "Show when a program uses a camera"
+msgstr "Anzeigen, wenn ein Programm eine Kamera benutzt"
+
+#. settings-schema.json->usage-indicator->tooltip
+msgid ""
+"Red dot on the panel icon and a line in the menu. aVinceCam only watches the "
+"camera device files; it does not open them."
+msgstr ""
+"Roter Punkt am Panel-Symbol und eine Zeile im Menü. aVinceCam beobachtet nur "
+"die Gerätedateien der Kameras, öffnet sie aber nicht."
+
+#. settings-schema.json->allow-lens-cameras->description
+msgid "Allow preview of cameras with a focus motor"
+msgstr "Vorschau für Kameras mit Fokusmotor erlauben"
+
+#. settings-schema.json->allow-lens-cameras->tooltip
+msgid ""
+"While such a camera streams, libcamera drives its focus motor automatically. "
+"Leave this off if the focus motor does not work properly."
+msgstr ""
+"Während eine solche Kamera Bilder liefert, steuert libcamera ihren "
+"Fokusmotor automatisch an. Ausgeschaltet lassen, wenn der Fokusmotor nicht "
+"einwandfrei funktioniert."

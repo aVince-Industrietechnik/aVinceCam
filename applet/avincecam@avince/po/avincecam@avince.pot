@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 03:08+0200\n"
+"POT-Creation-Date: 2026-10-20 10:32+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,85 +17,90 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: applet.js:397
+#: applet.js:424
 msgid "1 camera"
 msgstr ""
 
-#: applet.js:398
+#: applet.js:425
 #, javascript-format
 msgid "%d cameras"
 msgstr ""
 
-#: applet.js:400
+#: applet.js:427
 #, javascript-format
 msgid "Selected: %s"
 msgstr ""
 
-#: applet.js:404
+#: applet.js:430 applet.js:521
+#, javascript-format
+msgid "Camera in use: %s"
+msgstr ""
+
+#: applet.js:434
 #, javascript-format
 msgid "Preview running: %s"
 msgstr ""
 
-#: applet.js:417
+#: applet.js:515
 msgid "Cameras"
 msgstr ""
 
-#: applet.js:422
+#: applet.js:525
 msgid "Looking for cameras …"
 msgstr ""
 
-#: applet.js:424 presenter.js:204
+#: applet.js:527 presenter.js:205
 msgid "No camera found."
 msgstr ""
 
-#: applet.js:443
+#: applet.js:546
 msgid "Search again"
 msgstr ""
 
-#: applet.js:452
+#: applet.js:555
 msgid "Copy camera report"
 msgstr ""
 
-#: applet.js:495
+#: applet.js:617
 msgid "Please wait …"
 msgstr ""
 
-#: applet.js:503
+#: applet.js:625
 #, javascript-format
 msgid "Stop preview (%s)"
 msgstr ""
 
-#: applet.js:503
+#: applet.js:625
 msgid "Stop preview"
 msgstr ""
 
-#: applet.js:513 presenter.js:52
+#: applet.js:635 presenter.js:52
 msgid "Preview locked: camera has a focus motor"
 msgstr ""
 
-#: applet.js:518
+#: applet.js:640
 #, javascript-format
 msgid "Start preview (%s)"
 msgstr ""
 
-#: applet.js:537
+#: applet.js:659
 #, javascript-format
 msgid "Details: %s"
 msgstr ""
 
-#: applet.js:542
+#: applet.js:664
 msgid "Querying details …"
 msgstr ""
 
-#: applet.js:547
+#: applet.js:669
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr ""
 
-#: applet.js:548
+#: applet.js:670
 msgid "Query sizes and frame rates"
 msgstr ""
 
-#: applet.js:564
+#: applet.js:686
 #, javascript-format
 msgid "Notes (%d)"
 msgstr ""
@@ -220,57 +225,65 @@ msgstr ""
 msgid "Unknown error"
 msgstr ""
 
-#: presenter.js:130
+#: presenter.js:131
 #, javascript-format
 msgid "%d sizes, %s to %s (%s)"
 msgstr ""
 
-#: presenter.js:143
+#: presenter.js:144
 #, javascript-format
 msgid "up to %s fps (reported by the camera)"
 msgstr ""
 
-#: presenter.js:144
+#: presenter.js:145
 #, javascript-format
 msgid "up to %s fps (according to libcamera)"
 msgstr ""
 
-#: presenter.js:154
+#: presenter.js:155
 #, javascript-format
 msgid "Sensor: %s"
 msgstr ""
 
-#: presenter.js:156
+#: presenter.js:157
 #, javascript-format
 msgid "Picture: %s"
 msgstr ""
 
-#: presenter.js:157
+#: presenter.js:158
 msgid "Picture sizes: not queried"
 msgstr ""
 
-#: presenter.js:160
+#: presenter.js:161
 #, javascript-format
 msgid "Frame rate: %s"
 msgstr ""
 
-#: presenter.js:162
+#: presenter.js:163
 msgid "Frame rate: unknown"
 msgstr ""
 
-#: presenter.js:164
+#: presenter.js:165
 #, javascript-format
 msgid "libcamera id: %s"
 msgstr ""
 
-#: presenter.js:166
+#: presenter.js:167
 #, javascript-format
 msgid "Devices: %s"
 msgstr ""
 
-#: presenter.js:217
+#: presenter.js:218
 #, javascript-format
 msgid "Unclassified device: %s"
+msgstr ""
+
+#: presenter.js:239
+msgid "built-in camera"
+msgstr ""
+
+#: presenter.js:244
+msgid "unknown program"
 msgstr ""
 
 #. metadata.json->name
@@ -376,6 +389,16 @@ msgstr ""
 
 #. settings-schema.json->active-indicator->options
 msgid "No change"
+msgstr ""
+
+#. settings-schema.json->usage-indicator->description
+msgid "Show when a program uses a camera"
+msgstr ""
+
+#. settings-schema.json->usage-indicator->tooltip
+msgid ""
+"Red dot on the panel icon and a line in the menu. aVinceCam only watches the"
+" camera device files; it does not open them."
 msgstr ""
 
 #. settings-schema.json->allow-lens-cameras->description
