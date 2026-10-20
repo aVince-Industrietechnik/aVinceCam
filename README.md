@@ -4,7 +4,7 @@
 computer, shows what they are and lets you preview them, take photos and offer them to
 browsers and video calls.
 
-> Version 0.9.0 – tested on one machine (Intel IPU3 2-in-1 with front and back camera
+> Version 0.9.1 – tested on one machine (Intel IPU3 2-in-1 with front and back camera
 > plus a USB webcam, Linux Mint 22, Cinnamon 6.6). Reports from other machines are welcome.
 
 Deutsche Kurzfassung: [README.de.md](README.de.md)
@@ -18,8 +18,9 @@ Deutsche Kurzfassung: [README.de.md](README.de.md)
   when the menu opens, because on some machines it powers up all cameras
 - **Preview** with existing programs: `qcam` or GStreamer for libcamera cameras, VLC (or
   GStreamer) for USB cameras; aVinceCam stops only the preview it started
-- **Photo** button for libcamera cameras: lets the exposure settle (about 30 frames) and
-  saves the last frame as PNG
+- **Photo** button: libcamera cameras let the exposure settle (about 30 frames) and save
+  the last frame as PNG; USB webcams save their own MJPEG picture as JPEG, opening only
+  the webcam's device
 - **Virtual camera**: offers a libcamera camera through PipeWire as
   “aVinceCam: &lt;name&gt;”, so browsers and web video calls can use it
 - **Camera in use**: a red dot on the panel icon and a line in the menu show when any

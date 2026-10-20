@@ -377,8 +377,9 @@ class AVinceCamApplet extends Applet.IconApplet {
     // ------------------------------------------------------------ photo
 
     /*
-     * The core streams ~30 frames (exposure and noise reduction settle) and
-     * saves the last one as PNG; ~1.5 s of camera use plus a few seconds.
+     * libcamera cameras: the core streams ~30 frames (exposure and noise
+     * reduction settle) and saves the last one as PNG. USB cameras: about a
+     * second of frames, the last one saved as JPEG (MJPEG) or PNG (YUYV).
      */
     _takePhoto(camera) {
         if (this._removed || this._snapshotBusy || this._previewBusy || this._previewRunning())
@@ -757,15 +758,19 @@ class AVinceCamApplet extends Applet.IconApplet {
         start.connect("activate", () => this._startPreview(selected.id));
         this.menu.addMenuItem(start);
 
-        // USB cameras reach other programs directly; libcamera cameras need
-        // aVinceCam to offer them through PipeWire.
-        if (selected.api === "libcamera") {
+        // Photos: libcamera cameras through cam (D15), USB cameras with plain
+        // V4L2 (D17).
+        if (selected.api === "libcamera" || selected.api === "v4l2") {
             const photo = new PopupMenu.PopupIconMenuItem(
                 _("Take photo (%s)").replace("%s", Presenter.cameraTitle(selected, _)),
                 "camera-photo-symbolic", St.IconType.SYMBOLIC);
             photo.connect("activate", () => this._takePhoto(selected));
             this.menu.addMenuItem(photo);
+        }
 
+        // USB cameras reach other programs directly; libcamera cameras need
+        // aVinceCam to offer them through PipeWire.
+        if (selected.api === "libcamera") {
             const virtual = new PopupMenu.PopupIconMenuItem(
                 _("Offer as virtual camera (%s)").replace("%s", Presenter.cameraTitle(selected, _)),
                 "camera-web-symbolic", St.IconType.SYMBOLIC);

@@ -15,7 +15,7 @@ adds only its own directory. The core prints exactly one JSON object on stdout.
 | `preview <id>` | streams one camera | starts the viewer |
 | `preview <id> --viewer virtual [--name NAME]` | streams one camera | offers it to other programs through PipeWire as "aVinceCam: NAME" (D14) |
 | `stop` | none | stops the own preview only |
-| `snapshot <id> [--size WxH] [--out DIR]` | streams ~1 s | saves a still photo as PNG (D15) |
+| `snapshot <id> [--size WxH] [--out DIR]` | streams ~1 s | saves a still photo: libcamera cameras as PNG (D15), USB cameras as JPEG (MJPEG) or PNG (YUYV) from their own video node only (D17) |
 
 `preview` and `snapshot` refuse cameras with a focus motor (`lens-blocked`,
 D11) unless `--allow-lens` is given; they then run without libcamera's

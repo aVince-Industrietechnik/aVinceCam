@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.1 – 2026-10-20
+
+- Photos of USB cameras: the core streams about a second from the webcam's
+  own video node (MJPEG, else YUYV) and saves the last frame as JPEG – with
+  the standard Huffman tables added when the camera leaves them out – or as
+  PNG (D17); "Take photo" is offered for USB cameras too
+
 ## 0.9.0 – 2026-10-20
 
 First public version.

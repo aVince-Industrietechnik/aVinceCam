@@ -298,6 +298,11 @@ function withFakeRuntime(fn) {
         const [b] = runClient([PY, "-I", FAKE, "--scenario=mixed"],
                               ["snapshot", cams[1].id, "--size", "64x48"], 30);
         check("snapshot lens camera locked", b && b.error && b.error.code === "lens-blocked", b);
+        const usb = cams.find(c => c.api === "v4l2");
+        const [u] = runClient([PY, "-I", FAKE, "--scenario=mixed"],
+                              ["snapshot", usb.id, "--size", "1600x1200"], 30);
+        check("snapshot usb camera as jpeg", u && u.ok && u.data.path.endsWith(".jpg") &&
+              u.data.format === "MJPG", u);
         const text = Presenter.errorText({ code: "cam-failed", message: null, detail: "x" }, _);
         check("snapshot error text", text.indexOf("The photo could not be taken.") === 0, text);
     });

@@ -80,7 +80,7 @@
         "type": "combobox",
         "default": "1600x1200",
         "description": "Photo size",
-        "tooltip": "The camera is soft at full size; 1600 × 1200 keeps all its detail in a smaller file.",
+        "tooltip": "Built-in cameras are often soft at full size; 1600 × 1200 keeps their detail in a smaller file. USB cameras use the closest size they offer.",
         "options": {
             "1024 × 768": "1024x768",
             "1600 × 1200 (recommended)": "1600x1200",

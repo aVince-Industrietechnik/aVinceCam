@@ -33,8 +33,11 @@
   client) would need a loopback device, which aVinceCam does not install.
 - While the virtual camera runs, **USB cameras cannot be used** by other
   programs (libcamera keeps them open).
-- **Photos** are PNG files only (no JPEG without an extra library); each photo
-  powers up the cameras once, like a query.
+- **Photos** of libcamera cameras are PNG files (no JPEG encoder without an
+  extra library); each one powers up the cameras once, like a query. USB
+  cameras save their own MJPEG pictures as JPEG (YUYV-only cameras as PNG) in
+  the size closest to the photo size setting; their automatic exposure gets
+  about a second to settle.
 - **Camera use** of processes of other users is shown as "unknown program".
 - **GStreamer probes all video devices** when its video4linux2 plugin loads.
   On machines with complex camera pipelines this briefly powers them up.

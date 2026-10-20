@@ -179,3 +179,23 @@ motor are allowed) passes `--autofocus` to the core, which then writes no
 tuning file and sets no `LIBCAMERA_IPA_CONFIG_PATH`. The lock of D11 stays:
 `--autofocus` alone does not unlock a camera. On the IPU3 laptop the lens
 motor does not answer, so the setting is covered by tests only.
+
+## D17 – Photos of USB cameras with plain V4L2
+USB (UVC) cameras do not need libcamera, and starting libcamera would power
+up the whole IPU3 pipeline and keep every camera open. The core therefore
+takes their photos itself: it opens **only the camera's own video node**
+(`safety.check_v4l2_query()` must allow it, as for the format queries), sets
+MJPEG – else YUYV – in the size closest to the requested one, streams four
+memory-mapped buffers for about a second (at least 10 frames) so that the
+camera's automatic exposure settles, keeps the last frame and stops the
+stream. This is the only place where aVinceCam sets a format and streams
+itself; no camera control (brightness, exposure, …) is changed.
+
+MJPEG frames are JPEG pictures and are saved as `.jpg` without converting
+them. Many webcams leave out the Huffman tables; the standard tables of the
+JPEG specification (Annex K) are then inserted before the scan, so every
+picture viewer can open the file (tested: a JPEG without its tables decodes
+pixel for pixel like the original once they are added). YUYV frames are
+converted to PNG like the libcamera photos. The system calls are injectable,
+so the tests stream from a simulated webcam with the formats of a recorded
+one.

@@ -4,7 +4,7 @@
 Rechners erkennt, verständlich anzeigt, eine Vorschau startet, Fotos aufnimmt und Kameras
 für Browser und Videoanrufe bereitstellt.
 
-> Version 0.9.0 – getestet auf einem Gerät (Intel-IPU3-2-in-1 mit Front- und Rückkamera
+> Version 0.9.1 – getestet auf einem Gerät (Intel-IPU3-2-in-1 mit Front- und Rückkamera
 > sowie USB-Webcam, Linux Mint 22, Cinnamon 6.6). Rückmeldungen von anderen Rechnern sind
 > willkommen.
 
@@ -19,7 +19,8 @@ Ausführliche Beschreibung (Englisch): [README.md](README.md)
   Kamera eingeschaltet
 - **Vorschau** mit vorhandenen Programmen (qcam, GStreamer, VLC); aVinceCam beendet nur
   die eigene Vorschau
-- **Foto aufnehmen** (libcamera-Kameras): Belichtung einregeln lassen, PNG speichern
+- **Foto aufnehmen**: libcamera-Kameras als PNG nach dem Einregeln der Belichtung,
+  USB-Webcams als JPEG (nur das Gerät der Webcam wird geöffnet)
 - **Virtuelle Kamera** über PipeWire für Browser und Videoanrufe
 - **Kamera in Benutzung**: roter Punkt am Panel-Symbol, wenn ein Programm eine Kamera
   nutzt – ohne ein Gerät zu öffnen
