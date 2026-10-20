@@ -13,54 +13,54 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: applet.js:339
+#: applet.js:397
 msgid "1 camera"
 msgstr "1 Kamera"
 
-#: applet.js:340
+#: applet.js:398
 #, javascript-format
 msgid "%d cameras"
 msgstr "%d Kameras"
 
-#: applet.js:342
+#: applet.js:400
 #, javascript-format
 msgid "Selected: %s"
 msgstr "Ausgewählt: %s"
 
-#: applet.js:357
+#: applet.js:417
 msgid "Cameras"
 msgstr "Kameras"
 
-#: applet.js:362
+#: applet.js:422
 msgid "Looking for cameras …"
 msgstr "Kameras werden gesucht …"
 
-#: applet.js:364 presenter.js:204
+#: applet.js:424 presenter.js:204
 msgid "No camera found."
 msgstr "Keine Kamera gefunden."
 
-#: applet.js:383
+#: applet.js:443
 msgid "Search again"
 msgstr "Erneut suchen"
 
-#: applet.js:392
+#: applet.js:452
 msgid "Copy camera report"
 msgstr "Kamerabericht kopieren"
 
-#: applet.js:477
+#: applet.js:537
 #, javascript-format
 msgid "Details: %s"
 msgstr "Details: %s"
 
-#: applet.js:482
+#: applet.js:542
 msgid "Querying details …"
 msgstr "Details werden abgefragt …"
 
-#: applet.js:487
+#: applet.js:547
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr "Größen und Bildraten abfragen (schaltet die Kameras kurz ein)"
 
-#: applet.js:504
+#: applet.js:564
 #, javascript-format
 msgid "Notes (%d)"
 msgstr "Hinweise (%d)"
@@ -269,25 +269,25 @@ msgstr "Nur mit libcamera nutzbar, nicht mit klassischen Webcam-Programmen."
 msgid "No libcamera tuning file – image quality may suffer."
 msgstr "Keine libcamera-Abstimmungsdatei – die Bildqualität kann leiden."
 
-#: applet.js:346
+#: applet.js:404
 #, javascript-format
 msgid "Preview running: %s"
 msgstr "Vorschau läuft: %s"
 
-#: applet.js:435
+#: applet.js:495
 msgid "Please wait …"
 msgstr "Bitte warten …"
 
-#: applet.js:443
+#: applet.js:503
 #, javascript-format
 msgid "Stop preview (%s)"
 msgstr "Vorschau beenden (%s)"
 
-#: applet.js:443
+#: applet.js:503
 msgid "Stop preview"
 msgstr "Vorschau beenden"
 
-#: applet.js:458
+#: applet.js:518
 #, javascript-format
 msgid "Start preview (%s)"
 msgstr "Vorschau starten (%s)"
@@ -336,7 +336,7 @@ msgstr "qcam (libcamera)"
 msgid "GStreamer"
 msgstr "GStreamer"
 
-#: applet.js:453 presenter.js:52
+#: applet.js:513 presenter.js:52
 msgid "Preview locked: camera has a focus motor"
 msgstr "Vorschau gesperrt: Kamera mit Fokusmotor"
 
@@ -358,7 +358,7 @@ msgstr ""
 "Fokusmotor automatisch an. Ausgeschaltet lassen, wenn der Fokusmotor nicht "
 "einwandfrei funktioniert."
 
-#: applet.js:488
+#: applet.js:548
 msgid "Query sizes and frame rates"
 msgstr "Größen und Bildraten abfragen"
 
@@ -374,3 +374,19 @@ msgid ""
 msgstr ""
 "Für libcamera-Kameras. USB-Kameras nutzen VLC, falls installiert, sonst "
 "GStreamer."
+
+#. settings-schema.json->active-indicator->description
+msgid "Panel icon while a preview runs"
+msgstr "Panel-Symbol während einer Vorschau"
+
+#. settings-schema.json->active-indicator->options
+msgid "Turn slowly"
+msgstr "Langsam drehen"
+
+#. settings-schema.json->active-indicator->options
+msgid "Pulse with a red dot"
+msgstr "Pulsieren mit rotem Punkt"
+
+#. settings-schema.json->active-indicator->options
+msgid "No change"
+msgstr "Keine Änderung"

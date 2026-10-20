@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-19 19:39+0200\n"
+"POT-Creation-Date: 2026-10-20 03:08+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,85 +17,85 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: applet.js:339
+#: applet.js:397
 msgid "1 camera"
 msgstr ""
 
-#: applet.js:340
+#: applet.js:398
 #, javascript-format
 msgid "%d cameras"
 msgstr ""
 
-#: applet.js:342
+#: applet.js:400
 #, javascript-format
 msgid "Selected: %s"
 msgstr ""
 
-#: applet.js:346
+#: applet.js:404
 #, javascript-format
 msgid "Preview running: %s"
 msgstr ""
 
-#: applet.js:357
+#: applet.js:417
 msgid "Cameras"
 msgstr ""
 
-#: applet.js:362
+#: applet.js:422
 msgid "Looking for cameras …"
 msgstr ""
 
-#: applet.js:364 presenter.js:204
+#: applet.js:424 presenter.js:204
 msgid "No camera found."
 msgstr ""
 
-#: applet.js:383
+#: applet.js:443
 msgid "Search again"
 msgstr ""
 
-#: applet.js:392
+#: applet.js:452
 msgid "Copy camera report"
 msgstr ""
 
-#: applet.js:435
+#: applet.js:495
 msgid "Please wait …"
 msgstr ""
 
-#: applet.js:443
+#: applet.js:503
 #, javascript-format
 msgid "Stop preview (%s)"
 msgstr ""
 
-#: applet.js:443
+#: applet.js:503
 msgid "Stop preview"
 msgstr ""
 
-#: applet.js:453 presenter.js:52
+#: applet.js:513 presenter.js:52
 msgid "Preview locked: camera has a focus motor"
 msgstr ""
 
-#: applet.js:458
+#: applet.js:518
 #, javascript-format
 msgid "Start preview (%s)"
 msgstr ""
 
-#: applet.js:477
+#: applet.js:537
 #, javascript-format
 msgid "Details: %s"
 msgstr ""
 
-#: applet.js:482
+#: applet.js:542
 msgid "Querying details …"
 msgstr ""
 
-#: applet.js:487
+#: applet.js:547
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr ""
 
-#: applet.js:488
+#: applet.js:548
 msgid "Query sizes and frame rates"
 msgstr ""
 
-#: applet.js:504
+#: applet.js:564
 #, javascript-format
 msgid "Notes (%d)"
 msgstr ""
@@ -360,6 +360,22 @@ msgstr ""
 
 #. settings-schema.json->preview-viewer->options
 msgid "GStreamer"
+msgstr ""
+
+#. settings-schema.json->active-indicator->description
+msgid "Panel icon while a preview runs"
+msgstr ""
+
+#. settings-schema.json->active-indicator->options
+msgid "Turn slowly"
+msgstr ""
+
+#. settings-schema.json->active-indicator->options
+msgid "Pulse with a red dot"
+msgstr ""
+
+#. settings-schema.json->active-indicator->options
+msgid "No change"
 msgstr ""
 
 #. settings-schema.json->allow-lens-cameras->description

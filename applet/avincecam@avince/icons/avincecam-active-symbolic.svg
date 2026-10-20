@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <!-- single colour; Cinnamon recolours it to match the panel theme -->
+  <g fill="#bebebe">
+    <path fill-rule="evenodd" d="M8 0.5a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15zm0 1.4a6.1 6.1 0 1 1 0 12.2 6.1 6.1 0 0 1 0-12.2z"/>
+    <path d="M8.16 5.91 L11.01 3.28 A5.6 5.6 0 0 1 13.56 7.37 L9.73 6.81 Z"/>
+    <path d="M9.90 7.10 L13.59 8.24 A5.6 5.6 0 0 1 11.33 12.50 L9.90 8.90 Z"/>
+    <path d="M9.73 9.19 L10.59 12.97 A5.6 5.6 0 0 1 5.77 13.14 L8.16 10.09 Z"/>
+    <path d="M7.84 10.09 L4.99 12.72 A5.6 5.6 0 0 1 2.44 8.63 L6.27 9.19 Z"/>
+    <path d="M6.10 8.90 L2.41 7.76 A5.6 5.6 0 0 1 4.67 3.50 L6.10 7.10 Z"/>
+    <path d="M6.27 6.81 L5.41 3.03 A5.6 5.6 0 0 1 10.23 2.86 L7.84 5.91 Z"/>
+  </g>
+  <!-- active: dot in the theme's error colour (usually red); symbolic icons
+       recolour elements with class "error" separately from the rest -->
+  <circle class="error" cx="13.2" cy="2.8" r="2.6" fill="#cc0000"/>
+</svg>

@@ -35,10 +35,11 @@ def main():
     icons = os.path.join(APPLET, "icons")
     os.makedirs(icons, exist_ok=True)
     # Panel icons stay SVG so they are sharp at every panel size.
-    for name in ("avincecam.svg", "avincecam-symbolic.svg"):
+    for name in ("avincecam.svg", "avincecam-symbolic.svg",
+                 "avincecam-active.svg", "avincecam-active-symbolic.svg"):
         shutil.copyfile(os.path.join(ASSETS, name), os.path.join(icons, name))
-    print(f"written: {os.path.relpath(png, REPO)} ({SIZE} px), "
-          f"applet/avincecam@avince/icons/avincecam.svg, avincecam-symbolic.svg")
+    print(f"written: {os.path.relpath(png, REPO)} ({SIZE} px) and "
+          f"{len(os.listdir(icons))} panel icons in applet/avincecam@avince/icons/")
     return 0
 
 
