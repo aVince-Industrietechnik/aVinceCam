@@ -66,7 +66,11 @@ class LiveRunner:
 
 
 class RecordedRunner:
-    """Answers from recorded output files instead of running cam."""
+    """Answers from recorded output files instead of running cam.
+
+    `cam -c N` reads info-N.txt; `cam -c ID` reads the info file whose
+    "Using camera ID" line names that id.
+    """
 
     def __init__(self, directory):
         self.directory = directory
@@ -75,9 +79,12 @@ class RecordedRunner:
         if args == ["--list"]:
             name = "list.txt"
         elif len(args) >= 2 and args[0] == "-c":
-            name = f"info-{args[1]}.txt"
+            name = (f"info-{args[1]}.txt" if args[1].isdigit()
+                    else self._info_file_for_id(args[1]))
         else:
             return Result(2, "", "unsupported recorded command")
+        if name is None:
+            return Result(1, "", f"camera {args[1:2]} not found (recorded)")
         path = os.path.join(self.directory, name)
         try:
             with open(path, encoding="utf-8") as handle:
@@ -85,9 +92,24 @@ class RecordedRunner:
         except OSError:
             return Result(1, "", f"camera {args[1:2]} not found (recorded)")
 
+    def _info_file_for_id(self, camera_id):
+        try:
+            names = sorted(os.listdir(self.directory))
+        except OSError:
+            return None
+        for name in names:
+            if not (name.startswith("info-") and name.endswith(".txt")):
+                continue
+            with open(os.path.join(self.directory, name), encoding="utf-8") as handle:
+                match = _USING.match(handle.readline().rstrip())
+            if match and match["id"] == camera_id:
+                return name
+        return None
 
-def info_args(index):
-    return ["-c", str(index), "-I", "-p", "--list-controls"]
+
+def info_args(camera):
+    """Arguments for one camera, given by cam index (1, 2, ...) or by id."""
+    return ["-c", str(camera), "-I", "-p", "--list-controls"]
 
 
 def parse_list(text):
@@ -201,3 +223,30 @@ def probe_cameras(runner, max_cameras, stop=None):
         if stop and stop(found):
             break
     return found, errors, calls
+
+
+def probe_by_ids(runner, camera_ids):
+    """Query each camera by its libcamera id: one call per camera.
+
+    cam numbers cameras in the order libcamera lists them, and an external
+    USB camera can come first. Asking by id needs no walk over the indices.
+    Stops at the first id cam does not know, so the caller can fall back to
+    probe_cameras() on machines where libcamera names cameras differently.
+
+    Returns (list of (id, info or None, raw stdout), errors, number of calls,
+    complete) – complete is False when an id was not known.
+    """
+    found = []
+    errors = []
+    calls = 0
+    for camera_id in camera_ids:
+        calls += 1
+        result = runner.run(info_args(camera_id))
+        if result.returncode == 124:
+            errors.append({"code": "timeout", "message": f"cam -c {camera_id} timed out",
+                           "detail": None})
+            return found, errors, calls, True
+        if result.returncode != 0:
+            return found, errors, calls, False
+        found.append((camera_id, parse_info(result.stdout), result.stdout))
+    return found, errors, calls, True

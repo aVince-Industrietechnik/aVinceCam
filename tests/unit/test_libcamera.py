@@ -106,6 +106,35 @@ class RunnerTest(unittest.TestCase):
         self.assertEqual(len(found), 1)
         self.assertEqual(calls, 1)
 
+    def test_recorded_runner_by_id(self):
+        runner = libcamera.RecordedRunner(FIXTURES)
+        result = runner.run(libcamera.info_args(r"\_SB_.PCI0.LNK1"))
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(libcamera.parse_info(result.stdout)["id"], r"\_SB_.PCI0.LNK1")
+        self.assertNotEqual(runner.run(libcamera.info_args(r"\_SB_.PCI0.LNK9")).returncode, 0)
+
+    def test_probe_by_ids_one_call_each(self):
+        runner = libcamera.RecordedRunner(FIXTURES)
+        found, errors, calls, complete = libcamera.probe_by_ids(
+            runner, [r"\_SB_.PCI0.LNK1", r"\_SB_.PCI0.LNK0"])
+        self.assertEqual([info["id"] for _, info, _ in found],
+                         [r"\_SB_.PCI0.LNK1", r"\_SB_.PCI0.LNK0"])
+        self.assertEqual((errors, calls, complete), ([], 2, True))
+
+    def test_probe_by_ids_stops_at_unknown_id(self):
+        runner = libcamera.RecordedRunner(FIXTURES)
+        found, errors, calls, complete = libcamera.probe_by_ids(
+            runner, ["nonsense", r"\_SB_.PCI0.LNK0"])
+        self.assertEqual((found, errors, calls, complete), ([], [], 1, False))
+
+    def test_probe_by_ids_timeout(self):
+        class Slow:
+            def run(self, args):
+                return libcamera.Result(124, "", "timeout")
+        found, errors, calls, complete = libcamera.probe_by_ids(Slow(), ["a", "b"])
+        self.assertEqual(errors[0]["code"], "timeout")
+        self.assertEqual((found, calls, complete), ([], 1, True))
+
     def test_live_runner_is_blocked_in_tests(self):
         with mock.patch.dict(os.environ, {"AVINCECAM_NO_HARDWARE": "1"}):
             with mock.patch("subprocess.run") as run:

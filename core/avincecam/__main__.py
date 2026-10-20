@@ -257,16 +257,8 @@ def cmd_probe(args):
     calls = 0
     wanted = [c for c in cameras if c.api == "libcamera"]
     if wanted:
-        # libcamera may also list USB cameras, so allow for all of them.
-        all_cameras, _ = sysfs.scan(args.sysfs_root, _ipa_dirs(args))
-
-        def all_found(probed):
-            return merge.count_matches(wanted, probed) >= len(wanted)
-
         try:
-            probed, probe_errors, calls = libcamera.probe_cameras(
-                runner, len(all_cameras), stop=all_found)
-            errors.extend(probe_errors)
+            probed, calls = _probe_libcamera(runner, wanted, args, errors)
             notes = merge.apply_libcamera(cameras, probed)
         except libcamera.ToolMissing:
             errors.append(to_dict(CoreError(
@@ -292,6 +284,38 @@ def cmd_probe(args):
     })
     fatal = {"libcamera-tools-missing", "hardware-blocked"}
     return EXIT_ERROR if any(e["code"] in fatal for e in errors) else EXIT_OK
+
+
+def _probe_libcamera(runner, wanted, args, errors):
+    """cam output for the wanted cameras with as few cam calls as possible.
+
+    Every call powers up all cameras of an Intel IPU3 machine. With the
+    libcamera ids known from sysfs, each camera needs exactly one call.
+    Otherwise, or if cam does not know an id, cam indices are tried in turn.
+    Returns (probed, number of calls).
+    """
+    probed, calls, complete = [], 0, False
+    ids = [c.backend_id for c in wanted]
+    if all(ids):
+        probed, probe_errors, calls, complete = libcamera.probe_by_ids(runner, ids)
+        errors.extend(probe_errors)
+    if complete:
+        return probed, calls
+
+    seen = {info["id"] for _key, info, _raw in probed if info}
+
+    def new_entries(found):
+        return [e for e in found if not (e[1] and e[1]["id"] in seen)]
+
+    def all_found(found):
+        return merge.count_matches(wanted, probed + new_entries(found)) >= len(wanted)
+
+    # libcamera may also list USB cameras, so allow for all of them.
+    all_cameras, _ = sysfs.scan(args.sysfs_root, _ipa_dirs(args))
+    found, probe_errors, more_calls = libcamera.probe_cameras(
+        runner, len(all_cameras), stop=all_found)
+    errors.extend(probe_errors)
+    return probed + new_entries(found), calls + more_calls
 
 
 def _uvc_formats(camera, sysfs_root):
