@@ -68,6 +68,16 @@ def add_ipa_tuning(ipa_root, pipeline, *names):
         _write(os.path.join(ipa_root, pipeline, name), "# tuning")
 
 
+def make_dev(sysfs_root, dev_root):
+    """A plain file for every node of the fake sysfs, as a stand-in for /dev."""
+    from avincecam import sysfs  # the core module, importable in tests
+    os.makedirs(os.path.join(dev_root, "dev"), exist_ok=True)
+    for entry in sysfs.read_nodes(sysfs_root) + sysfs.read_media(sysfs_root):
+        path = os.path.join(dev_root, entry["dev"].lstrip("/"))
+        if not os.path.exists(path):
+            open(path, "w").close()
+
+
 # ---------------------------------------------------------------- scenarios
 
 def empty(root):

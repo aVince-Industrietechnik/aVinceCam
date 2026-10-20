@@ -220,8 +220,34 @@ function summaryText(scan, details, _) {
     return lines.join("\n");
 }
 
+/*
+ * Programs other than aVinceCam's own preview that use a camera, from the
+ * users list of the core's "watch" command.
+ */
+function foreignUsers(users) {
+    return (users || []).filter(u => u && !u.own_preview);
+}
+
+/*
+ * "Front camera (firefox), HD Webcam (zoom)" – which camera is used by which
+ * program, or null if no other program uses a camera. When the open device
+ * nodes do not tell the camera (Intel IPU3 shares its pipeline), it says
+ * "built-in camera".
+ */
+function usageText(users, cameras, _) {
+    const parts = foreignUsers(users).map(u => {
+        let what = _("built-in camera");
+        if (u.certain && u.cameras && u.cameras.length === 1) {
+            const cam = (cameras || []).find(c => c.id === u.cameras[0]);
+            what = cam ? cameraTitle(cam, _) : u.cameras[0];
+        }
+        return what + " (" + (u.name || _("unknown program")) + ")";
+    });
+    return parts.length ? parts.join(", ") : null;
+}
+
 /* Exported for applet and tests (cjs legacy imports use top-level names). */
 var Presenter = {
     cameraTitle, cameraSubtitle, warningText, errorText, noteColor, formatsText,
-    frameRateText, detailLines, parseCoreResult, summaryText
+    frameRateText, detailLines, parseCoreResult, summaryText, foreignUsers, usageText
 };

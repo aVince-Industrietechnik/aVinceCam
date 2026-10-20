@@ -69,6 +69,14 @@ def run_real_core(build, args):
         return core_main(args + ["--sysfs-root", root] + runtime)
     if command in ("stop", "status"):
         return core_main(args + runtime)
+    if command == "watch":
+        # Watches plain files in a temporary folder, never the real /dev.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = os.path.join(tmp, "sys")
+            os.makedirs(root)
+            build(root)
+            fakesysfs.make_dev(root, tmp)
+            return core_main(args + ["--sysfs-root", root, "--dev-root", tmp] + runtime)
     with tempfile.TemporaryDirectory() as tmp:
         root = os.path.join(tmp, "sys")
         ipa = os.path.join(tmp, "ipa")
