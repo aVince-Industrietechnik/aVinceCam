@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Panel icon turns slowly (or pulses with a red dot) while the own preview
+  runs; setting "Panel icon while a preview runs"
+
 - Project skeleton, architecture notes and read-only diagnostic tools
 - Core package skeleton with command line (`version`; other commands report
   "not implemented")

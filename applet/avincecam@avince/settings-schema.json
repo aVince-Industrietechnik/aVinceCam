@@ -56,6 +56,16 @@
             "GStreamer": "gst"
         }
     },
+    "active-indicator": {
+        "type": "combobox",
+        "default": "rotate",
+        "description": "Panel icon while a preview runs",
+        "options": {
+            "Turn slowly": "rotate",
+            "Pulse with a red dot": "pulse",
+            "No change": "off"
+        }
+    },
     "allow-lens-cameras": {
         "type": "switch",
         "default": false,

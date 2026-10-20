@@ -18,6 +18,8 @@ const St = imports.gi.St;
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const Pango = imports.gi.Pango;
+const Clutter = imports.gi.Clutter;
+const GObject = imports.gi.GObject;
 const Gettext = imports.gettext;
 
 const UUID = "avincecam@avince";
@@ -60,12 +62,17 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.panelIconSizeSymbolic = 24;
         this.previewViewer = "qcam";
         this.allowLensCameras = false;
+        this.activeIndicator = "rotate";
+        this._indicatorKey = null;
         this.settings = new Settings.AppletSettings(this, metadata.uuid, instanceId);
         this.settings.bindProperty(Settings.BindingDirection.IN,
                                    "preview-viewer", "previewViewer", null);
         this.settings.bindProperty(Settings.BindingDirection.IN,
                                    "allow-lens-cameras", "allowLensCameras",
                                    () => this._buildMenu());
+        this.settings.bindProperty(Settings.BindingDirection.IN,
+                                   "active-indicator", "activeIndicator",
+                                   () => this._updateIndicator());
         this.settings.bindProperty(Settings.BindingDirection.BIDIRECTIONAL,
                                    "selected-camera", "selectedCamera", null);
         this.settings.bindProperty(Settings.BindingDirection.IN,
@@ -112,8 +119,9 @@ class AVinceCamApplet extends Applet.IconApplet {
     /* Colourful (default) or single-colour icon, optionally in an own size. */
     _applyPanelIcon() {
         const symbolic = this.panelIconStyle === "symbolic";
-        const file = GLib.build_filenamev([this._metadataPath, "icons",
-            symbolic ? "avincecam-symbolic.svg" : "avincecam.svg"]);
+        const dot = this._previewRunning() && this.activeIndicator === "pulse";
+        const name = "avincecam" + (dot ? "-active" : "") + (symbolic ? "-symbolic" : "") + ".svg";
+        const file = GLib.build_filenamev([this._metadataPath, "icons", name]);
         if (!GLib.file_test(file, GLib.FileTest.IS_REGULAR))
             this.set_applet_icon_symbolic_name(FALLBACK_ICON_NAME);
         else if (symbolic)
@@ -121,6 +129,55 @@ class AVinceCamApplet extends Applet.IconApplet {
         else
             this.set_applet_icon_path(file);
         this._applyIconSize();
+        this._applyIndicatorAnimation();
+    }
+
+    /*
+     * While the own preview runs the icon turns slowly or pulses (setting
+     * "active-indicator"). Clutter runs the animation itself; nothing runs
+     * when no preview is active.
+     */
+    _applyIndicatorAnimation() {
+        const icon = this._applet_icon;
+        if (!icon)
+            return;
+        for (const name of ["rotation-angle-z", "scale-x", "scale-y"])
+            icon.remove_transition("avincecam-" + name);
+        icon.rotation_angle_z = 0;
+        icon.set_scale(1, 1);
+        if (this._removed || !this._previewRunning() || this.activeIndicator === "off")
+            return;
+
+        icon.set_pivot_point(0.5, 0.5);
+        if (this.activeIndicator === "pulse") {
+            for (const prop of ["scale-x", "scale-y"])
+                this._loop(icon, prop, 1.0, 1.12, 800, true, Clutter.AnimationMode.EASE_IN_OUT_SINE);
+        } else {
+            this._loop(icon, "rotation-angle-z", 0, 360, 4000, false, Clutter.AnimationMode.LINEAR);
+        }
+    }
+
+    _loop(actor, property, from, to, duration, autoReverse, mode) {
+        const transition = new Clutter.PropertyTransition({
+            property_name: property,
+            interval: new Clutter.Interval({ value_type: GObject.TYPE_DOUBLE }),
+            duration: duration,
+            repeat_count: -1,
+            auto_reverse: autoReverse,
+            progress_mode: mode
+        });
+        transition.set_from(from);
+        transition.set_to(to);
+        actor.add_transition("avincecam-" + property, transition);
+    }
+
+    /* Re-apply the icon only when what it shows has changed. */
+    _updateIndicator() {
+        const key = [this._previewRunning(), this.activeIndicator, this.panelIconStyle].join("|");
+        if (key === this._indicatorKey)
+            return;
+        this._indicatorKey = key;
+        this._applyPanelIcon();
     }
 
     /*
@@ -148,6 +205,7 @@ class AVinceCamApplet extends Applet.IconApplet {
 
     on_applet_removed_from_panel() {
         this._removed = true;
+        this._applyIndicatorAnimation();  // stops any running animation
         if (this._themeChangedId) {
             this._themeContext.disconnect(this._themeChangedId);
             this._themeChangedId = 0;
@@ -347,6 +405,8 @@ class AVinceCamApplet extends Applet.IconApplet {
                 cam ? Presenter.cameraTitle(cam, _) : (running.camera || "?"));
         }
         this.set_applet_tooltip(text);
+        // Called after every change of the preview state.
+        this._updateIndicator();
     }
 
     // ------------------------------------------------------------ menu
