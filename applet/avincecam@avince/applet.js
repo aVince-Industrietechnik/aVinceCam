@@ -70,6 +70,7 @@ class AVinceCamApplet extends Applet.IconApplet {
         this._watch = null;
         this._watchRetryId = 0;
         this._watchRestarts = 0;
+        this._selectRebuildId = 0;
 
         this._metadataPath = metadata.path;
         this.selectedCamera = "";
@@ -240,6 +241,10 @@ class AVinceCamApplet extends Applet.IconApplet {
 
     on_applet_removed_from_panel() {
         this._removed = true;
+        if (this._selectRebuildId) {
+            GLib.source_remove(this._selectRebuildId);
+            this._selectRebuildId = 0;
+        }
         this._stopWatch();
         this._applyIndicatorAnimation();  // stops any running animation
         if (this._themeChangedId) {
@@ -510,8 +515,17 @@ class AVinceCamApplet extends Applet.IconApplet {
 
     _select(cameraId) {
         this.selectedCamera = cameraId;
-        this._buildMenu();
         this._updateTooltip();
+        // The menu stays open; rebuild it once the click is handled, so the
+        // clicked item is not destroyed in its own signal handler.
+        if (!this._selectRebuildId) {
+            this._selectRebuildId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                this._selectRebuildId = 0;
+                if (!this._removed)
+                    this._buildMenu();
+                return GLib.SOURCE_REMOVE;
+            });
+        }
     }
 
     _updateTooltip() {
@@ -616,6 +630,12 @@ class AVinceCamApplet extends Applet.IconApplet {
     // ------------------------------------------------------------ menu
 
     _buildMenu() {
+        // Cinnamon closes an open menu when the key focus disappears – which
+        // happens when the hovered (focused) item is destroyed below. Park
+        // the focus on the menu itself while the items are replaced.
+        const focus = global.stage.key_focus;
+        if (this.menu.isOpen && focus && this.menu.actor.contains(focus))
+            global.stage.set_key_focus(this.menu.actor);
         this.menu.removeAll();
 
         const header = new PopupMenu.PopupMenuItem(_("Cameras"), { reactive: false });
@@ -809,6 +829,8 @@ class AVinceCamApplet extends Applet.IconApplet {
         item.label.add_style_class_name("avincecam-camera");
         // Radio button: filled for the selected camera.
         item.setOrnament(PopupMenu.OrnamentType.DOT, cam.id === this.selectedCamera);
+        // Choosing a camera keeps the menu open: its actions follow right below.
+        item.activate = event => PopupMenu.PopupMenuItem.prototype.activate.call(item, event, true);
         item.connect("activate", () => this._select(cam.id));
         this.menu.addMenuItem(item);
     }
