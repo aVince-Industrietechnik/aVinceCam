@@ -496,7 +496,13 @@ class AVinceCamApplet extends Applet.IconApplet {
         if (!result.data || !Array.isArray(result.data.users))
             return;
         this._watchRestarts = 0;
-        this._setUsage(Presenter.foreignUsers(result.data.users));
+        const users = Presenter.foreignUsers(result.data.users);
+        // A camera plugged in after the last scan: scan again (sysfs only),
+        // so the menu and tooltip can name it.
+        const known = new Set(this._cameras().map(c => c.id));
+        if (users.some(u => (u.cameras || []).some(id => !known.has(id))))
+            this._refresh();
+        this._setUsage(users);
     }
 
     _setUsage(users) {
