@@ -642,6 +642,8 @@ class AVinceCamApplet extends Applet.IconApplet {
                 text, "media-playback-stop-symbolic", St.IconType.SYMBOLIC);
             stop.connect("activate", () => this._stopPreview());
             this.menu.addMenuItem(stop);
+            if (virtual)
+                this._addVirtualHints(cam);
             return;
         }
         if (!selected)
@@ -667,6 +669,29 @@ class AVinceCamApplet extends Applet.IconApplet {
             virtual.connect("activate", () => this._startPreview(selected.id, "virtual"));
             this.menu.addMenuItem(virtual);
         }
+    }
+
+    /*
+     * How to use the virtual camera, shown while it runs (desk test T7,
+     * 2026-10-20): browsers need PipeWire camera support switched on, and
+     * libcamera keeps USB cameras open, so they cannot be used meanwhile.
+     */
+    _addVirtualHints(cam) {
+        const sub = new PopupMenu.PopupSubMenuMenuItem(_("Using the virtual camera"));
+        const color = Presenter.noteColor(this._menuTextColor());
+        const lines = [
+            _("Choose \"aVinceCam: %s\" in the browser or call")
+                .replace("%s", cam ? cam.label : "…"),
+            _("Firefox: about:config, media.webrtc.camera.allow-pipewire = true, restart"),
+            _("Chrome: chrome://flags, enable PipeWire camera support, restart"),
+            _("USB cameras cannot be used by other programs meanwhile")
+        ];
+        for (const line of lines) {
+            const item = this._textItem(line, "dialog-information-symbolic", "avincecam-note");
+            item.actor.set_style("color: " + color + ";");
+            sub.menu.addMenuItem(item);
+        }
+        this.menu.addMenuItem(sub);
     }
 
     _addCameraItem(cam) {

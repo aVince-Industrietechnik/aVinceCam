@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 10:43+0200\n"
+"POT-Creation-Date: 2026-10-20 11:41+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -31,7 +31,7 @@ msgstr ""
 msgid "Selected: %s"
 msgstr ""
 
-#: applet.js:435 applet.js:528
+#: applet.js:435 applet.js:534
 #, javascript-format
 msgid "Camera in use: %s"
 msgstr ""
@@ -46,80 +46,102 @@ msgstr ""
 msgid "Preview running: %s"
 msgstr ""
 
-#: applet.js:522
+#: applet.js:528
 msgid "Cameras"
 msgstr ""
 
-#: applet.js:532
+#: applet.js:538
 msgid "Looking for cameras …"
 msgstr ""
 
-#: applet.js:534 presenter.js:205
+#: applet.js:540 presenter.js:205
 msgid "No camera found."
 msgstr ""
 
-#: applet.js:553
+#: applet.js:559
 msgid "Search again"
 msgstr ""
 
-#: applet.js:562
+#: applet.js:568
 msgid "Copy camera report"
 msgstr ""
 
-#: applet.js:624
+#: applet.js:630
 msgid "Please wait …"
 msgstr ""
 
-#: applet.js:633
+#: applet.js:639
 #, javascript-format
 msgid "Stop virtual camera (%s)"
 msgstr ""
 
-#: applet.js:633
+#: applet.js:639
 msgid "Stop virtual camera"
 msgstr ""
 
-#: applet.js:634
+#: applet.js:640
 #, javascript-format
 msgid "Stop preview (%s)"
 msgstr ""
 
-#: applet.js:634
+#: applet.js:640
 msgid "Stop preview"
 msgstr ""
 
-#: applet.js:645 presenter.js:52
+#: applet.js:653 presenter.js:52
 msgid "Preview locked: camera has a focus motor"
 msgstr ""
 
-#: applet.js:650
+#: applet.js:658
 #, javascript-format
 msgid "Start preview (%s)"
 msgstr ""
 
-#: applet.js:659
+#: applet.js:667
 #, javascript-format
 msgid "Offer as virtual camera (%s)"
 msgstr ""
 
-#: applet.js:679
+#: applet.js:680
+msgid "Using the virtual camera"
+msgstr ""
+
+#: applet.js:683
+#, javascript-format
+msgid "Choose \"aVinceCam: %s\" in the browser or call"
+msgstr ""
+
+#: applet.js:685
+msgid ""
+"Firefox: about:config, media.webrtc.camera.allow-pipewire = true, restart"
+msgstr ""
+
+#: applet.js:686
+msgid "Chrome: chrome://flags, enable PipeWire camera support, restart"
+msgstr ""
+
+#: applet.js:687
+msgid "USB cameras cannot be used by other programs meanwhile"
+msgstr ""
+
+#: applet.js:710
 #, javascript-format
 msgid "Details: %s"
 msgstr ""
 
-#: applet.js:684
+#: applet.js:715
 msgid "Querying details …"
 msgstr ""
 
-#: applet.js:689
+#: applet.js:720
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr ""
 
-#: applet.js:690
+#: applet.js:721
 msgid "Query sizes and frame rates"
 msgstr ""
 
-#: applet.js:706
+#: applet.js:737
 #, javascript-format
 msgid "Notes (%d)"
 msgstr ""
