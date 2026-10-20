@@ -11,3 +11,5 @@ are removed.
 | `info-2.txt` | `cam -c 2 -I -p --list-controls` |
 
 Used by the parser tests and by `probe --tool-output`. No device is touched.
+A recorded `cam -c ID` (camera given by its libcamera id) is answered from
+the `info-N.txt` file whose `Using camera ID` line names that id.
