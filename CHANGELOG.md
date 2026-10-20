@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.1 – 2026-10-20
 
 - Photos of USB cameras: the core streams about a second from the webcam's
   own video node (MJPEG, else YUYV) and saves the last frame as JPEG – with
