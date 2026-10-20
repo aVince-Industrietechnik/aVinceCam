@@ -19,7 +19,7 @@ import sys
 import time
 from fractions import Fraction
 
-from . import gstisolation
+from . import gstisolation, tuning
 
 # The core launcher; the virtual camera runs as its own core process.
 LAUNCHER = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
@@ -219,17 +219,27 @@ def viewer_command(camera, viewer, size, uvc_formats=None):
 def viewer_environment(camera, viewer, runtime_dir):
     """Extra environment for the viewer, or None.
 
-    The GStreamer preview of a libcamera camera runs with a private plugin
+    libcamera cameras with a lens motor get a tuning file without autofocus
+    (tuning, D16) – for qcam, GStreamer and the virtual camera alike. The
+    GStreamer preview of a libcamera camera also runs with a private plugin
     set. The GStreamer fallback for USB cameras needs v4l2src, the very
     plugin that opens every node; it cannot be isolated (VLC is preferred).
     """
-    if viewer != "gst" or camera.api != "libcamera":
+    if camera.api != "libcamera":
         return None
+    env = {}
     try:
-        return gstisolation.isolated_environment(runtime_dir, "gst-preview", GST_PREVIEW_PLUGINS,
-                                                 need_one_of=GST_PREVIEW_SINKS)
-    except gstisolation.IsolationError as exc:
-        raise PreviewError(exc.code, exc.message, exc.detail) from exc
+        env.update(tuning.environment(runtime_dir, [camera]))
+    except OSError as exc:
+        raise PreviewError("tuning-failed", "the tuning file could not be written",
+                           str(exc)) from exc
+    if viewer == "gst":
+        try:
+            env.update(gstisolation.isolated_environment(
+                runtime_dir, "gst-preview", GST_PREVIEW_PLUGINS, need_one_of=GST_PREVIEW_SINKS))
+        except gstisolation.IsolationError as exc:
+            raise PreviewError(exc.code, exc.message, exc.detail) from exc
+    return env or None
 
 
 def check_tool(argv):
