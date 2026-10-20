@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.2 – 2026-10-20
 
 - Choosing a camera in the menu keeps the menu open, so its preview and photo
   entries can be used right away
