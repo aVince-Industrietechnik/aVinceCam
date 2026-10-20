@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """libcamera tuning files without the autofocus algorithm (decision D16).
 
 On Intel IPU3, libcamera's autofocus algorithm sweeps the lens on every

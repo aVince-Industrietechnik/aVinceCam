@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Read-only V4L2 queries for USB video class (UVC) cameras.
 
 Only enumeration ioctls are used: VIDIOC_QUERYCAP, VIDIOC_ENUM_FMT,

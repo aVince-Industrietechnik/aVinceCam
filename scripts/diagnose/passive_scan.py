@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """List camera-related device nodes from sysfs only.
 
 This script never opens anything below /dev. It reads sysfs attributes and

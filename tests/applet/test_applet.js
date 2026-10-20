@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Angelo Vincenti
 /*
  * Offline tests for the applet modules, run with plain cjs (no Cinnamon):
  *   cjs tests/applet/test_applet.js <repo>

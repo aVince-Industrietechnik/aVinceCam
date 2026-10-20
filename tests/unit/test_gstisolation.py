@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """GStreamer plugin isolation – stand-in plugin files, GStreamer is never loaded."""
 
 import os

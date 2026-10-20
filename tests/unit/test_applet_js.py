@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Run the cjs-based applet tests and a syntax check of all applet files."""
 
 import os

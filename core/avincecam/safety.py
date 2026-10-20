@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Central safety rules of aVinceCam.
 
 Every module that is about to open a device node asks this module first.

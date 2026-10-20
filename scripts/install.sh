@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 # Install aVinceCam for the current user (no root rights, no autostart).
 #
 #   scripts/install.sh

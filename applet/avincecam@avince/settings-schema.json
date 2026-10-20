@@ -42,6 +42,22 @@
             "32 px": 32
         }
     },
+    "active-indicator": {
+        "type": "combobox",
+        "default": "rotate",
+        "description": "Panel icon while a preview runs",
+        "options": {
+            "Turn slowly": "rotate",
+            "Pulse with a red dot": "pulse",
+            "No change": "off"
+        }
+    },
+    "usage-indicator": {
+        "type": "switch",
+        "default": true,
+        "description": "Show when a program uses a camera",
+        "tooltip": "Red dot on the panel icon and a line in the menu. aVinceCam only watches the camera device files; it does not open them."
+    },
     "head-preview": {
         "type": "header",
         "description": "Preview"
@@ -79,21 +95,9 @@
         "description": "Folder for photos",
         "tooltip": "Empty: the pictures folder, subfolder aVinceCam."
     },
-    "active-indicator": {
-        "type": "combobox",
-        "default": "rotate",
-        "description": "Panel icon while a preview runs",
-        "options": {
-            "Turn slowly": "rotate",
-            "Pulse with a red dot": "pulse",
-            "No change": "off"
-        }
-    },
-    "usage-indicator": {
-        "type": "switch",
-        "default": true,
-        "description": "Show when a program uses a camera",
-        "tooltip": "Red dot on the panel icon and a line in the menu. aVinceCam only watches the camera device files; it does not open them."
+    "head-lens": {
+        "type": "header",
+        "description": "Cameras with a focus motor"
     },
     "allow-lens-cameras": {
         "type": "switch",

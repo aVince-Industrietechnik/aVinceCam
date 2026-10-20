@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Angelo Vincenti
 /*
  * aVinceCam – Camera Control for Linux
  * Cinnamon applet.
@@ -327,7 +329,10 @@ class AVinceCamApplet extends Applet.IconApplet {
         let proc = null;
         const args = ["preview", cameraId, "--viewer",
                       viewer || (this.previewViewer === "gst" ? "gst" : "qcam")];
-        args.push(...this._lensArgs(this._cameraById(cameraId)));
+        const camera = this._cameraById(cameraId);
+        args.push(...this._lensArgs(camera));
+        if (viewer === "virtual" && camera)
+            args.push("--name", Presenter.cameraTitle(camera, _));
         proc = this.client.startPreview(
             args,
             PREVIEW_START_TIMEOUT_SECONDS,
@@ -779,7 +784,7 @@ class AVinceCamApplet extends Applet.IconApplet {
         const color = Presenter.noteColor(this._menuTextColor());
         const lines = [
             _("Choose \"aVinceCam: %s\" in the browser or call")
-                .replace("%s", cam ? cam.label : "…"),
+                .replace("%s", cam ? Presenter.cameraTitle(cam, _) : "…"),
             _("Firefox: about:config, media.webrtc.camera.allow-pipewire = true, restart"),
             _("Chrome: chrome://flags, enable PipeWire camera support, restart"),
             _("USB cameras cannot be used by other programs meanwhile")

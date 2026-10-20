@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Preview start/stop with a fake viewer – no camera is touched.
 
 The core replaces itself with the viewer (exec), so these tests run the core
@@ -276,6 +278,19 @@ class UnitTest(unittest.TestCase):
         no_id = Camera(id=FRONT, label="x", api="libcamera")
         with self.assertRaises(preview.PreviewError):
             preview.viewer_command(no_id, "qcam", (1280, 720))
+
+    def test_virtual_camera_name(self):
+        cam = Camera(id=FRONT, label="Front camera", api="libcamera",
+                     backend_id=r"\_SB_.PCI0.LNK0")
+
+        def name(given):
+            argv = preview.viewer_command(cam, "virtual", (1280, 720), name=given)
+            return argv[argv.index("--name") + 1]
+        self.assertEqual(name(None), "Front camera")
+        self.assertEqual(name("Frontkamera"), "Frontkamera")
+        self.assertEqual(name("  two\nlines  "), "two lines")
+        self.assertEqual(name("   "), "Front camera")
+        self.assertEqual(len(name("x" * 200)), 64)
 
 
 class UvcModeTest(unittest.TestCase):

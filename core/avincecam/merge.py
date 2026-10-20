@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Merge libcamera details into the cameras found in sysfs.
 
 A libcamera camera is matched to a sysfs sensor by sensor model and position.

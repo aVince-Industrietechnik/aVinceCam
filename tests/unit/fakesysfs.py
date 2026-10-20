@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Build fake sysfs trees for tests (no real hardware involved).
 
 The layout follows real sysfs: device directories below devices/, driver and

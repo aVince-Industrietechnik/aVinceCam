@@ -2,13 +2,19 @@
 
 - **Image quality** depends on libcamera tuning files for the sensor. Without
   one, libcamera uses an uncalibrated default and pictures may look soft or
-  have wrong colours. aVinceCam reports this but cannot fix it.
+  have wrong colours (colour cast, dark corners). aVinceCam reports this but
+  cannot fix it. libcamera 0.2.0 leaves the noise reduction of the Intel IPU3
+  on the kernel defaults, which smooths fine detail in low light.
+- **Fixed-focus camera modules** of notebooks are often soft at full size even
+  in the raw sensor data; about 1.3–2 megapixels carry real detail. Photos
+  default to 1600 × 1200 for that reason.
 - **Autofocus** is not controlled by version 1. On some machines the lens
   motor is not powered correctly; aVinceCam never addresses lens motors.
 - **Cameras with a focus motor:** libcamera drives the motor automatically
   during a preview. aVinceCam locks their preview by default (see D11) and,
   when allowed, runs them without libcamera's autofocus (D16): the focus then
-  stays fixed. The setting "Use libcamera's autofocus" switches libcamera's
+  stays where the lens rests – often at a distance, so close objects (documents)
+  are blurred. The setting "Use libcamera's autofocus" switches libcamera's
   autofocus back on – only for machines whose lens motor works.
 - **Intel IPU3** can run only one camera pipeline at a time. aVinceCam allows
   one preview at a time.

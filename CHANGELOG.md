@@ -1,53 +1,48 @@
 # Changelog
 
-## Unreleased
+## 0.9.0 – 2026-10-20
 
-- Setting "Use libcamera's autofocus" for cameras with a focus motor (default
-  off: they run with a fixed focus, D16); core option `--autofocus` for
-  `preview` and `snapshot`
+First public version.
 
+### Cameras and details
+- Camera detection from sysfs only: USB cameras (UVC) and sensors of complex
+  pipelines (Intel IPU3/IPU6, MIPI), front/back position, lens motor and
+  missing tuning hints; nothing is opened when the menu opens
+- Details on request: libcamera cameras through `cam` (sizes, frame rate
+  limits, sensor size, libcamera id; probed by id), USB cameras through
+  read-only V4L2 enumeration ioctls
+- Camera report to the clipboard
+
+### Preview, photo, virtual camera
+- Preview with `qcam` or GStreamer (libcamera) and VLC or GStreamer (USB), with
+  lock file, busy check and own-process-only stop; the applet removes the lock
+  of a preview whose window was closed
+- GStreamer pipelines for libcamera cameras run with a private plugin set, so
+  GStreamer's video4linux2 plugin never opens every camera node
+- Photos of libcamera cameras: about 30 frames until the exposure has settled,
+  the last one saved as PNG (default 1600 × 1200), folder and size settings
+- Virtual camera: a libcamera camera offered through PipeWire for browsers and
+  web video calls, with hints for Firefox and Chrome
+- Camera in use: inotify on the device nodes plus `/proc`, red dot on the panel
+  icon and a line in the menu; aVinceCam's own use is recognised
+
+### Cameras with a focus motor
+- Locked by default (setting to allow)
+- When allowed they run without libcamera's autofocus: a copy of the tuning
+  file without the `Af` algorithm is used only by the programs aVinceCam starts
+- Setting "Use libcamera's autofocus" for machines whose focus motor works;
+  core option `--autofocus` for `preview` and `snapshot`
+
+### Applet
+- Colourful aperture icon (default) or single-colour panel icon, icon size
+  setting; the icon turns slowly or pulses while the own preview runs
+- Notes in the menu in light green; English and German texts
+
+### Installation and development
 - `scripts/install.sh` / `scripts/uninstall.sh`: user-level installation with
   backup and an exact list of installed paths; `--purge` removes the settings
-- The applet removes the lock of a preview whose window was closed
-  (`stop --cleanup-only`, never stops a process)
-- Tests wait for real readiness instead of fixed sleeps; every test run
-  saves its full output to `~/.cache/avincecam-tests/last-run.log`
-
-- Notes in the menu are shown in light green instead of blue (a darker
-  green on light themes)
-
-- Panel icon turns slowly (or pulses with a red dot) while the own preview
-  runs; setting "Panel icon while a preview runs"
-
-- Project skeleton, architecture notes and read-only diagnostic tools
-- Core package skeleton with command line (`version`; other commands report
-  "not implemented")
-- Central safety rules: sub-devices and lens motors are never opened, V4L2
-  queries only on UVC nodes – with unit tests on simulated sysfs trees
-- Test runner, public-content check, decision log, JSON interface description
-- `scan`: camera detection from sysfs only – UVC cameras and sensors of
-  complex pipelines, front/back position, lens motor and missing tuning
-  hints; simulated sysfs trees for tests
-- Diagnose tool: media device driver is now read from the owning device
-- `probe`: details of libcamera cameras from `cam` (sizes, frame rate limits,
-  sensor size, libcamera id), matched to the sysfs cameras by model and
-  position; stops calling `cam` as soon as all requested cameras are found
-- Parser tests against recorded `cam` output of libcamera 0.2.0
-- `AVINCECAM_NO_HARDWARE=1` blocks every camera tool call (set by the tests)
-- Cinnamon applet: camera list with selection, details (queried only on
-  request), notes, camera report to the clipboard; asynchronous core calls
-  with time limits; no preview yet
-- Fake core for applet tests and offline tests of the applet modules (cjs)
-- `scripts/dev-link.sh` to link the applet for development
-- Colourful aperture icon (default) and single-colour panel icon, icon size
-  setting; `scripts/build-icons.py` builds them from `assets/icons`
-- German translation; test that every applet text is translated
-- Preview: `preview`, `stop`, `status` with lock file, busy check and
-  own-process-only stop; qcam or GStreamer; libcamera id from sysfs;
-  applet entries to start and stop the preview, preview program setting
-- Preview of cameras with a focus motor locked by default (setting to allow)
-- USB cameras: formats, sizes and frame rates via read-only V4L2 enumeration
-  ioctls (checked against v4l2-ctl: identical); the preview picks MJPG at the
-  requested size with the highest frame rate, else the fastest YUYV mode
-- USB camera preview with VLC (only the camera's node is opened), GStreamer
-  as fallback; `scripts/diagnose/watch_opens.py` shows who opens camera nodes
+- Automatic tests without hardware (simulated sysfs trees, recorded `cam`
+  output, fake core and fake viewers); `AVINCECAM_NO_HARDWARE=1` blocks every
+  camera tool call; full output of each run in `~/.cache/avincecam-tests/`
+- `scripts/check-public.py` checks that the repository contains nothing
+  private; read-only diagnostic helpers in `scripts/diagnose/`

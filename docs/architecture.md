@@ -10,8 +10,9 @@
 
 **Core** (`core/`, Python 3)
 - a short-lived command line program, started on demand, answers in JSON
-- commands: `scan`, `probe`, `status`, `preview <id>`, `stop`, `diagnose`,
-  `version` – see [json-interface.md](json-interface.md)
+- commands: `scan`, `probe`, `status`, `preview <id>` (also as virtual camera),
+  `stop`, `snapshot <id>`, `watch`, `diagnose`, `version` – see
+  [json-interface.md](json-interface.md)
 - no daemon, no D-Bus service, no root rights
 
 Decisions and their reasons: [decisions.md](decisions.md).
@@ -21,19 +22,21 @@ Decisions and their reasons: [decisions.md](decisions.md).
 | Source | Device access | Used for |
 |---|---|---|
 | sysfs (`/sys/class/video4linux`, `/sys/bus/media`) | none | node list, drivers, USB IDs, camera type |
-| libcamera (via GStreamer device monitor or `cam`) | opens devices, no streaming | complex cameras (IPU3, IPU6, MIPI) |
+| libcamera (via `cam`, D9) | opens devices, no streaming | complex cameras (IPU3, IPU6, MIPI) |
 | V4L2 ioctls | opens the node | USB webcams (UVC) |
 
 Opening the applet menu uses sysfs only. libcamera is called on demand,
 because enumerating may power up sensors and lens motors.
 
-Which libcamera access becomes the main path is decided by measurements in the
-diagnostic phase (see `scripts/diagnose/`).
+Camera use is watched with inotify on the device nodes and `/proc` (D13); no
+device is opened for that.
 
 ## Safety rules built into the design
 
 - **Lens/VCM sub-devices** (focus motors such as `dw9714`) are never opened.
   On some machines merely opening them triggers a failing power-up.
+- **Cameras with a focus motor** are locked by default and, when allowed, run
+  without libcamera's autofocus unless the user switches it on (D11, D16).
 - **One preview at a time** in version 1. A lock file under `$XDG_RUNTIME_DIR/avincecam/`
   stores PID and process start time.
 - **Only own processes are stopped.** PID and start time must match; nothing is killed by name.
@@ -49,6 +52,11 @@ core/avincecam/          Python package
   model.py               data classes
   safety.py              safety rules (never open sub-devices / lens motors)
   sysfs.py libcamera.py v4l2.py merge.py busy.py preview.py
+  snapshot.py            photos (cam, last of ~30 frames, PNG)
+  virtualcam.py          virtual camera through PipeWire
+  watch.py               camera use (inotify, /proc)
+  gstisolation.py        private GStreamer plugin set (D12)
+  tuning.py              tuning files without autofocus (D16)
 applet/avincecam@avince/ Cinnamon applet
   applet.js              menu and panel icon
   coreClient.js          asynchronous core calls with time limit
@@ -57,6 +65,7 @@ assets/                  icon sources
 scripts/diagnose/        read-only diagnostic helpers for development
 scripts/check-public.py  checks that the repository contains nothing private
 scripts/dev-link.sh      link the applet into Cinnamon for development
+scripts/install.sh       install for the current user (uninstall.sh removes it)
 tests/unit/              automatic tests, no hardware needed
 tests/applet/            cjs tests of the applet modules
 tests/fake-core/         stand-in core for applet tests (simulated cameras)

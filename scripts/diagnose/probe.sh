@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 # Run ONE diagnostic command and record what it did to the kernel log.
 #
 # This wrapper does not decide what is safe. Every command run through it

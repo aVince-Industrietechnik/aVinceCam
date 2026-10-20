@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Detect whether camera device nodes are held open by a process.
 
 Reads only /proc/<pid>/fd links. Processes of other users are not readable

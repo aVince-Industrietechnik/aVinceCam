@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Still photo of a libcamera camera, saved as PNG (decision D13).
 
 `cam` streams about 30 frames so that exposure and the ImgU's temporal noise

@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Copy the icons from assets/icons into the applet folder.
 
 - assets/icons/avincecam.svg          -> applet/<uuid>/icon.png (128 px,

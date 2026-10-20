@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Start and stop the own preview.
 
 Rules (see docs/decisions.md):
@@ -170,11 +172,19 @@ def gst_launch_value(text):
     return '"' + text.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
 
-def viewer_command(camera, viewer, size, uvc_formats=None):
+def virtual_name(name, camera):
+    """Name of the virtual camera: the given one (one line, at most 64
+    characters) or the camera's label."""
+    name = " ".join((name or "").split())[:64]
+    return name or camera.label
+
+
+def viewer_command(camera, viewer, size, uvc_formats=None, name=None):
     """Argument list of the preview program, or raise PreviewError.
 
     viewer "virtual" offers the camera to other programs through PipeWire
-    instead of showing it (see virtualcam.py).
+    instead of showing it (see virtualcam.py); name is what other programs
+    show after "aVinceCam: " (the applet passes its translated title).
     """
     if viewer == "virtual":
         if camera.api != "libcamera":
@@ -184,7 +194,7 @@ def viewer_command(camera, viewer, size, uvc_formats=None):
             raise PreviewError("no-camera-id", "the libcamera id of this camera is unknown")
         width, height = size
         return [sys.executable, "-I", LAUNCHER, "virtual-camera", camera.backend_id,
-                "--size", f"{width}x{height}", "--name", camera.label]
+                "--size", f"{width}x{height}", "--name", virtual_name(name, camera)]
     if camera.api == "libcamera":
         if not camera.backend_id:
             raise PreviewError("no-camera-id", "the libcamera id of this camera is unknown")

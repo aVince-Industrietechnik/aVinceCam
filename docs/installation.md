@@ -38,7 +38,9 @@ installations stay in `~/.local/share/avincecam/backups/`.
 ## Requirements
 
 - Cinnamon 6.x, Python 3
-- libcamera cameras: `libcamera-tools` (`cam`, `qcam`)
+- libcamera cameras: `libcamera-tools` (`cam`, `qcam`); GStreamer preview:
+  `gstreamer1.0-libcamera`; virtual camera: additionally
+  `gstreamer1.0-pipewire`, `python3-gi`, `gir1.2-gstreamer-1.0`
 - USB cameras: `vlc` for the preview (recommended); otherwise
   `gstreamer1.0-tools` and `gstreamer1.0-plugins-good` (see D12)
 

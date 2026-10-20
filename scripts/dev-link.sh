@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 # Development only: make the applet from this repository known to Cinnamon
 # by a symbolic link, or remove that link again.
 #

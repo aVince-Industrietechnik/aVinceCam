@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Still photo: NV12 -> PNG, frame handling and the snapshot command with a fake cam."""
 
 import json

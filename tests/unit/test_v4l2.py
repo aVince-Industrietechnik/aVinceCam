@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """V4L2 queries against a simulated UVC camera – no device is opened."""
 
 import errno

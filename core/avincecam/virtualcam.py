@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Offer a libcamera camera to other programs as a PipeWire camera.
 
 Browsers and video calls (Firefox, Chrome, Teams and Zoom on the web) find

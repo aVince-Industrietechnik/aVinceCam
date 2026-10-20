@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Check that the repository contains nothing private.
 
 The repository is meant to become public. Machine-specific paths, backup
