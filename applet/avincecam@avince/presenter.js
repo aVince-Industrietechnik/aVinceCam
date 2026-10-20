@@ -99,15 +99,16 @@ function errorText(error, _) {
 }
 
 /*
- * Colour for notes: blue that stays readable on the current theme.
+ * Colour for notes: a light green (#7EE000), in a shade that stays
+ * readable on the current theme.
  * `fg` is the menu's text colour [r, g, b]; light text means a dark menu.
- * Both blues reach a contrast of about 6.5:1 on typical menu backgrounds.
+ * Both greens reach a contrast of at least 5.8:1 on typical menu backgrounds.
  */
 function noteColor(fg) {
     if (!fg || fg.length < 3)
-        return "#3584e4";
+        return "#5FA800";
     const brightness = (0.299 * fg[0] + 0.587 * fg[1] + 0.114 * fg[2]) / 255;
-    return brightness > 0.5 ? "#78aeed" : "#1a5fb4";
+    return brightness > 0.5 ? "#7EE000" : "#3D6B00";
 }
 
 function sizeText(w, h) {

@@ -26,5 +26,7 @@ if os.environ.get("FAKE_VIEWER_IGNORE_TERM") == "1":
     signal.signal(signal.SIGTERM, signal.SIG_IGN)
 else:
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+# Tests wait for this line instead of sleeping a fixed time.
+print("fake viewer ready", flush=True)
 
 time.sleep(float(os.environ.get("FAKE_VIEWER_SECONDS", "60")))

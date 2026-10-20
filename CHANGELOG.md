@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `scripts/install.sh` / `scripts/uninstall.sh`: user-level installation with
+  backup and an exact list of installed paths; `--purge` removes the settings
+- The applet removes the lock of a preview whose window was closed
+  (`stop --cleanup-only`, never stops a process)
+- Tests wait for real readiness instead of fixed sleeps; every test run
+  saves its full output to `~/.cache/avincecam-tests/last-run.log`
+
+- Notes in the menu are shown in light green instead of blue (a darker
+  green on light themes)
+
 - Panel icon turns slowly (or pulses with a red dot) while the own preview
   runs; setting "Panel icon while a preview runs"
 

@@ -305,6 +305,10 @@ class AVinceCamApplet extends Applet.IconApplet {
                 // A viewer that fails right away usually could not open the camera.
                 if (!signaled && exitStatus !== 0 && seconds < 15)
                     this._reportViewerFailure(log);
+                // The viewer ended on its own (window closed): remove its lock.
+                // --cleanup-only never stops a process, so a preview started in
+                // the meantime is safe.
+                this.client.run(["stop", "--cleanup-only"], STOP_TIMEOUT_SECONDS, () => {});
                 this._buildMenu();
                 this._updateTooltip();
             });

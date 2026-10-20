@@ -97,9 +97,9 @@ function fakeJson(scenario, args) {
 })();
 
 (function testNoteColor() {
-    check("dark theme gets light blue", Presenter.noteColor([225, 225, 225]) === "#78aeed");
-    check("light theme gets dark blue", Presenter.noteColor([48, 48, 48]) === "#1a5fb4");
-    check("unknown theme gets middle blue", Presenter.noteColor(null) === "#3584e4");
+    check("dark theme gets light green", Presenter.noteColor([225, 225, 225]) === "#7EE000");
+    check("light theme gets dark green", Presenter.noteColor([48, 48, 48]) === "#3D6B00");
+    check("unknown theme gets middle green", Presenter.noteColor(null) === "#5FA800");
 })();
 
 (function testParseCoreResult() {

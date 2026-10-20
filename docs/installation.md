@@ -1,16 +1,46 @@
 # Installation and removal
 
-Not available yet. Planned for a later development phase:
+Everything happens in your home folder: no root rights, no autostart
+entries, no system packages.
 
-- `scripts/install.sh` – user level only: copies the applet (including the
-  core) to `~/.local/share/cinnamon/applets/avincecam@avince/`. No root rights,
-  no autostart entries, no system packages. Existing files are backed up
-  first, and every installed file is recorded in a list.
-- `scripts/uninstall.sh` – removes exactly the files in that list, the applet
-  settings in `~/.config/cinnamon/spices/avincecam@avince/` and the runtime
-  directory. Remove the applet from the panel before running it.
+## Install
 
-The applet is added to the panel by the user via *System Settings → Applets*.
+```
+scripts/install.sh
+```
+
+- copies the applet together with its core to
+  `~/.local/share/cinnamon/applets/avincecam@avince/`
+- installs the translations to `~/.local/share/locale/<lang>/LC_MESSAGES/`
+- backs up anything already there to `~/.local/share/avincecam/backups/<time>/`
+- lists every installed path in `~/.local/share/avincecam/installed.txt`
+- refuses to replace a development link (`scripts/dev-link.sh unlink` first)
+
+Then add the applet via *System Settings → Applets*. After an update,
+restart Cinnamon (Alt+F2, r, Enter on X11) – Cinnamon keeps the old applet
+code in memory until then.
+
+## Remove
+
+1. Remove the applet from the panel: right-click on its icon → *Remove*.
+2. Run
+
+   ```
+   scripts/uninstall.sh            # keeps your applet settings
+   scripts/uninstall.sh --purge    # also removes the settings
+   ```
+
+`uninstall.sh` stops a running aVinceCam preview, removes exactly the paths
+listed in `installed.txt` (never anything outside your home folder) and the
+runtime folder `$XDG_RUNTIME_DIR/avincecam`. Backups of earlier
+installations stay in `~/.local/share/avincecam/backups/`.
+
+## Requirements
+
+- Cinnamon 6.x, Python 3
+- libcamera cameras: `libcamera-tools` (`cam`, `qcam`)
+- USB cameras: `vlc` for the preview (recommended); otherwise
+  `gstreamer1.0-tools` and `gstreamer1.0-plugins-good` (see D12)
 
 ## Translations
 
