@@ -45,6 +45,7 @@ SCENARIOS = {
 
 
 FAKE_VIEWER = os.path.join(REPO, "tests", "fake-viewer", "avincecam-fake-viewer")
+FAKE_CAM = os.path.join(REPO, "tests", "fake-cam", "avincecam-fake-cam")
 
 
 def fake_runtime_dir():
@@ -69,6 +70,17 @@ def run_real_core(build, args):
         return core_main(args + ["--sysfs-root", root] + runtime)
     if command in ("stop", "status"):
         return core_main(args + runtime)
+    if command == "snapshot":
+        # Fake cam, fake /dev; photos go to the fake runtime folder, never to ~/Pictures.
+        os.environ["AVINCECAM_FAKE_CAM"] = FAKE_CAM
+        with tempfile.TemporaryDirectory() as tmp:
+            root = os.path.join(tmp, "sys")
+            os.makedirs(root)
+            build(root)
+            os.makedirs(os.path.join(tmp, "dev"))
+            extra = ["--sysfs-root", root, "--dev-root", tmp,
+                     "--out", os.path.join(fake_runtime_dir(), "photos")]
+            return core_main(args + extra + runtime)
     if command == "watch":
         # Watches plain files in a temporary folder, never the real /dev.
         with tempfile.TemporaryDirectory() as tmp:

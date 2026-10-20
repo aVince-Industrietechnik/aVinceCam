@@ -7,11 +7,13 @@ implemented yet say so explicitly instead of returning empty results.
 import argparse
 import json
 import os
+import shutil
+import subprocess
 import sys
 import time
 
 from . import SCHEMA_VERSION, __version__
-from . import busy, libcamera, merge, preview, safety, sysfs, v4l2, virtualcam, watch
+from . import busy, libcamera, merge, preview, safety, snapshot, sysfs, v4l2, virtualcam, watch
 from .model import CoreError, Format, to_dict
 
 EXIT_OK = 0
@@ -19,8 +21,8 @@ EXIT_ERROR = 1
 EXIT_USAGE = 2
 EXIT_NOT_IMPLEMENTED = 3
 
-COMMANDS = ("scan", "probe", "status", "preview", "stop", "watch", "virtual-camera",
-            "diagnose", "version")
+COMMANDS = ("scan", "probe", "status", "preview", "stop", "snapshot", "watch",
+            "virtual-camera", "diagnose", "version")
 
 
 def emit(payload):
@@ -62,6 +64,15 @@ def build_parser():
                          help="also preview cameras with a focus motor "
                               "(libcamera then drives the motor automatically)")
     preview.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
+    snap = sub.add_parser("snapshot", help="take a still photo (streams ~1 s, saves a PNG)")
+    snap.add_argument("camera")
+    snap.add_argument("--size", default="%dx%d" % snapshot.DEFAULT_SIZE)
+    snap.add_argument("--frames", type=int, default=snapshot.DEFAULT_FRAMES)
+    snap.add_argument("--out", help="folder for the photo (default: pictures folder/aVinceCam)")
+    snap.add_argument("--allow-lens", action="store_true",
+                      help="also cameras with a focus motor (libcamera drives it while streaming)")
+    snap.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
+    snap.add_argument("--dev-root", default="/", help=argparse.SUPPRESS)
     stop = sub.add_parser("stop", help="stop the own preview")
     stop.add_argument("--cleanup-only", action="store_true",
                       help="only remove the lock of a preview that has already ended; "
@@ -77,7 +88,7 @@ def build_parser():
     watch_cmd.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
     watch_cmd.add_argument("--dev-root", default="/", help=argparse.SUPPRESS)
     # Test hooks: simulated /proc, /dev prefix and runtime directory.
-    for command in (scan, preview, stop, status, watch_cmd):
+    for command in (scan, preview, stop, status, watch_cmd, snap):
         command.add_argument("--runtime-dir", help=argparse.SUPPRESS)
         command.add_argument("--proc-root", default="/proc", help=argparse.SUPPRESS)
     preview.add_argument("--dev-root", default="/", help=argparse.SUPPRESS)
@@ -107,6 +118,8 @@ def main(argv=None):
         return cmd_stop(args)
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "snapshot":
+        return cmd_snapshot(args)
     if args.command == "watch":
         return cmd_watch(args)
     if args.command == "virtual-camera":
@@ -250,6 +263,102 @@ def cmd_stop(args):
 
 def cmd_status(args):
     emit({"command": "status", "preview": _preview_status(args), "errors": []})
+    return EXIT_OK
+
+
+SNAPSHOT_CAM_TIMEOUT = 30
+
+
+def cmd_snapshot(args):
+    """Stream ~30 frames with cam, keep the last one, save it as PNG.
+
+    Same checks as a preview (lens lock, lock file, busy pipeline). While it
+    runs, the lock file names this process with viewer "snapshot", so the
+    applet and the watch see that the camera is in use by aVinceCam.
+    """
+    started = time.monotonic()
+    cameras, _ = sysfs.scan(args.sysfs_root, sysfs.DEFAULT_IPA_DIRS)
+    camera = next((c for c in cameras if c.id == args.camera), None)
+    if camera is None:
+        return _error("snapshot", "unknown-camera", f"no camera with id {args.camera}")
+    if camera.api != "libcamera" or not camera.backend_id:
+        return _error("snapshot", "snapshot-unsupported",
+                      "photos are available for libcamera cameras only")
+    if camera.has_lens and not args.allow_lens:
+        return _error("snapshot", "lens-blocked",
+                      "photos with cameras with a focus motor are locked "
+                      "(libcamera would drive the motor automatically)")
+    size = _parse_size(args.size)
+    if size is None or not 1 <= args.frames <= 120:
+        return _error("snapshot", "invalid-argument", "invalid size or number of frames")
+
+    fake = os.environ.get("AVINCECAM_FAKE_CAM")
+    tool = fake or shutil.which(libcamera.TOOL)
+    if not fake and os.environ.get("AVINCECAM_NO_HARDWARE") == "1":
+        return _error("snapshot", "hardware-blocked",
+                      "hardware access is switched off (AVINCECAM_NO_HARDWARE=1)")
+    if not tool:
+        return _error("snapshot", "libcamera-tools-missing",
+                      "the libcamera tool 'cam' is not installed", "libcamera-tools")
+
+    try:
+        directory = _runtime_dir(args)
+    except preview.PreviewError as exc:
+        return _error("snapshot", exc.code, exc.message)
+    lock = preview.read_lock(directory)
+    if preview.lock_alive(lock, args.proc_root):
+        return _error("snapshot", "preview-running",
+                      "a preview is running – stop it first", detail=lock.get("camera"))
+    preview.remove_lock(directory)  # stale or missing
+
+    devices = _pipeline_nodes(camera, args.sysfs_root)
+    if args.dev_root != "/":
+        devices = [os.path.join(args.dev_root, d.lstrip("/")) for d in devices]
+    holding = busy.holders(devices, args.proc_root, exclude_pids=(os.getpid(),))
+    if holding:
+        names = ", ".join(sorted({h["name"] or str(h["pid"]) for h in holding}))
+        return _error("snapshot", "camera-busy", "the camera is in use by another program",
+                      detail=names, holders=holding)
+
+    out_dir = args.out or os.path.join(snapshot.pictures_dir(), snapshot.SUBFOLDER)
+    frame_dir = os.path.join(directory, "snapshot")
+    pid = os.getpid()
+    preview.write_lock(directory, {"pid": pid, "start_time": preview.start_time(pid),
+                                   "camera": camera.id, "viewer": "snapshot",
+                                   "command": [tool], "started": int(time.time())})
+    try:
+        shutil.rmtree(frame_dir, ignore_errors=True)
+        os.makedirs(frame_dir, mode=0o700)
+        argv = [tool] + snapshot.cam_args(camera.backend_id, size, args.frames, frame_dir)
+        try:
+            done = subprocess.run(argv, capture_output=True, text=True,
+                                  timeout=SNAPSHOT_CAM_TIMEOUT, stdin=subprocess.DEVNULL)
+        except subprocess.TimeoutExpired:
+            return _error("snapshot", "cam-timeout", "cam did not finish in time",
+                          f"{SNAPSHOT_CAM_TIMEOUT} s")
+        frame = snapshot.keep_last_frame(frame_dir)
+        if done.returncode != 0:
+            tail = (done.stderr or "").strip().splitlines()[-1:] or [""]
+            return _error("snapshot", "cam-failed", "cam could not take the photo", tail[0])
+        if frame is None:
+            return _error("snapshot", "no-frame", "cam delivered no frame")
+        try:
+            os.makedirs(out_dir, exist_ok=True)
+            path = snapshot.photo_path(out_dir)
+            with open(frame, "rb") as handle:
+                data = handle.read()
+            snapshot.write_png(path, size[0], size[1], snapshot.nv12_rows(data, *size))
+        except snapshot.SnapshotError as exc:
+            return _error("snapshot", exc.code, exc.message, exc.detail)
+        except OSError as exc:
+            return _error("snapshot", "write-failed", "the photo could not be saved", str(exc))
+    finally:
+        shutil.rmtree(frame_dir, ignore_errors=True)
+        preview.remove_lock(directory)
+
+    emit({"command": "snapshot", "camera": camera.id, "path": path, "folder": out_dir,
+          "size": list(size), "frames": args.frames, **snapshot.last_metadata(done.stdout),
+          "seconds": round(time.monotonic() - started, 1), "errors": []})
     return EXIT_OK
 
 

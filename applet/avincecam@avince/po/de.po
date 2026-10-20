@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aVinceCam 0.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 11:41+0200\n"
+"POT-Creation-Date: 2026-10-20 13:11+0200\n"
 "PO-Revision-Date: 2026-10-19 18:05+0200\n"
 "Last-Translator: aVinceCam project\n"
 "Language-Team: German\n"
@@ -13,135 +13,151 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: applet.js:429
+#: applet.js:408
+msgid "Photo saved"
+msgstr "Foto gespeichert"
+
+#: applet.js:410
+msgid "Open folder"
+msgstr "Ordner öffnen"
+
+#: applet.js:502
 msgid "1 camera"
 msgstr "1 Kamera"
 
-#: applet.js:430
+#: applet.js:503
 #, javascript-format
 msgid "%d cameras"
 msgstr "%d Kameras"
 
-#: applet.js:432
+#: applet.js:505
 #, javascript-format
 msgid "Selected: %s"
 msgstr "Ausgewählt: %s"
 
-#: applet.js:435 applet.js:534
+#: applet.js:508 applet.js:607
 #, javascript-format
 msgid "Camera in use: %s"
 msgstr "Kamera in Benutzung: %s"
 
-#: applet.js:440
+#: applet.js:513
 #, javascript-format
 msgid "Virtual camera active: %s"
 msgstr "Virtuelle Kamera aktiv: %s"
 
-#: applet.js:440
+#: applet.js:513
 #, javascript-format
 msgid "Preview running: %s"
 msgstr "Vorschau läuft: %s"
 
-#: applet.js:528
+#: applet.js:601
 msgid "Cameras"
 msgstr "Kameras"
 
-#: applet.js:538
+#: applet.js:611
 msgid "Looking for cameras …"
 msgstr "Kameras werden gesucht …"
 
-#: applet.js:540 presenter.js:205
+#: applet.js:613 presenter.js:213
 msgid "No camera found."
 msgstr "Keine Kamera gefunden."
 
-#: applet.js:559
+#: applet.js:632
 msgid "Search again"
 msgstr "Erneut suchen"
 
-#: applet.js:568
+#: applet.js:641
 msgid "Copy camera report"
 msgstr "Kamerabericht kopieren"
 
-#: applet.js:630
+#: applet.js:703
 msgid "Please wait …"
 msgstr "Bitte warten …"
 
-#: applet.js:639
+#: applet.js:708
+msgid "Taking photo …"
+msgstr "Foto wird aufgenommen …"
+
+#: applet.js:717
 #, javascript-format
 msgid "Stop virtual camera (%s)"
 msgstr "Virtuelle Kamera beenden (%s)"
 
-#: applet.js:639
+#: applet.js:717
 msgid "Stop virtual camera"
 msgstr "Virtuelle Kamera beenden"
 
-#: applet.js:640
+#: applet.js:718
 #, javascript-format
 msgid "Stop preview (%s)"
 msgstr "Vorschau beenden (%s)"
 
-#: applet.js:640
+#: applet.js:718
 msgid "Stop preview"
 msgstr "Vorschau beenden"
 
-#: applet.js:653 presenter.js:52
+#: applet.js:731 presenter.js:52
 msgid "Preview locked: camera has a focus motor"
 msgstr "Vorschau gesperrt: Kamera mit Fokusmotor"
 
-#: applet.js:658
+#: applet.js:736
 #, javascript-format
 msgid "Start preview (%s)"
 msgstr "Vorschau starten (%s)"
 
-#: applet.js:667
+#: applet.js:745
+#, javascript-format
+msgid "Take photo (%s)"
+msgstr "Foto aufnehmen (%s)"
+
+#: applet.js:751
 #, javascript-format
 msgid "Offer as virtual camera (%s)"
 msgstr "Als virtuelle Kamera bereitstellen (%s)"
 
-#: applet.js:680
+#: applet.js:764
 msgid "Using the virtual camera"
 msgstr "Virtuelle Kamera benutzen"
 
-#: applet.js:683
+#: applet.js:767
 #, javascript-format
 msgid "Choose \"aVinceCam: %s\" in the browser or call"
 msgstr "Im Browser oder Videoanruf \"aVinceCam: %s\" wählen"
 
-#: applet.js:685
+#: applet.js:769
 msgid ""
 "Firefox: about:config, media.webrtc.camera.allow-pipewire = true, restart"
 msgstr ""
-"Firefox: about:config, media.webrtc.camera.allow-pipewire = true, neu "
-"starten"
+"Firefox: about:config, media.webrtc.camera.allow-pipewire = true, neu starten"
 
-#: applet.js:686
+#: applet.js:770
 msgid "Chrome: chrome://flags, enable PipeWire camera support, restart"
 msgstr ""
 "Chrome: chrome://flags, PipeWire-Kamera-Unterstützung einschalten, neu "
 "starten"
 
-#: applet.js:687
+#: applet.js:771
 msgid "USB cameras cannot be used by other programs meanwhile"
 msgstr "USB-Kameras sind währenddessen für andere Programme nicht nutzbar"
 
-#: applet.js:710
+#: applet.js:794
 #, javascript-format
 msgid "Details: %s"
 msgstr "Details: %s"
 
-#: applet.js:715
+#: applet.js:799
 msgid "Querying details …"
 msgstr "Details werden abgefragt …"
 
-#: applet.js:720
+#: applet.js:804
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr "Größen und Bildraten abfragen (schaltet die Kameras kurz ein)"
 
-#: applet.js:721
+#: applet.js:805
 msgid "Query sizes and frame rates"
 msgstr "Größen und Bildraten abfragen"
 
-#: applet.js:737
+#: applet.js:821
 #, javascript-format
 msgid "Notes (%d)"
 msgstr "Hinweise (%d)"
@@ -247,84 +263,112 @@ msgstr "Kein Laufzeitordner für die Vorschau verfügbar."
 msgid "The preview could not be stopped."
 msgstr "Die Vorschau konnte nicht beendet werden."
 
-#: presenter.js:68
+#: presenter.js:53
+msgid "Photos are available for libcamera cameras only."
+msgstr "Fotos gibt es nur für libcamera-Kameras."
+
+#: presenter.js:54
+msgid "The photo could not be taken."
+msgstr "Das Foto konnte nicht aufgenommen werden."
+
+#: presenter.js:55
+msgid "The photo took too long and was cancelled."
+msgstr "Das Foto hat zu lange gedauert und wurde abgebrochen."
+
+#: presenter.js:56
+msgid "The camera delivered no picture."
+msgstr "Die Kamera hat kein Bild geliefert."
+
+#: presenter.js:57
+msgid "The picture had an unexpected size."
+msgstr "Das Bild hatte eine unerwartete Größe."
+
+#: presenter.js:58
+msgid "The photo could not be saved."
+msgstr "Das Foto konnte nicht gespeichert werden."
+
+#: presenter.js:59
+msgid "Invalid photo size."
+msgstr "Ungültige Fotogröße."
+
+#: presenter.js:76
 msgid "Camera"
 msgstr "Kamera"
 
-#: presenter.js:79
+#: presenter.js:87
 msgid "USB (UVC)"
 msgstr "USB (UVC)"
 
-#: presenter.js:81
+#: presenter.js:89
 msgid "external"
 msgstr "extern"
 
-#: presenter.js:83
+#: presenter.js:91
 msgid "built in"
 msgstr "eingebaut"
 
-#: presenter.js:94 presenter.js:95
+#: presenter.js:102 presenter.js:103
 msgid "Unknown error"
 msgstr "Unbekannter Fehler"
 
-#: presenter.js:131
+#: presenter.js:139
 #, javascript-format
 msgid "%d sizes, %s to %s (%s)"
 msgstr "%d Größen, %s bis %s (%s)"
 
-#: presenter.js:144
+#: presenter.js:152
 #, javascript-format
 msgid "up to %s fps (reported by the camera)"
 msgstr "bis %s fps (laut Kamera)"
 
-#: presenter.js:145
+#: presenter.js:153
 #, javascript-format
 msgid "up to %s fps (according to libcamera)"
 msgstr "bis %s fps (laut libcamera)"
 
-#: presenter.js:155
+#: presenter.js:163
 #, javascript-format
 msgid "Sensor: %s"
 msgstr "Sensor: %s"
 
-#: presenter.js:157
+#: presenter.js:165
 #, javascript-format
 msgid "Picture: %s"
 msgstr "Bild: %s"
 
-#: presenter.js:158
+#: presenter.js:166
 msgid "Picture sizes: not queried"
 msgstr "Bildgrößen: noch nicht abgefragt"
 
-#: presenter.js:161
+#: presenter.js:169
 #, javascript-format
 msgid "Frame rate: %s"
 msgstr "Bildrate: %s"
 
-#: presenter.js:163
+#: presenter.js:171
 msgid "Frame rate: unknown"
 msgstr "Bildrate: unbekannt"
 
-#: presenter.js:165
+#: presenter.js:173
 #, javascript-format
 msgid "libcamera id: %s"
 msgstr "libcamera-Kennung: %s"
 
-#: presenter.js:167
+#: presenter.js:175
 #, javascript-format
 msgid "Devices: %s"
 msgstr "Geräte: %s"
 
-#: presenter.js:218
+#: presenter.js:226
 #, javascript-format
 msgid "Unclassified device: %s"
 msgstr "Nicht zugeordnetes Gerät: %s"
 
-#: presenter.js:239
+#: presenter.js:247
 msgid "built-in camera"
 msgstr "eingebaute Kamera"
 
-#: presenter.js:244
+#: presenter.js:252
 msgid "unknown program"
 msgstr "unbekanntes Programm"
 
@@ -418,6 +462,44 @@ msgstr "qcam (libcamera)"
 #. settings-schema.json->preview-viewer->options
 msgid "GStreamer"
 msgstr "GStreamer"
+
+#. settings-schema.json->head-photo->description
+msgid "Photo"
+msgstr "Foto"
+
+#. settings-schema.json->snapshot-size->description
+msgid "Photo size"
+msgstr "Fotogröße"
+
+#. settings-schema.json->snapshot-size->tooltip
+msgid ""
+"The camera is soft at full size; 1600 × 1200 keeps all its detail in a "
+"smaller file."
+msgstr "In voller Größe ist die Kamera weich; 1600 × 1200 behält alle Details in einer kleineren Datei."
+
+#. settings-schema.json->snapshot-size->options
+msgid "1024 × 768"
+msgstr "1024 × 768"
+
+#. settings-schema.json->snapshot-size->options
+msgid "1600 × 1200 (recommended)"
+msgstr "1600 × 1200 (empfohlen)"
+
+#. settings-schema.json->snapshot-size->options
+msgid "2048 × 1536"
+msgstr "2048 × 1536"
+
+#. settings-schema.json->snapshot-size->options
+msgid "2560 × 1920 (full size)"
+msgstr "2560 × 1920 (volle Größe)"
+
+#. settings-schema.json->snapshot-folder->description
+msgid "Folder for photos"
+msgstr "Ordner für Fotos"
+
+#. settings-schema.json->snapshot-folder->tooltip
+msgid "Empty: the pictures folder, subfolder aVinceCam."
+msgstr "Leer: Bilderordner, Unterordner aVinceCam."
 
 #. settings-schema.json->active-indicator->description
 msgid "Panel icon while a preview runs"

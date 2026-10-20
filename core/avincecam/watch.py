@@ -114,6 +114,15 @@ def camera_map(sysfs_root, dev_root="/", ipa_dirs=sysfs.DEFAULT_IPA_DIRS):
     return cameras, owners
 
 
+def _parent_pid(pid, proc_root):
+    try:
+        with open(os.path.join(proc_root, str(pid), "stat"), encoding="utf-8") as handle:
+            # the command name may contain spaces and ")": parse after the last ")"
+            return int(handle.read().rsplit(")", 1)[1].split()[1])
+    except (OSError, ValueError, IndexError):
+        return None
+
+
 def usage(owners, proc_root="/proc", exclude_pids=(), own_preview_pid=None):
     """Programs that hold camera nodes open, as a sorted list of dicts.
 
@@ -132,7 +141,10 @@ def usage(owners, proc_root="/proc", exclude_pids=(), own_preview_pid=None):
             "name": holder["name"],
             "cameras": sorted(exclusive or shared),
             "certain": len(exclusive or shared) == 1,
-            "own_preview": holder["pid"] == own_preview_pid,
+            # The photo command runs cam as a child: that counts as own use too.
+            "own_preview": own_preview_pid is not None and (
+                holder["pid"] == own_preview_pid or
+                _parent_pid(holder["pid"], proc_root) == own_preview_pid),
         })
     return sorted(users, key=lambda u: u["pid"])
 

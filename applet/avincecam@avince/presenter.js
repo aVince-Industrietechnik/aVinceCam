@@ -49,12 +49,20 @@ function errorTexts(_) {
         "no-camera-id": _("The libcamera id of this camera is unknown."),
         "no-runtime-dir": _("No runtime folder for the preview is available."),
         "stop-failed": _("The preview could not be stopped."),
-        "lens-blocked": _("Preview locked: camera has a focus motor")
+        "lens-blocked": _("Preview locked: camera has a focus motor"),
+        "snapshot-unsupported": _("Photos are available for libcamera cameras only."),
+        "cam-failed": _("The photo could not be taken."),
+        "cam-timeout": _("The photo took too long and was cancelled."),
+        "no-frame": _("The camera delivered no picture."),
+        "frame-size": _("The picture had an unexpected size."),
+        "write-failed": _("The photo could not be saved."),
+        "invalid-argument": _("Invalid photo size.")
     };
 }
 
 /* Errors whose detail is worth showing next to the text. */
-const DETAIL_ERRORS = ["camera-busy", "viewer-missing", "viewer-failed"];
+const DETAIL_ERRORS = ["camera-busy", "viewer-missing", "viewer-failed", "cam-failed",
+                       "write-failed"];
 
 function upper(text) {
     return text ? String(text).toUpperCase() : "";

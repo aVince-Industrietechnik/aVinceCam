@@ -8,6 +8,7 @@
  *   menu opened         -> core "scan"   (sysfs only, no device access)
  *   "Query details"     -> core "probe"  (starts libcamera cameras briefly)
  *   "Start preview"     -> core "preview" (becomes the viewer)
+ *   "Take photo"        -> core "snapshot" (streams ~1 s, saves a PNG)
  *   while loaded        -> core "watch"  (which programs use a camera;
  *                                         inotify and /proc, no device access)
  */
@@ -22,6 +23,8 @@ const Pango = imports.gi.Pango;
 const Clutter = imports.gi.Clutter;
 const GObject = imports.gi.GObject;
 const Gettext = imports.gettext;
+const Main = imports.ui.main;
+const MessageTray = imports.ui.messageTray;
 
 const UUID = "avincecam@avince";
 const AppletDir = imports.applets[UUID];
@@ -32,6 +35,8 @@ const SCAN_TIMEOUT_SECONDS = 10;
 const PROBE_TIMEOUT_SECONDS = 40;
 const PREVIEW_START_TIMEOUT_SECONDS = 15;
 const STOP_TIMEOUT_SECONDS = 15;
+// cam needs ~1.5 s for 30 frames, the PNG a few seconds more.
+const SNAPSHOT_TIMEOUT_SECONDS = 90;
 // The watch process is started again after an unexpected end, a few times.
 const WATCH_RETRY_SECONDS = 10;
 const WATCH_RESTARTS = 5;
@@ -58,6 +63,7 @@ class AVinceCamApplet extends Applet.IconApplet {
         this._detailsOpen = false;  // keep the details submenu open on rebuild
         this._previewBusy = false;  // a start or stop request is under way
         this._previewProc = null;   // viewer started by this applet instance
+        this._snapshotBusy = false; // a photo is being taken
         this._usage = [];           // other programs using a camera (core "watch")
         this._watch = null;
         this._watchRetryId = 0;
@@ -72,6 +78,8 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.allowLensCameras = false;
         this.activeIndicator = "rotate";
         this.usageIndicator = true;
+        this.snapshotSize = "1600x1200";
+        this.snapshotFolder = "";
         this._indicatorKey = null;
         this.settings = new Settings.AppletSettings(this, metadata.uuid, instanceId);
         this.settings.bindProperty(Settings.BindingDirection.IN,
@@ -82,6 +90,10 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.settings.bindProperty(Settings.BindingDirection.IN,
                                    "active-indicator", "activeIndicator",
                                    () => this._updateIndicator());
+        this.settings.bindProperty(Settings.BindingDirection.IN,
+                                   "snapshot-size", "snapshotSize", null);
+        this.settings.bindProperty(Settings.BindingDirection.IN,
+                                   "snapshot-folder", "snapshotFolder", null);
         this.settings.bindProperty(Settings.BindingDirection.IN,
                                    "usage-indicator", "usageIndicator",
                                    () => this._applyUsageSetting());
@@ -135,7 +147,7 @@ class AVinceCamApplet extends Applet.IconApplet {
     _applyPanelIcon() {
         const symbolic = this.panelIconStyle === "symbolic";
         // Red dot: own preview with "pulse", or another program uses a camera.
-        const dot = (this._previewRunning() && this.activeIndicator === "pulse") ||
+        const dot = (this._ownCameraActive() && this.activeIndicator === "pulse") ||
                     this._cameraInUse();
         const name = "avincecam" + (dot ? "-active" : "") + (symbolic ? "-symbolic" : "") + ".svg";
         const file = GLib.build_filenamev([this._metadataPath, "icons", name]);
@@ -150,9 +162,9 @@ class AVinceCamApplet extends Applet.IconApplet {
     }
 
     /*
-     * While the own preview runs the icon turns slowly or pulses (setting
-     * "active-indicator"). Clutter runs the animation itself; nothing runs
-     * when no preview is active.
+     * While aVinceCam itself uses a camera (preview, virtual camera, photo)
+     * the icon turns slowly or pulses (setting "active-indicator"). Clutter
+     * runs the animation itself; nothing runs when no camera is in use.
      */
     _applyIndicatorAnimation() {
         const icon = this._applet_icon;
@@ -162,7 +174,7 @@ class AVinceCamApplet extends Applet.IconApplet {
             icon.remove_transition("avincecam-" + name);
         icon.rotation_angle_z = 0;
         icon.set_scale(1, 1);
-        if (this._removed || !this._previewRunning() || this.activeIndicator === "off")
+        if (this._removed || !this._ownCameraActive() || this.activeIndicator === "off")
             return;
 
         icon.set_pivot_point(0.5, 0.5);
@@ -190,7 +202,7 @@ class AVinceCamApplet extends Applet.IconApplet {
 
     /* Re-apply the icon only when what it shows has changed. */
     _updateIndicator() {
-        const key = [this._previewRunning(), this.activeIndicator, this.panelIconStyle,
+        const key = [this._ownCameraActive(), this.activeIndicator, this.panelIconStyle,
                      this._cameraInUse()].join("|");
         if (key === this._indicatorKey)
             return;
@@ -285,6 +297,11 @@ class AVinceCamApplet extends Applet.IconApplet {
         return (this._scan && this._scan.preview) || { running: false };
     }
 
+    /* aVinceCam itself uses a camera: preview, virtual camera or photo. */
+    _ownCameraActive() {
+        return this._previewRunning() || this._snapshotBusy;
+    }
+
     _previewRunning() {
         return this._previewProc !== null || this._previewState().running === true;
     }
@@ -343,6 +360,62 @@ class AVinceCamApplet extends Applet.IconApplet {
         if (proc === null)
             this._previewBusy = false;
         this._buildMenu();
+    }
+
+    // ------------------------------------------------------------ photo
+
+    /*
+     * The core streams ~30 frames (exposure and noise reduction settle) and
+     * saves the last one as PNG; ~1.5 s of camera use plus a few seconds.
+     */
+    _takePhoto(camera) {
+        if (this._removed || this._snapshotBusy || this._previewBusy || this._previewRunning())
+            return;
+        this._snapshotBusy = true;
+        this._lastError = null;
+        const args = ["snapshot", camera.id, "--size", this.snapshotSize || "1600x1200"];
+        const folder = this._snapshotFolderPath();
+        if (folder)
+            args.push("--out", folder);
+        if (camera.has_lens && this.allowLensCameras)
+            args.push("--allow-lens");
+        this._buildMenu();
+        this._updateIndicator();
+        this.client.run(args, SNAPSHOT_TIMEOUT_SECONDS, result => {
+            this._snapshotBusy = false;
+            if (result.error || !result.data || !result.data.path) {
+                this._lastError = { error: result.error ||
+                    { code: "cam-failed", message: null, detail: null }, context: "snapshot" };
+            } else {
+                this._notifyPhoto(result.data.path, result.data.folder);
+            }
+            this._buildMenu();
+            this._updateTooltip();
+        });
+    }
+
+    /* The setting holds a path or a file:// URI; empty means the default. */
+    _snapshotFolderPath() {
+        const value = (this.snapshotFolder || "").trim();
+        if (!value)
+            return null;
+        return value.startsWith("file://") ? Gio.File.new_for_uri(value).get_path() : value;
+    }
+
+    _notifyPhoto(path, folder) {
+        const source = new MessageTray.SystemNotificationSource();
+        Main.messageTray.add(source);
+        const notification = new MessageTray.Notification(source, _("Photo saved"), path);
+        notification.setTransient(false);
+        notification.addButton("open-folder", _("Open folder"));
+        notification.connect("action-invoked", () => {
+            try {
+                Gio.AppInfo.launch_default_for_uri(Gio.File.new_for_path(folder).get_uri(), null);
+            } catch (e) {
+                global.logError("aVinceCam: could not open " + folder + ": " + e);
+            }
+        });
+        source.notify(notification);
     }
 
     _reportViewerFailure(logPath) {
@@ -631,6 +704,11 @@ class AVinceCamApplet extends Applet.IconApplet {
                                                  "avincecam-info"));
             return;
         }
+        if (this._snapshotBusy || state.viewer === "snapshot") {
+            this.menu.addMenuItem(this._textItem(_("Taking photo …"), "content-loading-symbolic",
+                                                 "avincecam-info"));
+            return;
+        }
         if (this._previewRunning()) {
             const cam = this._cameras().find(c => c.id === state.camera);
             const title = cam ? Presenter.cameraTitle(cam, _) : "";
@@ -663,6 +741,12 @@ class AVinceCamApplet extends Applet.IconApplet {
         // USB cameras reach other programs directly; libcamera cameras need
         // aVinceCam to offer them through PipeWire.
         if (selected.api === "libcamera") {
+            const photo = new PopupMenu.PopupIconMenuItem(
+                _("Take photo (%s)").replace("%s", Presenter.cameraTitle(selected, _)),
+                "camera-photo-symbolic", St.IconType.SYMBOLIC);
+            photo.connect("activate", () => this._takePhoto(selected));
+            this.menu.addMenuItem(photo);
+
             const virtual = new PopupMenu.PopupIconMenuItem(
                 _("Offer as virtual camera (%s)").replace("%s", Presenter.cameraTitle(selected, _)),
                 "camera-web-symbolic", St.IconType.SYMBOLIC);
