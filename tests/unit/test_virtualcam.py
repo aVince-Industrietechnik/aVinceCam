@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Virtual camera: plugin isolation, pipeline and start through the preview.
 
 GStreamer is never loaded here: the pipeline is built against a stand-in

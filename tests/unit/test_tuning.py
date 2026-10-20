@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Tuning files without autofocus (D16) – no camera, no system file changed."""
 
 import json

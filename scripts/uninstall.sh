@@ -1,4 +1,6 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 # Remove what scripts/install.sh installed, and nothing else.
 #
 #   scripts/uninstall.sh            keep the applet settings

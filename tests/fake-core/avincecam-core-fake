@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Stand-in for the aVinceCam core, for applet tests without a camera.
 
 Usage: avincecam-core-fake --scenario=NAME <core arguments...>

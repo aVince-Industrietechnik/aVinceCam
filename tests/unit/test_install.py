@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """install.sh / uninstall.sh in a fake home – the real home is never touched."""
 
 import json

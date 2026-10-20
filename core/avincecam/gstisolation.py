@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Run GStreamer with only the plugins a pipeline needs.
 
 GStreamer's video4linux2 plugin opens every video and sub-device node of the

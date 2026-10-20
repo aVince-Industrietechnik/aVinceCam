@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Preview start/stop with a fake viewer – no camera is touched.
 
 The core replaces itself with the viewer (exec), so these tests run the core

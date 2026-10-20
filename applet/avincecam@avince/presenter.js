@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Angelo Vincenti
 /*
  * aVinceCam – presentation logic.
  *
@@ -22,7 +24,7 @@ function locationTitles(_) {
 function warningTexts(_) {
     return {
         "needs-libcamera": _("Works only with libcamera, not with classic webcam programs."),
-        "lens-not-controlled": _("Has a focus motor; aVinceCam keeps libcamera's autofocus off unless switched on in the settings."),
+        "lens-not-controlled": _("Has a focus motor; without libcamera's autofocus (settings) the focus stays fixed – close objects may be blurred."),
         "no-sensor-tuning": _("No libcamera tuning file – image quality may suffer."),
         "pipeline-unknown": _("The camera pipeline could not be determined."),
         "libcamera-no-match": _("libcamera did not report this camera."),

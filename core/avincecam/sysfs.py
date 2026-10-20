@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Quick camera detection from sysfs.
 
 Only sysfs attributes and symlinks are read. No file below /dev is opened,

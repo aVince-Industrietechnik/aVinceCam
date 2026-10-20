@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Watch which processes open camera device nodes (read-only diagnosis).
 
 Two sources, both read-only:

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Watch which programs use a camera – without opening any camera device.
 
 inotify reports when a device node below /dev is opened or closed. Adding

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """watch: camera use from inotify and /proc – simulated sysfs, plain files as nodes."""
 
 import builtins

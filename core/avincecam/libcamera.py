@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Camera details via the libcamera `cam` tool.
 
 The text output of `cam` is not a stable interface. All parsing lives in

@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """probe with simulated sysfs and recorded cam output – no hardware."""
 
 import os

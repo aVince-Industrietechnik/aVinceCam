@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Data model shared by the core and the JSON interface."""
 
 from dataclasses import asdict, dataclass, field

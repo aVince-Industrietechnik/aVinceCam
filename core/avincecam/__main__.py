@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Angelo Vincenti
 """Command line entry point: python3 -m avincecam <command> [--json]
 
 Every command answers with one JSON object on stdout. Commands that are not
