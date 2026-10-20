@@ -100,6 +100,23 @@ class UsageTest(WatchBase):
             users = watch.usage(self.owners, exclude_pids=(), own_preview_pid=os.getpid())
         self.assertTrue(users[0]["own_preview"])
 
+    def test_child_of_own_preview_is_own(self):
+        """A snapshot runs cam as a child process of the locked core process."""
+        node = self.dev(self.node_of(WEBCAM, "video"))
+        child = subprocess.Popen([sys.executable, "-c",
+                                  f"import time; f=open({node!r}); print('ok', flush=True); time.sleep(30)"],
+                                 stdout=subprocess.PIPE, text=True)
+        try:
+            child.stdout.readline()
+            users = watch.usage(self.owners, exclude_pids=(os.getpid(),),
+                                own_preview_pid=os.getpid())
+            self.assertEqual([u["pid"] for u in users], [child.pid])
+            self.assertTrue(users[0]["own_preview"])
+        finally:
+            child.kill()
+            child.wait()
+            child.stdout.close()
+
     def test_excluded_pid_is_ignored(self):
         with open(self.dev(self.node_of(WEBCAM, "video"))):
             self.assertEqual(watch.usage(self.owners, exclude_pids=(os.getpid(),)), [])

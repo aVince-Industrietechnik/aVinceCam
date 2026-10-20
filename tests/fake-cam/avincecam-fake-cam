@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+"""Stand-in for libcamera's `cam` in snapshot tests – touches no device.
+
+Understands the arguments aVinceCam's snapshot uses:
+  -c ID --stream role=still,width=W,height=H,pixelformat=NV12 --capture=N
+  --metadata --file=DIR/frame-#.bin
+Writes N NV12 frames (a grey ramp with a colour patch) named like cam does
+and prints per-frame metadata. FAKE_CAM_EXIT=<code> makes it fail.
+"""
+
+import os
+import sys
+
+
+def main(argv):
+    if os.environ.get("FAKE_CAM_EXIT"):
+        print("fake cam: simulated failure", file=sys.stderr)
+        return int(os.environ["FAKE_CAM_EXIT"])
+    width = height = frames = None
+    pattern = None
+    for i, arg in enumerate(argv):
+        if arg == "--stream":
+            opts = dict(kv.split("=", 1) for kv in argv[i + 1].split(","))
+            width, height = int(opts["width"]), int(opts["height"])
+        elif arg.startswith("--capture="):
+            frames = int(arg.split("=", 1)[1])
+        elif arg.startswith("--file="):
+            pattern = arg.split("=", 1)[1]
+    if None in (width, height, frames, pattern):
+        print("fake cam: missing arguments", file=sys.stderr)
+        return 2
+    luma = bytes((x * 255) // max(1, width - 1) for x in range(width)) * height
+    chroma = bytearray(b"\x80" * (width * height // 2))
+    # a red patch in the top left quarter (V high)
+    for r in range(height // 4):
+        for x in range(0, width // 2, 2):
+            chroma[r * width + x + 1] = 240
+    frame = luma + bytes(chroma)
+    for seq in range(frames):
+        path = pattern.replace("#", "cam0-stream0-%06d" % seq, 1)
+        with open(path, "wb") as handle:
+            handle.write(frame)
+        print(f"{seq}.000000 (30.00 fps) cam0-stream0 seq: {seq:06d} bytesused: {len(frame)}")
+        print(f"\tExposureTime = {33018 if seq > 5 else 10000}")
+        print(f"\tAnalogueGain = {4.1 if seq > 5 else 1.0:.6f}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

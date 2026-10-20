@@ -115,3 +115,35 @@ only the USB camera's node, and closing its window ended VLC at once. The
 plain video window of `cvlc` did not end VLC when closed and is not used.
 UVC previews therefore use VLC when installed; GStreamer remains the
 fallback. VLC creates its own settings below `~/.config/vlc/`.
+
+## D13 – Camera use is watched with inotify, never by opening a device
+The core command `watch` adds inotify watches to the camera device nodes
+(adding a watch only looks up the path; the device is not opened) and reads
+the holders from /proc after an open or close. Opens shorter than 0.5 s
+(udev, PipeWire enumerating devices) are not reported. The lens motor node is
+not watched. aVinceCam's own preview, virtual camera and photo – including
+child processes such as `cam` – count as own use. Measured on an Intel IPU3
+laptop: 17 MB, no CPU while idle; a program opening the webcam is shown
+after about 1 s.
+
+## D14 – Virtual camera through PipeWire, no system change
+Browsers and web video calls find cameras through PipeWire; IPU3 cameras only
+work through libcamera. aVinceCam runs `libcamerasrc ! videoconvert !
+pipewiresink mode=provide` while the user switches it on, so the camera
+appears as "aVinceCam: <name>". No package, PipeWire or WirePlumber setting
+is changed. GStreamer sees only the four plugins it needs (private plugin
+folder and registry), so the video4linux2 plugin (D12) is never loaded.
+Measured: Firefox 158 shows the front camera at 1280x720, ~7 % of one CPU
+core. Firefox needs `media.webrtc.camera.allow-pipewire = true` and a
+restart. libcamera keeps all cameras it knows open while it runs, including
+USB cameras, which other programs then cannot use; libcamera 0.2.0 offers no
+way to exclude them.
+
+## D15 – Photos: about 30 frames, keep the last one
+Measured on an Intel IPU3 laptop: with 10 frames the exposure is still
+settling (analogue gain jumping between 1x and 33x) and the ImgU's temporal
+noise reduction smears the picture; after about 30 frames it is stable. The
+core runs `cam` for 30 frames at 1600x1200 (the camera is soft at full size,
+so this keeps its detail), keeps the last frame and writes a PNG with the
+standard library. Frames go to the runtime folder (tmpfs) and are deleted at
+once. Cameras with a focus motor stay locked as for the preview (D11).

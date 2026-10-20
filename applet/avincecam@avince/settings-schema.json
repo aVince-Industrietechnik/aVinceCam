@@ -56,6 +56,29 @@
             "GStreamer": "gst"
         }
     },
+    "head-photo": {
+        "type": "header",
+        "description": "Photo"
+    },
+    "snapshot-size": {
+        "type": "combobox",
+        "default": "1600x1200",
+        "description": "Photo size",
+        "tooltip": "The camera is soft at full size; 1600 × 1200 keeps all its detail in a smaller file.",
+        "options": {
+            "1024 × 768": "1024x768",
+            "1600 × 1200 (recommended)": "1600x1200",
+            "2048 × 1536": "2048x1536",
+            "2560 × 1920 (full size)": "2560x1920"
+        }
+    },
+    "snapshot-folder": {
+        "type": "filechooser",
+        "select-dir": true,
+        "default": "",
+        "description": "Folder for photos",
+        "tooltip": "Empty: the pictures folder, subfolder aVinceCam."
+    },
     "active-indicator": {
         "type": "combobox",
         "default": "rotate",

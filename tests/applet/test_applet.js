@@ -286,6 +286,21 @@ function withFakeRuntime(fn) {
     check("watch process gone", handle.proc.get_identifier() === null);
 })();
 
+(function testSnapshotThroughFakeCore() {
+    withFakeRuntime(dir => {
+        const cams = fakeJson("mixed", ["scan"]).cameras;
+        const [r] = runClient([PY, "-I", FAKE, "--scenario=mixed"],
+                              ["snapshot", cams[0].id, "--size", "64x48"], 30);
+        check("snapshot ok", r && r.ok && r.data.path.endsWith(".png"), r);
+        check("snapshot stays in fake runtime", r && r.data.path.indexOf(dir) === 0, r && r.data.path);
+        const [b] = runClient([PY, "-I", FAKE, "--scenario=mixed"],
+                              ["snapshot", cams[1].id, "--size", "64x48"], 30);
+        check("snapshot lens camera locked", b && b.error && b.error.code === "lens-blocked", b);
+        const text = Presenter.errorText({ code: "cam-failed", message: null, detail: "x" }, _);
+        check("snapshot error text", text.indexOf("The photo could not be taken.") === 0, text);
+    });
+})();
+
 (function testWatchWithoutCore() {
     check("watch without core", new CoreClient.CoreClient(null).watch(["watch"], () => {}, () => {}) === null);
 })();

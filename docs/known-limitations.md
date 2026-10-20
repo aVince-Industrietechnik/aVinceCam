@@ -17,9 +17,16 @@
   the user asks for details.
 - Sizes are those of libcamera's default (viewfinder) stream; the sensor may
   offer more in other stream roles.
-- Browsers and video conferencing tools may not see libcamera-only cameras;
-  that needs PipeWire's libcamera support or a loopback device and is outside
-  the scope of aVinceCam.
+- Browsers and video conferencing tools do not see libcamera-only cameras by
+  themselves. aVinceCam's **virtual camera** offers them through PipeWire
+  (D14): Firefox needs `media.webrtc.camera.allow-pipewire = true`, Chrome its
+  PipeWire camera flag. Native apps that only use V4L2 (e.g. the Zoom desktop
+  client) would need a loopback device, which aVinceCam does not install.
+- While the virtual camera runs, **USB cameras cannot be used** by other
+  programs (libcamera keeps them open).
+- **Photos** are PNG files only (no JPEG without an extra library); each photo
+  powers up the cameras once, like a query.
+- **Camera use** of processes of other users is shown as "unknown program".
 - **GStreamer probes all video devices** when its video4linux2 plugin loads.
   On machines with complex camera pipelines this briefly powers them up.
   aVinceCam uses VLC for USB cameras when available (D12).
