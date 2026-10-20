@@ -13,74 +13,29 @@ like a preview (lock file, busy check, lens lock) and stopped the same way.
 
 GStreamer's video4linux2 plugin opens every video and sub-device node of
 the machine when it is loaded (decision D12) – including the lens motor.
-This process therefore sees only the few plugins it needs: they are linked
-into a private plugin folder and GStreamer uses a private registry, so the
-video4linux2 plugin is never loaded.
+This process therefore sees only the few plugins it needs (gstisolation).
 """
 
 import os
 import signal
 import sys
 
+from . import gstisolation
+
 # Plugins the pipeline needs (file names in the GStreamer plugin folder).
 PLUGINS = ("libgstcoreelements.so", "libgstlibcamera.so",
            "libgstvideoconvertscale.so", "libgstpipewire.so")
-PLUGIN_DIRS = ("/usr/lib/x86_64-linux-gnu/gstreamer-1.0",
-               "/usr/lib/aarch64-linux-gnu/gstreamer-1.0",
-               "/usr/lib64/gstreamer-1.0", "/usr/lib/gstreamer-1.0")
 # A format every PipeWire camera consumer understands.
 OUTPUT_FORMAT = "I420"
 
-
-class VirtualCameraError(Exception):
-    def __init__(self, code, message, detail=None):
-        super().__init__(message)
-        self.code = code
-        self.message = message
-        self.detail = detail
-
-
-def find_plugin_dir(candidates=PLUGIN_DIRS):
-    for directory in candidates:
-        if os.path.isfile(os.path.join(directory, "libgstlibcamera.so")):
-            return directory
-    return None
+VirtualCameraError = gstisolation.IsolationError
+find_plugin_dir = gstisolation.find_plugin_dir
+gst_environment = gstisolation.environment
 
 
 def prepare_plugins(private_dir, system_dir):
     """Link exactly the needed plugins into `private_dir`. Returns the list."""
-    os.makedirs(private_dir, mode=0o700, exist_ok=True)
-    for name in os.listdir(private_dir):
-        if name not in PLUGINS:
-            os.remove(os.path.join(private_dir, name))
-    missing = [p for p in PLUGINS if not os.path.isfile(os.path.join(system_dir, p))]
-    if missing:
-        package = ("gstreamer1.0-libcamera" if "libgstlibcamera.so" in missing else
-                   "gstreamer1.0-pipewire" if "libgstpipewire.so" in missing else
-                   "gstreamer1.0-plugins-base")
-        raise VirtualCameraError("plugin-missing", "a GStreamer plugin is missing",
-                                 f"{', '.join(missing)} (package {package})")
-    for name in PLUGINS:
-        link = os.path.join(private_dir, name)
-        target = os.path.join(system_dir, name)
-        if os.path.islink(link) and os.readlink(link) == target:
-            continue
-        if os.path.lexists(link):
-            os.remove(link)
-        os.symlink(target, link)
-    return sorted(os.listdir(private_dir))
-
-
-def gst_environment(private_dir, registry):
-    """Environment that limits GStreamer to the private plugin folder."""
-    return {
-        "GST_PLUGIN_SYSTEM_PATH_1_0": private_dir,
-        "GST_PLUGIN_SYSTEM_PATH": private_dir,
-        "GST_PLUGIN_PATH_1_0": "",
-        "GST_PLUGIN_PATH": "",
-        "GST_REGISTRY_1_0": registry,
-        "GST_REGISTRY": registry,
-    }
+    return gstisolation.prepare_plugins(private_dir, system_dir, PLUGINS)
 
 
 def stream_properties(name):
@@ -126,18 +81,11 @@ def run(camera_id, width, height, name, runtime_dir):
     Messages go to stderr (the preview log). Must run in a fresh process:
     the GStreamer environment has to be set before GStreamer is loaded.
     """
-    system_dir = find_plugin_dir()
-    if system_dir is None:
-        print("aVinceCam: GStreamer libcamera plugin not found "
-              "(package gstreamer1.0-libcamera)", file=sys.stderr)
-        return 1
-    private_dir = os.path.join(runtime_dir, "gst-plugins")
     try:
-        prepare_plugins(private_dir, system_dir)
-    except VirtualCameraError as exc:
+        os.environ.update(gstisolation.isolated_environment(runtime_dir, "gst", PLUGINS))
+    except gstisolation.IsolationError as exc:
         print(f"aVinceCam: {exc.message}: {exc.detail}", file=sys.stderr)
         return 1
-    os.environ.update(gst_environment(private_dir, os.path.join(runtime_dir, "gst-registry.bin")))
 
     import gi
     gi.require_version("Gst", "1.0")

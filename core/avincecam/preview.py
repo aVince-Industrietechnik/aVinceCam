@@ -19,9 +19,17 @@ import sys
 import time
 from fractions import Fraction
 
+from . import gstisolation
+
 # The core launcher; the virtual camera runs as its own core process.
 LAUNCHER = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))),
                         "avincecam-core")
+# GStreamer preview of a libcamera camera: only these plugins (gstisolation),
+# so the video4linux2 plugin – which opens every camera node (D12) – is not
+# loaded. autovideosink picks one of the video outputs that is installed.
+GST_PREVIEW_PLUGINS = ("libgstcoreelements.so", "libgstlibcamera.so",
+                       "libgstvideoconvertscale.so", "libgstautodetect.so")
+GST_PREVIEW_SINKS = ("libgstxvimagesink.so", "libgstximagesink.so", "libgstwaylandsink.so")
 LOCK_NAME = "preview.json"
 LOG_NAME = "preview.log"
 STOP_WAIT_SECONDS = 5
@@ -199,6 +207,22 @@ def viewer_command(camera, viewer, size, uvc_formats=None):
         return source + [f"video/x-raw,format=YUY2,width={w},height={h},framerate={_gst_rate(fps)}",
                          "!", "videoconvert", "!", "autovideosink"]
     raise PreviewError("unsupported-camera", f"no preview for api {camera.api!r}")
+
+
+def viewer_environment(camera, viewer, runtime_dir):
+    """Extra environment for the viewer, or None.
+
+    The GStreamer preview of a libcamera camera runs with a private plugin
+    set. The GStreamer fallback for USB cameras needs v4l2src, the very
+    plugin that opens every node; it cannot be isolated (VLC is preferred).
+    """
+    if viewer != "gst" or camera.api != "libcamera":
+        return None
+    try:
+        return gstisolation.isolated_environment(runtime_dir, "gst-preview", GST_PREVIEW_PLUGINS,
+                                                 need_one_of=GST_PREVIEW_SINKS)
+    except gstisolation.IsolationError as exc:
+        raise PreviewError(exc.code, exc.message, exc.detail) from exc
 
 
 def check_tool(argv):
