@@ -34,12 +34,13 @@ Deutsche Kurzfassung: [README.de.md](README.de.md)
   <img src="assets/screenshots/en/details.png" alt="Details of the front camera" height="300">
 </p>
 
-Notes for a camera with a focus motor, and the virtual camera with its hints:
+Notes for a camera with a focus motor:
 
-<p>
-  <img src="assets/screenshots/en/notes.png" alt="Notes for the back camera" width="49%">
-  <img src="assets/screenshots/en/virtual-camera.png" alt="Virtual camera active" width="40%">
-</p>
+<img src="assets/screenshots/en/notes.png" alt="Notes for the back camera">
+
+The virtual camera with its hints for browsers:
+
+<img src="assets/screenshots/en/virtual-camera.png" alt="Virtual camera active">
 
 <img src="assets/screenshots/en/settings.png" alt="Settings" width="560">
 
