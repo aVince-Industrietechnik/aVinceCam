@@ -2,7 +2,7 @@
     "uuid": "avincecam@avince",
     "name": "aVinceCam",
     "description": "Camera Control for Linux - find your cameras, preview them, take photos and offer them to browsers",
-    "version": "0.9.1",
+    "version": "0.9.2",
     "cinnamon-version": [
         "6.6"
     ],

@@ -4,7 +4,7 @@
 Rechners erkennt, verständlich anzeigt, eine Vorschau startet, Fotos aufnimmt und Kameras
 für Browser und Videoanrufe bereitstellt.
 
-> Version 0.9.1 – getestet auf einem Gerät (Intel-IPU3-2-in-1 mit Front- und Rückkamera
+> Version 0.9.2 – getestet auf einem Gerät (Intel-IPU3-2-in-1 mit Front- und Rückkamera
 > sowie USB-Webcam, Linux Mint 22, Cinnamon 6.6). Rückmeldungen von anderen Rechnern sind
 > willkommen.
 

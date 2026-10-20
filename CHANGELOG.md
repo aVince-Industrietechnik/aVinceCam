@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.2 – 2026-10-20
+
+- Choosing a camera in the menu keeps the menu open, so its preview and photo
+  entries can be used right away
+
 ## 0.9.1 – 2026-10-20
 
 - Photos of USB cameras: the core streams about a second from the webcam's

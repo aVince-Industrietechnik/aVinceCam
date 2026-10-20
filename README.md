@@ -4,7 +4,7 @@
 computer, shows what they are and lets you preview them, take photos and offer them to
 browsers and video calls.
 
-> Version 0.9.1 – tested on one machine (Intel IPU3 2-in-1 with front and back camera
+> Version 0.9.2 – tested on one machine (Intel IPU3 2-in-1 with front and back camera
 > plus a USB webcam, Linux Mint 22, Cinnamon 6.6). Reports from other machines are welcome.
 
 Deutsche Kurzfassung: [README.de.md](README.de.md)
