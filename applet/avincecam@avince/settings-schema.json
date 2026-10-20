@@ -99,7 +99,14 @@
         "type": "switch",
         "default": false,
         "description": "Allow preview of cameras with a focus motor",
-        "tooltip": "While such a camera streams, libcamera drives its focus motor automatically. Leave this off if the focus motor does not work properly."
+        "tooltip": "Preview, photo and virtual camera of such cameras. aVinceCam runs them without libcamera's autofocus: the focus motor is not moved and the focus stays fixed."
+    },
+    "use-libcamera-autofocus": {
+        "type": "switch",
+        "default": false,
+        "dependency": "allow-lens-cameras",
+        "description": "Use libcamera's autofocus",
+        "tooltip": "libcamera then moves the focus motor while the camera streams. Only switch this on if the focus motor works: if it does not answer, every attempt ends up as an error in the system log."
     },
     "selected-camera": {
         "type": "generic",

@@ -76,6 +76,7 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.panelIconSizeSymbolic = 24;
         this.previewViewer = "qcam";
         this.allowLensCameras = false;
+        this.useLibcameraAutofocus = false;
         this.activeIndicator = "rotate";
         this.usageIndicator = true;
         this.snapshotSize = "1600x1200";
@@ -87,6 +88,8 @@ class AVinceCamApplet extends Applet.IconApplet {
         this.settings.bindProperty(Settings.BindingDirection.IN,
                                    "allow-lens-cameras", "allowLensCameras",
                                    () => this._buildMenu());
+        this.settings.bindProperty(Settings.BindingDirection.IN,
+                                   "use-libcamera-autofocus", "useLibcameraAutofocus", null);
         this.settings.bindProperty(Settings.BindingDirection.IN,
                                    "active-indicator", "activeIndicator",
                                    () => this._updateIndicator());
@@ -324,8 +327,7 @@ class AVinceCamApplet extends Applet.IconApplet {
         let proc = null;
         const args = ["preview", cameraId, "--viewer",
                       viewer || (this.previewViewer === "gst" ? "gst" : "qcam")];
-        if (this.allowLensCameras)
-            args.push("--allow-lens");
+        args.push(...this._lensArgs(this._cameraById(cameraId)));
         proc = this.client.startPreview(
             args,
             PREVIEW_START_TIMEOUT_SECONDS,
@@ -382,8 +384,7 @@ class AVinceCamApplet extends Applet.IconApplet {
         const folder = this._snapshotFolderPath();
         if (folder)
             args.push("--out", folder);
-        if (camera.has_lens && this.allowLensCameras)
-            args.push("--allow-lens");
+        args.push(...this._lensArgs(camera));
         this._buildMenu();
         this._updateIndicator();
         this.client.run(args, SNAPSHOT_TIMEOUT_SECONDS, result => {
@@ -475,6 +476,14 @@ class AVinceCamApplet extends Applet.IconApplet {
 
     _cameras() {
         return (this._scan && this._scan.cameras) || [];
+    }
+
+    _cameraById(id) {
+        return this._cameras().find(c => c.id === id) || null;
+    }
+
+    _lensArgs(camera) {
+        return Presenter.lensArgs(camera, this.allowLensCameras, this.useLibcameraAutofocus);
     }
 
     _forgetVanishedDetails() {

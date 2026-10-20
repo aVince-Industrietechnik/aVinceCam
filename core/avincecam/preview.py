@@ -216,11 +216,12 @@ def viewer_command(camera, viewer, size, uvc_formats=None):
     raise PreviewError("unsupported-camera", f"no preview for api {camera.api!r}")
 
 
-def viewer_environment(camera, viewer, runtime_dir):
+def viewer_environment(camera, viewer, runtime_dir, autofocus=False):
     """Extra environment for the viewer, or None.
 
     libcamera cameras with a lens motor get a tuning file without autofocus
-    (tuning, D16) – for qcam, GStreamer and the virtual camera alike. The
+    (tuning, D16) – for qcam, GStreamer and the virtual camera alike – unless
+    autofocus is asked for; libcamera then uses its own tuning file. The
     GStreamer preview of a libcamera camera also runs with a private plugin
     set. The GStreamer fallback for USB cameras needs v4l2src, the very
     plugin that opens every node; it cannot be isolated (VLC is preferred).
@@ -229,7 +230,8 @@ def viewer_environment(camera, viewer, runtime_dir):
         return None
     env = {}
     try:
-        env.update(tuning.environment(runtime_dir, [camera]))
+        if not autofocus:
+            env.update(tuning.environment(runtime_dir, [camera]))
     except OSError as exc:
         raise PreviewError("tuning-failed", "the tuning file could not be written",
                            str(exc)) from exc

@@ -301,6 +301,17 @@ function withFakeRuntime(fn) {
     });
 })();
 
+(function testLensArgs() {
+    const lens = { id: "b", has_lens: true }, plain = { id: "f", has_lens: false };
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    check("lens args locked", same(Presenter.lensArgs(lens, false, true), []));
+    check("lens args allowed", same(Presenter.lensArgs(lens, true, false), ["--allow-lens"]));
+    check("lens args autofocus", same(Presenter.lensArgs(lens, true, true),
+                                      ["--allow-lens", "--autofocus"]));
+    check("lens args plain camera", same(Presenter.lensArgs(plain, true, true), []));
+    check("lens args unknown camera", same(Presenter.lensArgs(null, true, false), ["--allow-lens"]));
+})();
+
 (function testWatchWithoutCore() {
     check("watch without core", new CoreClient.CoreClient(null).watch(["watch"], () => {}, () => {}) === null);
 })();

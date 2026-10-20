@@ -16,6 +16,11 @@ adds only its own directory. The core prints exactly one JSON object on stdout.
 | `preview <id> --viewer virtual` | streams one camera | offers it to other programs through PipeWire (D14) |
 | `stop` | none | stops the own preview only |
 | `snapshot <id> [--size WxH] [--out DIR]` | streams ~1 s | saves a still photo as PNG (D15) |
+
+`preview` and `snapshot` refuse cameras with a focus motor (`lens-blocked`,
+D11) unless `--allow-lens` is given; they then run without libcamera's
+autofocus (D16). `--autofocus` (only together with `--allow-lens`) leaves
+libcamera's own tuning file and autofocus in place.
 | `watch` | none (inotify, /proc) | one line per change of camera use, until stdin closes (D13) |
 | `diagnose` | like `probe` | text report |
 

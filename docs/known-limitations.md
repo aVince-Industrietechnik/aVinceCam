@@ -8,7 +8,8 @@
 - **Cameras with a focus motor:** libcamera drives the motor automatically
   during a preview. aVinceCam locks their preview by default (see D11) and,
   when allowed, runs them without libcamera's autofocus (D16): the focus then
-  stays fixed.
+  stays fixed. The setting "Use libcamera's autofocus" switches libcamera's
+  autofocus back on – only for machines whose lens motor works.
 - **Intel IPU3** can run only one camera pipeline at a time. aVinceCam allows
   one preview at a time.
 - **Busy detection** sees only processes of the current user.
