@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 13:11+0200\n"
+"POT-Creation-Date: 2026-10-20 14:49+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,148 +17,148 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: applet.js:408
+#: applet.js:414
 msgid "Photo saved"
 msgstr ""
 
-#: applet.js:410
+#: applet.js:416
 msgid "Open folder"
 msgstr ""
 
-#: applet.js:502
+#: applet.js:516
 msgid "1 camera"
 msgstr ""
 
-#: applet.js:503
+#: applet.js:517
 #, javascript-format
 msgid "%d cameras"
 msgstr ""
 
-#: applet.js:505
+#: applet.js:519
 #, javascript-format
 msgid "Selected: %s"
 msgstr ""
 
-#: applet.js:508 applet.js:607
+#: applet.js:522 applet.js:621
 #, javascript-format
 msgid "Camera in use: %s"
 msgstr ""
 
-#: applet.js:513
+#: applet.js:527
 #, javascript-format
 msgid "Virtual camera active: %s"
 msgstr ""
 
-#: applet.js:513
+#: applet.js:527
 #, javascript-format
 msgid "Preview running: %s"
 msgstr ""
 
-#: applet.js:601
+#: applet.js:615
 msgid "Cameras"
 msgstr ""
 
-#: applet.js:611
+#: applet.js:625
 msgid "Looking for cameras …"
 msgstr ""
 
-#: applet.js:613 presenter.js:213
+#: applet.js:627 presenter.js:213
 msgid "No camera found."
 msgstr ""
 
-#: applet.js:632
+#: applet.js:646
 msgid "Search again"
 msgstr ""
 
-#: applet.js:641
+#: applet.js:655
 msgid "Copy camera report"
 msgstr ""
 
-#: applet.js:703
+#: applet.js:717
 msgid "Please wait …"
 msgstr ""
 
-#: applet.js:708
+#: applet.js:722
 msgid "Taking photo …"
 msgstr ""
 
-#: applet.js:717
+#: applet.js:731
 #, javascript-format
 msgid "Stop virtual camera (%s)"
 msgstr ""
 
-#: applet.js:717
+#: applet.js:731
 msgid "Stop virtual camera"
 msgstr ""
 
-#: applet.js:718
+#: applet.js:732
 #, javascript-format
 msgid "Stop preview (%s)"
 msgstr ""
 
-#: applet.js:718
+#: applet.js:732
 msgid "Stop preview"
 msgstr ""
 
-#: applet.js:731 presenter.js:52
+#: applet.js:745 presenter.js:52
 msgid "Preview locked: camera has a focus motor"
 msgstr ""
 
-#: applet.js:736
+#: applet.js:750
 #, javascript-format
 msgid "Start preview (%s)"
 msgstr ""
 
-#: applet.js:745
+#: applet.js:759
 #, javascript-format
 msgid "Take photo (%s)"
 msgstr ""
 
-#: applet.js:751
+#: applet.js:765
 #, javascript-format
 msgid "Offer as virtual camera (%s)"
 msgstr ""
 
-#: applet.js:764
+#: applet.js:778
 msgid "Using the virtual camera"
 msgstr ""
 
-#: applet.js:767
+#: applet.js:781
 #, javascript-format
 msgid "Choose \"aVinceCam: %s\" in the browser or call"
 msgstr ""
 
-#: applet.js:769
+#: applet.js:783
 msgid ""
 "Firefox: about:config, media.webrtc.camera.allow-pipewire = true, restart"
 msgstr ""
 
-#: applet.js:770
+#: applet.js:784
 msgid "Chrome: chrome://flags, enable PipeWire camera support, restart"
 msgstr ""
 
-#: applet.js:771
+#: applet.js:785
 msgid "USB cameras cannot be used by other programs meanwhile"
 msgstr ""
 
-#: applet.js:794
+#: applet.js:808
 #, javascript-format
 msgid "Details: %s"
 msgstr ""
 
-#: applet.js:799
+#: applet.js:813
 msgid "Querying details …"
 msgstr ""
 
-#: applet.js:804
+#: applet.js:818
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr ""
 
-#: applet.js:805
+#: applet.js:819
 msgid "Query sizes and frame rates"
 msgstr ""
 
-#: applet.js:821
+#: applet.js:835
 #, javascript-format
 msgid "Notes (%d)"
 msgstr ""
@@ -176,7 +176,9 @@ msgid "Works only with libcamera, not with classic webcam programs."
 msgstr ""
 
 #: presenter.js:25
-msgid "Has a focus motor; libcamera drives it during a preview."
+msgid ""
+"Has a focus motor; aVinceCam keeps libcamera's autofocus off unless switched"
+" on in the settings."
 msgstr ""
 
 #: presenter.js:26
@@ -531,6 +533,18 @@ msgstr ""
 
 #. settings-schema.json->allow-lens-cameras->tooltip
 msgid ""
-"While such a camera streams, libcamera drives its focus motor automatically."
-" Leave this off if the focus motor does not work properly."
+"Preview, photo and virtual camera of such cameras. aVinceCam runs them "
+"without libcamera's autofocus: the focus motor is not moved and the focus "
+"stays fixed."
+msgstr ""
+
+#. settings-schema.json->use-libcamera-autofocus->description
+msgid "Use libcamera's autofocus"
+msgstr ""
+
+#. settings-schema.json->use-libcamera-autofocus->tooltip
+msgid ""
+"libcamera then moves the focus motor while the camera streams. Only switch "
+"this on if the focus motor works: if it does not answer, every attempt ends "
+"up as an error in the system log."
 msgstr ""

@@ -62,7 +62,10 @@ def build_parser():
                          help="picture size for the GStreamer viewer")
     preview.add_argument("--allow-lens", action="store_true",
                          help="also preview cameras with a focus motor "
-                              "(libcamera then drives the motor automatically)")
+                              "(without libcamera's autofocus, D16)")
+    preview.add_argument("--autofocus", action="store_true",
+                         help="with --allow-lens: let libcamera's autofocus drive the "
+                              "focus motor")
     preview.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
     snap = sub.add_parser("snapshot", help="take a still photo (streams ~1 s, saves a PNG)")
     snap.add_argument("camera")
@@ -70,7 +73,9 @@ def build_parser():
     snap.add_argument("--frames", type=int, default=snapshot.DEFAULT_FRAMES)
     snap.add_argument("--out", help="folder for the photo (default: pictures folder/aVinceCam)")
     snap.add_argument("--allow-lens", action="store_true",
-                      help="also cameras with a focus motor (libcamera drives it while streaming)")
+                      help="also cameras with a focus motor (without libcamera's autofocus, D16)")
+    snap.add_argument("--autofocus", action="store_true",
+                      help="with --allow-lens: let libcamera's autofocus drive the focus motor")
     snap.add_argument("--sysfs-root", default="/sys", help=argparse.SUPPRESS)
     snap.add_argument("--dev-root", default="/", help=argparse.SUPPRESS)
     stop = sub.add_parser("stop", help="stop the own preview")
@@ -202,7 +207,8 @@ def cmd_preview(args):
         if camera.api == "v4l2" and not fake:
             uvc_formats = _uvc_formats(camera, args.sysfs_root)
         argv = preview.viewer_command(camera, args.viewer, size, uvc_formats)
-        viewer_env = preview.viewer_environment(camera, args.viewer, directory)
+        viewer_env = preview.viewer_environment(camera, args.viewer, directory,
+                                                autofocus=args.autofocus)
         viewer_name = ("virtual-camera" if args.viewer == "virtual"
                        else os.path.basename(argv[0]))
         if fake:
@@ -333,8 +339,11 @@ def cmd_snapshot(args):
         shutil.rmtree(frame_dir, ignore_errors=True)
         os.makedirs(frame_dir, mode=0o700)
         argv = [tool] + snapshot.cam_args(camera.backend_id, size, args.frames, frame_dir)
-        # Cameras with a lens motor: tuning file without autofocus (D16).
-        env = dict(os.environ, **tuning.environment(directory, [camera]))
+        # Cameras with a lens motor: tuning file without autofocus (D16),
+        # unless the user asked for libcamera's autofocus.
+        env = dict(os.environ)
+        if not args.autofocus:
+            env.update(tuning.environment(directory, [camera]))
         try:
             done = subprocess.run(argv, capture_output=True, text=True, env=env,
                                   timeout=SNAPSHOT_CAM_TIMEOUT, stdin=subprocess.DEVNULL)

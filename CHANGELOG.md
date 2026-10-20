@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Setting "Use libcamera's autofocus" for cameras with a focus motor (default
+  off: they run with a fixed focus, D16); core option `--autofocus` for
+  `preview` and `snapshot`
+
 - `scripts/install.sh` / `scripts/uninstall.sh`: user-level installation with
   backup and an exact list of installed paths; `--purge` removes the settings
 - The applet removes the lock of a preview whose window was closed

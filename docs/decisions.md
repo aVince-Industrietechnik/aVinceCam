@@ -170,3 +170,12 @@ without the `Af` entry to its runtime folder and sets
 camera, photo). The system's files are not changed and any calibration in
 them is kept. The lens stays where it rests; the focus is fixed. Whether the
 lock of D11 can be relaxed is decided after a desk test.
+
+Addendum (2026-10-20): desk test T12 (back camera, 48 s) showed no write to
+the lens motor while streaming. On machines whose lens motor works,
+libcamera's autofocus is better than a fixed focus, so the setting "Use
+libcamera's autofocus" (default off, shown only while cameras with a focus
+motor are allowed) passes `--autofocus` to the core, which then writes no
+tuning file and sets no `LIBCAMERA_IPA_CONFIG_PATH`. The lock of D11 stays:
+`--autofocus` alone does not unlock a camera. On the IPU3 laptop the lens
+motor does not answer, so the setting is covered by tests only.

@@ -153,6 +153,21 @@ class ViewerTest(PreviewBase):
         proc.wait(timeout=10)
         self.assertIn("fake viewer ipa config:", self.log())
 
+    def test_autofocus_keeps_libcameras_own_tuning(self):
+        for viewer in ("qcam", "virtual"):
+            proc, answer = self.start(BACK, "--allow-lens", "--autofocus", "--viewer", viewer)
+            self.assertTrue(answer["started"], answer)
+            self.wait_ready()
+            self.core("stop")
+            proc.wait(timeout=10)
+            self.assertNotIn("ipa config", self.log(), viewer)
+            self.assertFalse(os.path.exists(os.path.join(self.run_dir, "ipa-config")), viewer)
+
+    def test_autofocus_does_not_unlock(self):
+        proc, answer = self.start(BACK, "--autofocus")
+        proc.wait(timeout=10)
+        self.assertEqual(answer["errors"][0]["code"], "lens-blocked", answer)
+
     def test_front_camera_unchanged(self):
         proc, answer = self.start(FRONT)
         self.wait_ready()
@@ -173,16 +188,17 @@ class SnapshotTest(unittest.TestCase):
             env_file = os.path.join(tmp, "cam-env.txt")
             env = dict(os.environ, AVINCECAM_NO_HARDWARE="1", AVINCECAM_FAKE_CAM=FAKE_CAM,
                        FAKE_CAM_ENV_FILE=env_file, **{tuning.SYSTEM_DIRS_ENV: share})
-            for camera, expect in ((BACK, True), (FRONT, False)):
+            for camera, extra, expect in ((BACK, [], True), (FRONT, [], False),
+                                          (BACK, ["--autofocus"], False)):
                 result = subprocess.run(
                     [sys.executable, "-I", CORE, "snapshot", camera, "--size", "64x48",
                      "--allow-lens", "--sysfs-root", sys_dir, "--dev-root", os.path.join(tmp, "dev"),
-                     "--runtime-dir", os.path.join(tmp, "run"), "--out", os.path.join(tmp, "out")],
-                    capture_output=True, text=True, timeout=60, env=env)
+                     "--runtime-dir", os.path.join(tmp, "run"), "--out", os.path.join(tmp, "out")]
+                    + extra, capture_output=True, text=True, timeout=60, env=env)
                 self.assertEqual(json.loads(result.stdout)["errors"], [], result.stdout)
                 with open(env_file, encoding="utf-8") as handle:
                     seen = handle.read()
-                self.assertEqual(bool(seen), expect, (camera, seen))
+                self.assertEqual(bool(seen), expect, (camera, extra, seen))
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ function locationTitles(_) {
 function warningTexts(_) {
     return {
         "needs-libcamera": _("Works only with libcamera, not with classic webcam programs."),
-        "lens-not-controlled": _("Has a focus motor; libcamera drives it during a preview."),
+        "lens-not-controlled": _("Has a focus motor; aVinceCam keeps libcamera's autofocus off unless switched on in the settings."),
         "no-sensor-tuning": _("No libcamera tuning file – image quality may suffer."),
         "pipeline-unknown": _("The camera pipeline could not be determined."),
         "libcamera-no-match": _("libcamera did not report this camera."),
@@ -254,8 +254,20 @@ function usageText(users, cameras, _) {
     return parts.length ? parts.join(", ") : null;
 }
 
+/*
+ * Core options for a camera with a focus motor: allowed at all, and with
+ * libcamera's autofocus (otherwise the core runs it without, D16). An
+ * unknown camera (null) gets them too; the core decides from its own scan.
+ */
+function lensArgs(cam, allowLens, useAutofocus) {
+    if (!allowLens || (cam && !cam.has_lens))
+        return [];
+    return useAutofocus ? ["--allow-lens", "--autofocus"] : ["--allow-lens"];
+}
+
 /* Exported for applet and tests (cjs legacy imports use top-level names). */
 var Presenter = {
     cameraTitle, cameraSubtitle, warningText, errorText, noteColor, formatsText,
-    frameRateText, detailLines, parseCoreResult, summaryText, foreignUsers, usageText
+    frameRateText, detailLines, parseCoreResult, summaryText, foreignUsers, usageText,
+    lensArgs
 };
