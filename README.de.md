@@ -26,6 +26,17 @@ Ausführliche Beschreibung (Englisch): [README.md](README.md)
 - **Kamerabericht** in die Zwischenablage
 - Deutsch und Englisch
 
+## Bildschirmfotos
+
+<p>
+  <img src="assets/screenshots/de/menu.png" alt="Kameraliste und Aktionen" height="300">
+  <img src="assets/screenshots/de/virtual-camera.png" alt="Virtuelle Kamera aktiv" height="300">
+</p>
+
+<img src="assets/screenshots/de/settings.png" alt="Einstellungen" width="560">
+
+Weitere Bilder (Details, Hinweise) unter `assets/screenshots/de/`.
+
 ## Sicherheit
 
 Kein Hintergrunddienst, keine Root-Rechte, keine Änderungen an Treibern, Paketen oder

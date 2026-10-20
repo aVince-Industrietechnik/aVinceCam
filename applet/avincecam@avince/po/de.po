@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: aVinceCam 0.9.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-20 15:59+0200\n"
+"POT-Creation-Date: 2026-10-20 16:11+0200\n"
 "PO-Revision-Date: 2026-10-20 15:59+0200\n"
 "Last-Translator: aVinceCam project\n"
 "Language-Team: German\n"
@@ -13,151 +13,151 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: applet.js:416
+#: applet.js:419
 msgid "Photo saved"
 msgstr "Foto gespeichert"
 
-#: applet.js:418
+#: applet.js:421
 msgid "Open folder"
 msgstr "Ordner öffnen"
 
-#: applet.js:518
+#: applet.js:521
 msgid "1 camera"
 msgstr "1 Kamera"
 
-#: applet.js:519
+#: applet.js:522
 #, javascript-format
 msgid "%d cameras"
 msgstr "%d Kameras"
 
-#: applet.js:521
+#: applet.js:524
 #, javascript-format
 msgid "Selected: %s"
 msgstr "Ausgewählt: %s"
 
-#: applet.js:524 applet.js:623
+#: applet.js:527 applet.js:626
 #, javascript-format
 msgid "Camera in use: %s"
 msgstr "Kamera in Benutzung: %s"
 
-#: applet.js:529
+#: applet.js:532
 #, javascript-format
 msgid "Virtual camera active: %s"
 msgstr "Virtuelle Kamera aktiv: %s"
 
-#: applet.js:529
+#: applet.js:532
 #, javascript-format
 msgid "Preview running: %s"
 msgstr "Vorschau läuft: %s"
 
-#: applet.js:617
+#: applet.js:620
 msgid "Cameras"
 msgstr "Kameras"
 
-#: applet.js:627
+#: applet.js:630
 msgid "Looking for cameras …"
 msgstr "Kameras werden gesucht …"
 
-#: applet.js:629 presenter.js:215
+#: applet.js:632 presenter.js:215
 msgid "No camera found."
 msgstr "Keine Kamera gefunden."
 
-#: applet.js:648
+#: applet.js:651
 msgid "Search again"
 msgstr "Erneut suchen"
 
-#: applet.js:657
+#: applet.js:660
 msgid "Copy camera report"
 msgstr "Kamerabericht kopieren"
 
-#: applet.js:719
+#: applet.js:722
 msgid "Please wait …"
 msgstr "Bitte warten …"
 
-#: applet.js:724
+#: applet.js:727
 msgid "Taking photo …"
 msgstr "Foto wird aufgenommen …"
 
-#: applet.js:733
+#: applet.js:736
 #, javascript-format
 msgid "Stop virtual camera (%s)"
 msgstr "Virtuelle Kamera beenden (%s)"
 
-#: applet.js:733
+#: applet.js:736
 msgid "Stop virtual camera"
 msgstr "Virtuelle Kamera beenden"
 
-#: applet.js:734
+#: applet.js:737
 #, javascript-format
 msgid "Stop preview (%s)"
 msgstr "Vorschau beenden (%s)"
 
-#: applet.js:734
+#: applet.js:737
 msgid "Stop preview"
 msgstr "Vorschau beenden"
 
-#: applet.js:747 presenter.js:54
+#: applet.js:750 presenter.js:54
 msgid "Preview locked: camera has a focus motor"
 msgstr "Vorschau gesperrt: Kamera mit Fokusmotor"
 
-#: applet.js:752
+#: applet.js:755
 #, javascript-format
 msgid "Start preview (%s)"
 msgstr "Vorschau starten (%s)"
 
-#: applet.js:761
+#: applet.js:764
 #, javascript-format
 msgid "Take photo (%s)"
 msgstr "Foto aufnehmen (%s)"
 
-#: applet.js:767
+#: applet.js:770
 #, javascript-format
 msgid "Offer as virtual camera (%s)"
 msgstr "Als virtuelle Kamera bereitstellen (%s)"
 
-#: applet.js:780
+#: applet.js:783
 msgid "Using the virtual camera"
 msgstr "Virtuelle Kamera benutzen"
 
-#: applet.js:783
+#: applet.js:786
 #, javascript-format
 msgid "Choose \"aVinceCam: %s\" in the browser or call"
 msgstr "Im Browser oder Videoanruf \"aVinceCam: %s\" wählen"
 
-#: applet.js:785
+#: applet.js:788
 msgid ""
 "Firefox: about:config, media.webrtc.camera.allow-pipewire = true, restart"
 msgstr ""
 "Firefox: about:config, media.webrtc.camera.allow-pipewire = true, neu starten"
 
-#: applet.js:786
+#: applet.js:789
 msgid "Chrome: chrome://flags, enable PipeWire camera support, restart"
 msgstr ""
 "Chrome: chrome://flags, PipeWire-Kamera-Unterstützung einschalten, neu "
 "starten"
 
-#: applet.js:787
+#: applet.js:790
 msgid "USB cameras cannot be used by other programs meanwhile"
 msgstr "USB-Kameras sind währenddessen für andere Programme nicht nutzbar"
 
-#: applet.js:810
+#: applet.js:813
 #, javascript-format
 msgid "Details: %s"
 msgstr "Details: %s"
 
-#: applet.js:815
+#: applet.js:818
 msgid "Querying details …"
 msgstr "Details werden abgefragt …"
 
-#: applet.js:820
+#: applet.js:823
 msgid "Query sizes and frame rates (switches the cameras on briefly)"
 msgstr "Größen und Bildraten abfragen (schaltet die Kameras kurz ein)"
 
-#: applet.js:821
+#: applet.js:824
 msgid "Query sizes and frame rates"
 msgstr "Größen und Bildraten abfragen"
 
-#: applet.js:837
+#: applet.js:840
 #, javascript-format
 msgid "Notes (%d)"
 msgstr "Hinweise (%d)"
@@ -447,6 +447,34 @@ msgstr "36 px"
 msgid "16 px"
 msgstr "16 px"
 
+#. settings-schema.json->active-indicator->description
+msgid "Panel icon while a preview runs"
+msgstr "Panel-Symbol während einer Vorschau"
+
+#. settings-schema.json->active-indicator->options
+msgid "Turn slowly"
+msgstr "Langsam drehen"
+
+#. settings-schema.json->active-indicator->options
+msgid "Pulse with a red dot"
+msgstr "Pulsieren mit rotem Punkt"
+
+#. settings-schema.json->active-indicator->options
+msgid "No change"
+msgstr "Keine Änderung"
+
+#. settings-schema.json->usage-indicator->description
+msgid "Show when a program uses a camera"
+msgstr "Anzeigen, wenn ein Programm eine Kamera benutzt"
+
+#. settings-schema.json->usage-indicator->tooltip
+msgid ""
+"Red dot on the panel icon and a line in the menu. aVinceCam only watches the "
+"camera device files; it does not open them."
+msgstr ""
+"Roter Punkt am Panel-Symbol und eine Zeile im Menü. aVinceCam beobachtet nur "
+"die Gerätedateien der Kameras, öffnet sie aber nicht."
+
 #. settings-schema.json->head-preview->description
 msgid "Preview"
 msgstr "Vorschau"
@@ -511,33 +539,9 @@ msgstr "Ordner für Fotos"
 msgid "Empty: the pictures folder, subfolder aVinceCam."
 msgstr "Leer: Bilderordner, Unterordner aVinceCam."
 
-#. settings-schema.json->active-indicator->description
-msgid "Panel icon while a preview runs"
-msgstr "Panel-Symbol während einer Vorschau"
-
-#. settings-schema.json->active-indicator->options
-msgid "Turn slowly"
-msgstr "Langsam drehen"
-
-#. settings-schema.json->active-indicator->options
-msgid "Pulse with a red dot"
-msgstr "Pulsieren mit rotem Punkt"
-
-#. settings-schema.json->active-indicator->options
-msgid "No change"
-msgstr "Keine Änderung"
-
-#. settings-schema.json->usage-indicator->description
-msgid "Show when a program uses a camera"
-msgstr "Anzeigen, wenn ein Programm eine Kamera benutzt"
-
-#. settings-schema.json->usage-indicator->tooltip
-msgid ""
-"Red dot on the panel icon and a line in the menu. aVinceCam only watches the "
-"camera device files; it does not open them."
-msgstr ""
-"Roter Punkt am Panel-Symbol und eine Zeile im Menü. aVinceCam beobachtet nur "
-"die Gerätedateien der Kameras, öffnet sie aber nicht."
+#. settings-schema.json->head-lens->description
+msgid "Cameras with a focus motor"
+msgstr "Kameras mit Fokusmotor"
 
 #. settings-schema.json->allow-lens-cameras->description
 msgid "Allow preview of cameras with a focus motor"

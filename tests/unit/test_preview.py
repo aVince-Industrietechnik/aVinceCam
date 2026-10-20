@@ -279,6 +279,19 @@ class UnitTest(unittest.TestCase):
         with self.assertRaises(preview.PreviewError):
             preview.viewer_command(no_id, "qcam", (1280, 720))
 
+    def test_virtual_camera_name(self):
+        cam = Camera(id=FRONT, label="Front camera", api="libcamera",
+                     backend_id=r"\_SB_.PCI0.LNK0")
+
+        def name(given):
+            argv = preview.viewer_command(cam, "virtual", (1280, 720), name=given)
+            return argv[argv.index("--name") + 1]
+        self.assertEqual(name(None), "Front camera")
+        self.assertEqual(name("Frontkamera"), "Frontkamera")
+        self.assertEqual(name("  two\nlines  "), "two lines")
+        self.assertEqual(name("   "), "Front camera")
+        self.assertEqual(len(name("x" * 200)), 64)
+
 
 class UvcModeTest(unittest.TestCase):
     """Preview mode for the recorded formats of a real USB 2.0 webcam."""

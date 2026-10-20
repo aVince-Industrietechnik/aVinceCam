@@ -27,6 +27,24 @@ Deutsche Kurzfassung: [README.de.md](README.de.md)
 - **Camera report** to the clipboard, for bug reports and forums
 - English and German
 
+## Screenshots
+
+<p>
+  <img src="assets/screenshots/en/menu.png" alt="Camera list and actions" height="300">
+  <img src="assets/screenshots/en/details.png" alt="Details of the front camera" height="300">
+</p>
+
+Notes for a camera with a focus motor, and the virtual camera with its hints:
+
+<p>
+  <img src="assets/screenshots/en/notes.png" alt="Notes for the back camera" width="49%">
+  <img src="assets/screenshots/en/virtual-camera.png" alt="Virtual camera active" width="40%">
+</p>
+
+<img src="assets/screenshots/en/settings.png" alt="Settings" width="560">
+
+The screenshots were taken with the simulated cameras of the test suite.
+
 ## Safety by design
 
 - No background service, no root rights, no changes to drivers, packages or system

@@ -13,7 +13,7 @@ adds only its own directory. The core prints exactly one JSON object on stdout.
 | `probe [<id>]` | opens devices, no streaming | adds formats and frame rates |
 | `status` | none | own preview, busy state |
 | `preview <id>` | streams one camera | starts the viewer |
-| `preview <id> --viewer virtual` | streams one camera | offers it to other programs through PipeWire (D14) |
+| `preview <id> --viewer virtual [--name NAME]` | streams one camera | offers it to other programs through PipeWire as "aVinceCam: NAME" (D14) |
 | `stop` | none | stops the own preview only |
 | `snapshot <id> [--size WxH] [--out DIR]` | streams ~1 s | saves a still photo as PNG (D15) |
 

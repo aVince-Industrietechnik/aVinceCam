@@ -62,6 +62,8 @@ def build_parser():
                               "PipeWire instead of showing it")
     preview.add_argument("--size", default="1280x720",
                          help="picture size for the GStreamer viewer")
+    preview.add_argument("--name", help="with --viewer virtual: name shown to other programs "
+                                        "after 'aVinceCam: ' (default: the camera's label)")
     preview.add_argument("--allow-lens", action="store_true",
                          help="also preview cameras with a focus motor "
                               "(without libcamera's autofocus, D16)")
@@ -208,7 +210,7 @@ def cmd_preview(args):
         uvc_formats = None
         if camera.api == "v4l2" and not fake:
             uvc_formats = _uvc_formats(camera, args.sysfs_root)
-        argv = preview.viewer_command(camera, args.viewer, size, uvc_formats)
+        argv = preview.viewer_command(camera, args.viewer, size, uvc_formats, name=args.name)
         viewer_env = preview.viewer_environment(camera, args.viewer, directory,
                                                 autofocus=args.autofocus)
         viewer_name = ("virtual-camera" if args.viewer == "virtual"
